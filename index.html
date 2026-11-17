@@ -507,8 +507,8 @@
   .fields .full { grid-column: 1 / -1; }
   @media (max-width: 600px) { .fields { grid-template-columns: minmax(0, 1fr); } }
   .f label { display: block; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px; font-weight: 750; }
-  .f input, .f select, .f textarea, .kl input, .invent input, .formrow input, .formrow select { width: 100%; border: 1px solid var(--line-2); border-radius: 14px; background: var(--glass); color: var(--ink); padding: 11px 14px; font-size: 14.5px; transition: border-color .2s, box-shadow .2s; }
-  .f input:focus, .f select:focus, .f textarea:focus, .kl input:focus, .invent input:focus { outline: none; border-color: rgba(255,111,150,0.55); box-shadow: 0 0 0 4px rgba(255,111,150,0.1); }
+  .f input, .f select, .f textarea, .kl input, .invent input, .formrow input, .formrow select, .office-foot textarea, #stNotes, #savedFind { width: 100%; border: 1px solid var(--line-2); border-radius: 14px; background: var(--glass); color: var(--ink); padding: 11px 14px; font-size: 14.5px; transition: border-color .2s, box-shadow .2s; }
+  .f input:focus, .f select:focus, .f textarea:focus, .kl input:focus, .invent input:focus, .office-foot textarea:focus, #stNotes:focus, #savedFind:focus { outline: none; border-color: rgba(255,111,150,0.55); box-shadow: 0 0 0 4px rgba(255,111,150,0.1); }
   .f textarea { resize: vertical; min-height: 76px; line-height: 1.5; }
   select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.6' fill='none' stroke-linecap='round'/></svg>"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px !important; }
   details.tweak summary { cursor: pointer; color: var(--accent); font-size: 13.5px; font-weight: 650; margin-top: 14px; list-style: none; }
@@ -662,6 +662,145 @@
   .rrow .t span { display: block; font-size: 12px; color: var(--ink-3); }
   .rrow .v { font-weight: 750; white-space: nowrap; }
   @media (max-width: 560px) { .podium { gap: 8px; } .pod { padding: 18px 6px 12px; } .pod b { font-size: 18px; } }
+  /* ---- the university */
+  .courses { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+  .course { display: flex; flex-direction: column; gap: 8px; text-align: left; padding: 18px; border-radius: 24px; border: 1px solid var(--line); background: var(--glass); color: var(--ink);
+    transition: transform .25s cubic-bezier(.2,.8,.2,1), border-color .25s, box-shadow .25s; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+  .course:hover { transform: translateY(-3px); border-color: var(--line-2); box-shadow: var(--shadow); }
+  .course .ctop { display: flex; align-items: center; gap: 12px; }
+  .course .ctop .av { width: 46px; height: 46px; }
+  .course .ct { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .course .code { font-size: 11px; font-weight: 750; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); }
+  .course .ct small { color: var(--ink-3); font-size: 12.5px; }
+  .course > b { font-family: var(--font-display); font-size: 25px; font-weight: 600; line-height: 1.1; margin-top: 4px; }
+  .course > p { margin: 0; color: var(--ink-2); font-size: 13.5px; line-height: 1.5; }
+  .cprog { display: flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 6px; font-size: 12px; color: var(--ink-3); white-space: nowrap; }
+  .cprog .bar { flex: 1; }
+  .grade.sm { width: 40px; height: 40px; font-size: 16px; box-shadow: none; }
+  .crumb { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; border: 0; background: none; padding: 4px 0; color: var(--ink-3); font-size: 13px; font-weight: 650; }
+  .crumb:hover { color: var(--ink); }
+  .crumb svg.i { width: 16px; height: 16px; }
+  .prof-row { display: flex; gap: 16px; align-items: center; }
+  .prof-row .av { width: 72px; height: 72px; }
+  .prof-row .t { flex: 1; min-width: 0; }
+  .prof-row .t b { display: block; font-family: var(--font-display); font-size: 22px; font-weight: 600; }
+  .prof-row .t span { display: block; color: var(--gold); font-size: 11px; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; margin-top: 2px; }
+  .prof-row .t p { margin: 6px 0 0; font-size: 13.5px; line-height: 1.5; }
+  @media (max-width: 560px) { .prof-row { flex-wrap: wrap; } .prof-row .btn { width: 100%; } }
+  .lessons { display: flex; flex-direction: column; gap: 10px; }
+  .lrow { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; padding: 14px 16px; border-radius: 20px; border: 1px solid var(--line); background: var(--glass); color: var(--ink); transition: border-color .2s, transform .2s; }
+  .lrow:hover { border-color: var(--line-2); transform: translateY(-2px); }
+  .lrow .n { width: 38px; height: 38px; flex: none; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-display); font-size: 19px; font-weight: 600; border: 1px solid var(--line-2); color: var(--ink-2); }
+  .lrow.done .n { background: var(--jade-soft); color: var(--jade); border-color: transparent; }
+  .lrow .n svg.i { width: 18px; height: 18px; }
+  .lrow .t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .lrow .t b { font-family: var(--font-display); font-size: 20px; font-weight: 600; }
+  .lrow .t small { color: var(--ink-3); font-size: 12.5px; line-height: 1.4; }
+  .lrow .go { color: var(--accent); font-weight: 700; font-size: 13px; white-space: nowrap; }
+  .lecture .lh { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .lecture .lh b { display: block; font-family: var(--font-display); font-size: 19px; font-weight: 600; }
+  .lecture .lh span { display: block; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); font-weight: 750; }
+  .lecture .talk { margin: 0; font-family: var(--font-display); font-size: 21px; line-height: 1.45; color: var(--ink); }
+  .rules { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+  .rules li { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; line-height: 1.5; color: var(--ink-2); }
+  .rules li svg.i { width: 18px; height: 18px; flex: none; color: var(--jade); margin-top: 2px; }
+  .example { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 700px) { .example { grid-template-columns: 1fr; } }
+  .example .ex { position: relative; padding: 14px 16px; border-radius: 18px; border: 1px solid var(--line); background: var(--glass); font-size: 14.5px; line-height: 1.55; }
+  .example .ex .tag { margin-bottom: 8px; display: inline-block; }
+  .example .ex.weak > div { opacity: .72; }
+  .example .ex.strong { border-color: rgba(242,195,139,0.45); background: var(--gold-soft); }
+  .example .ex .ib { position: absolute; top: 8px; right: 8px; width: 34px; min-width: 34px; height: 34px; }
+  .why { margin: -4px 0 0; font-size: 13px; }
+  .assign .goal { margin: 0 0 14px; font-size: 16px; line-height: 1.5; color: var(--ink); }
+  .who-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .who-row b { display: block; font-family: var(--font-display); font-size: 18px; font-weight: 600; }
+  .who-row span { display: block; font-size: 12.5px; color: var(--ink-3); }
+  .assign .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .passed { display: flex; align-items: center; gap: 10px; margin-top: 14px; color: var(--ink-3); font-size: 13px; }
+  .lnav { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
+  .lnav .sp { flex: 1; }
+  .lnav .btn { white-space: normal; text-align: left; }
+  .lesson-done { align-self: stretch; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; padding: 18px; border-radius: 24px; border: 1px solid rgba(242,195,139,0.5); background: var(--gold-soft); margin: 8px 0; animation: rise .4s ease both; }
+  .lesson-done .grade { width: 64px; height: 64px; font-size: 26px; }
+  .lesson-done .t { flex: 1; min-width: 200px; }
+  .lesson-done .t b { display: block; font-family: var(--font-display); font-size: 24px; font-weight: 600; }
+  .lesson-done .t span { display: block; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); font-weight: 750; margin-top: 2px; }
+  .lesson-done .t p { margin: 8px 0 0; font-style: italic; color: var(--ink-2); font-size: 14px; }
+  .lesson-done .row { display: flex; gap: 8px; flex-wrap: wrap; width: 100%; justify-content: flex-end; }
+  .diploma { position: relative; margin-top: 18px; padding: 34px 28px; border-radius: 26px; text-align: center; border: 1px solid rgba(242,195,139,0.55);
+    background: radial-gradient(120% 140% at 50% 0%, rgba(242,195,139,0.16), transparent 60%), var(--glass); box-shadow: inset 0 0 0 6px rgba(242,195,139,0.06), var(--shadow-sm); animation: rise .5s ease both; }
+  .diploma::before { content: ""; position: absolute; inset: 10px; border-radius: 18px; border: 1px solid rgba(242,195,139,0.35); pointer-events: none; }
+  .diploma .eyebrow { justify-content: center; }
+  .diploma small { display: block; color: var(--ink-3); font-size: 13px; margin-top: 14px; }
+  .diploma .nm { display: block; font-family: var(--font-display); font-size: clamp(34px, 5vw, 52px); font-weight: 600; line-height: 1.05; margin-top: 6px; }
+  .diploma .deg { display: block; font-family: var(--font-display); font-style: italic; font-size: 27px; margin-top: 4px; background: var(--grad-text); -webkit-background-clip: text; background-clip: text; color: transparent; padding: 0 6px; }
+  .diploma .meta { color: var(--ink-2); font-size: 13.5px; margin-top: 10px; }
+  .diploma .sigs { display: flex; justify-content: center; gap: 40px; margin-top: 20px; flex-wrap: wrap; }
+  .diploma .sigs span { font-family: var(--font-display); font-style: italic; font-size: 19px; border-top: 1px solid var(--line-2); padding-top: 6px; min-width: 150px; }
+  .diploma .sigs em { display: block; font-family: var(--font-ui); font-style: normal; font-size: 11px; color: var(--ink-3); letter-spacing: .1em; text-transform: uppercase; margin-top: 2px; }
+  .diploma .btn { margin-top: 18px; position: relative; }
+  .tx-list { display: flex; flex-direction: column; }
+  .tx { display: grid; grid-template-columns: 62px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 8px 4px; border: 0; border-top: 1px solid var(--line); background: none; color: var(--ink); text-align: left; font-size: 13px; }
+  .tx:first-child { border-top: 0; }
+  .tx .code { font-size: 11px; font-weight: 750; letter-spacing: .06em; color: var(--gold); white-space: nowrap; }
+  .tx .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink-2); }
+  .tx b { font-weight: 750; }
+  .fac-list { display: flex; flex-direction: column; gap: 6px; }
+  .fp { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px; border-radius: 16px; border: 1px solid var(--line); background: var(--glass); color: var(--ink); text-align: left; transition: border-color .2s, background .2s; }
+  .fp:hover { border-color: var(--line-2); background: var(--glass-2); }
+  .fp b { display: block; font-family: var(--font-display); font-size: 18px; font-weight: 600; }
+  .fp small { display: block; color: var(--ink-3); font-size: 12.5px; }
+  .faculty-pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+  /* ---- office hours */
+  .office .card-head { gap: 12px; }
+  .office .card-body { display: flex; flex-direction: column; gap: 12px; min-height: 300px; }
+  .office-who { flex: 1; min-width: 0; }
+  .office-who h2 { margin: 0; }
+  .oh-who { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .oh-who .av { width: 50px; height: 50px; }
+  .oh-who .t { min-width: 0; }
+  .oh-who b { display: block; font-family: var(--font-display); font-size: 23px; font-weight: 600; line-height: 1.1; }
+  .oh-who span { display: block; color: var(--ink-3); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .oh-who .lnk { margin-left: auto; border: 0; background: none; color: var(--accent); font-weight: 650; font-size: 12.5px; padding: 0 4px; white-space: nowrap; }
+  .oh-msg { display: flex; flex-direction: column; gap: 8px; max-width: 88%; animation: rise .3s ease both; }
+  .oh-msg.you { align-self: flex-end; }
+  .oh-msg .b { padding: 12px 15px; border-radius: 18px; font-size: 14.5px; line-height: 1.55; background: var(--glass); border: 1px solid var(--line); white-space: pre-wrap; }
+  .oh-msg.you .b { background: var(--grad); color: #fff; border-color: transparent; }
+  .oh-msg .ex { padding: 12px 15px; border-radius: 16px; background: var(--gold-soft); border: 1px solid rgba(242,195,139,0.4); font-size: 14px; line-height: 1.5; }
+  .oh-msg .ex .tag { display: inline-block; margin-bottom: 6px; }
+  .oh-msg .ex .acts { display: flex; gap: 12px; margin-top: 6px; }
+  .oh-msg .ex .acts button { border: 0; background: none; color: var(--gold); font-weight: 700; font-size: 12.5px; padding: 0; }
+  .office-foot { gap: 10px; align-items: flex-end; }
+  .office-foot textarea { flex: 1; min-height: 46px; max-height: 140px; resize: none; }
+  /* ---- write for me, saved lines, the story, words you lean on */
+  .idea { max-height: none; display: flex; flex-direction: column; }
+  .idea > span { flex: 1; }
+  .idea .irow { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .idea .irow .btn { min-height: 34px; padding: 0 13px; font-size: 12.5px; }
+  .idea { position: relative; }
+  .idea .irow .ib { position: absolute; top: 6px; right: 6px; width: 32px; min-width: 32px; height: 32px; }
+  .lecture .talk, .lesson-done .t p, .oh-msg .b { text-wrap: pretty; }
+  .page-title .display, .hero .display { text-wrap: balance; }
+  .macts .ghost { font-style: italic; color: var(--plum); }
+  .saved-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+  .sv { padding: 12px 14px; border-radius: 16px; border: 1px solid var(--line); background: var(--glass); color: var(--ink); text-align: left; }
+  .sv .txt { font-size: 14.5px; line-height: 1.5; }
+  .sv .meta { display: flex; align-items: center; gap: 6px; margin-top: 8px; flex-wrap: wrap; color: var(--ink-3); font-size: 12px; }
+  .sv .meta .sp { flex: 1; }
+  .sv .meta .btn { min-height: 30px; padding: 0 11px; font-size: 12px; }
+  .saved-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+  .sv.quick { cursor: pointer; transition: border-color .2s, transform .2s; }
+  .sv.quick:hover { border-color: var(--line-2); transform: translateY(-2px); }
+  .premises { display: flex; gap: 6px; flex-wrap: wrap; }
+  .scene-card .premise { margin: 4px 0 0; font-style: italic; color: var(--ink-2); font-size: 13px; }
+  .live-start { align-self: center; width: min(580px, 100%); text-align: center; padding: 24px 22px; border-radius: 24px; border: 1px dashed var(--line-2); background: var(--glass); margin: 10px auto; }
+  .live-start > b { display: block; font-family: var(--font-display); font-size: 25px; font-weight: 600; }
+  .live-start p { margin: 6px auto 0; max-width: 460px; font-size: 13.5px; line-height: 1.55; }
+  .live-start .row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+  .live-start .goals { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 18px; }
+  .live-start .goals .lab { width: 100%; font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); font-weight: 750; }
+  @media (max-width: 760px) { .tab { font-size: 10px; } }
   @media (min-width: 761px) { .head.home-head { display: none; } }
 </style>
 </head>
@@ -693,10 +832,11 @@
         <div class="bar2">
           <button class="ib c-rose" type="button" id="actBtn" title="Wrap in *asterisks* as an action"></button>
           <button class="ib c-slate" type="button" id="oocBtn" title="Talk out of character (( like this ))" aria-pressed="false"></button>
-          <button class="ib c-amber" type="button" id="ideasBtn" title="Three ideas for your next line"></button>
+          <button class="ib c-amber" type="button" id="ideasBtn" title="Velvet writes your next line three ways: send one, or edit it first"></button>
           <button class="ib c-violet" type="button" id="shotBtn" title="Read their lines from a screenshot of your chat" hidden></button>
           <button class="ib c-teal" type="button" id="suggestBtn" title="Suggest my replies" hidden></button>
           <button class="ib c-violet" type="button" id="polishBtn" title="Make your draft more vivid"></button>
+          <button class="ib c-gold" type="button" id="savedBtn" title="Your saved lines"></button>
           <span class="grow"></span>
           <button class="send" id="sendBtn" type="submit" aria-label="Send" disabled></button>
         </div>
@@ -802,6 +942,21 @@
     <div class="card-head"><h2 id="advTitle">What to try</h2><button class="ib" type="button" data-close aria-label="Close" id="advClose"></button></div>
     <div class="card-body" id="advBody"></div>
     <div class="card-foot" id="advFoot"></div>
+  </div>
+</div>
+
+<div class="sheet" id="officeSheet" hidden>
+  <div class="card wide office">
+    <div class="card-head"><div class="office-who" id="officeWho"></div><button class="ib" type="button" data-close aria-label="Close" id="officeClose"></button></div>
+    <div class="card-body" id="officeBody"></div>
+    <form class="card-foot office-foot" id="officeForm" autocomplete="off"><textarea id="officeIn" rows="1" maxlength="800" placeholder="Ask anything about roleplay" aria-label="Your question"></textarea><button class="btn main" type="submit" id="officeAsk"></button></form>
+  </div>
+</div>
+
+<div class="sheet" id="savedSheet" hidden>
+  <div class="card wide">
+    <div class="card-head"><h2>Saved lines</h2><button class="ib" type="button" data-close aria-label="Close" id="savedClose"></button></div>
+    <div class="card-body" id="savedBody"></div>
   </div>
 </div>
 
@@ -922,7 +1077,7 @@
       partner: 'Begin out of character in (( )). Ask about their likes, limits and a safeword, share yours, and only start the scene once you have agreed.',
       coach: "Did they cover likes, limits and a safeword, and ask about the partner's? Progress is a third for each.",
       opening: 'Start out of character in (( )): say hi, and ask {you} about likes, limits and a safeword before the scene begins. Share a little about yours.',
-      starts: 'partner',
+      starts: 'partner', ooc: 'yes',
     },
     lead: {
       name: 'Take the lead',
@@ -966,11 +1121,47 @@
       style: 'chat',
     },
   };
+  // Velvet University: each lesson's assignment is a drill (generated from handlers/velvet.py LESSONS).
+  // "ooc": the coach also reads lines out of character (( like this )).
+  const LESSONS = {
+    rp101_1: {"name": "RP 101 · Actions and speech", "goal": "Pair a clear *action* with a line of speech in every reply, in the present tense, and never write what your partner does.", "partner": "Answer naturally and leave them room to act.", "coach": "Each line that pairs a clear *action* with speech, in the present tense, without deciding anything for the partner, adds 25. Mark down lines that write the partner's actions.", "per": "25"},
+    rp101_2: {"name": "RP 101 · Give them a hook", "goal": "End every line with a hook your partner can answer: a question, an invitation, a choice, or a touch that asks for a reaction.", "partner": "Answer their hooks with enthusiasm. When a line gives you nothing to answer, keep your reply short.", "coach": "Each line that ends with a clear hook (a question, an invitation, a choice, a touch that asks for a reaction) adds 25.", "per": "25"},
+    rp101_3: {"name": "RP 101 · Match their rhythm", "goal": "Match the length and energy of each of your partner's replies: short for short, rich for rich.", "partner": "Vary your reply length on purpose: some quick one-liners, some longer, detailed paragraphs.", "coach": "Each line that roughly matches the length and energy of the partner's last reply adds 25. Mark down a wall of text after a one-liner, or a few words after a rich paragraph.", "per": "25"},
+    wrt120_1: {"name": "WRT 120 · Show the feeling", "goal": "Show every feeling through the body (hands, breath, voice, eyes) and never name an emotion outright.", "partner": "React to what their body shows you, and give them moments that stir strong feelings.", "coach": "Each line that shows a feeling through the body without naming the emotion adds 25. Mark down named emotions like nervous, excited or turned on.", "per": "25"},
+    wrt120_2: {"name": "WRT 120 · Specific beats general", "goal": "Put at least one concrete, specific detail in every line, and no generic words like nice, hot, sexy or beautiful.", "partner": "Notice and answer their details, and give them specific things to notice about you and the place.", "coach": "Each line with at least one concrete, specific detail and no generic adjective (nice, hot, sexy, beautiful) adds 25.", "per": "25"},
+    wrt120_3: {"name": "WRT 120 · All five senses", "goal": "Use sight, sound, touch, smell and taste across your lines.", "partner": "Give them rich moments for every sense to answer: scents, textures, sounds, tastes.", "coach": "Count which of the five senses their lines have used so far. Progress is 20 for each sense used."},
+    ten210_1: {"name": "TEN 210 · The almost", "goal": "Build anticipation with almosts (near-touches, pauses, held looks, unfinished sentences) without rushing to the act.", "partner": "Lean into the tension. Almost give in, but let them set the pace.", "coach": "Each line that builds anticipation with an almost (a near-touch, a pause, a held look, an unfinished sentence) adds 25. Mark down rushing.", "pace": "slow", "per": "25"},
+    ten210_2: {"name": "TEN 210 · Push and pull", "goal": "Alternate on purpose between moving closer and pulling back: an advance, then a retreat or a challenge.", "partner": "Answer their pushes and pulls: chase when they retreat, hesitate when they rush.", "coach": "Each line that clearly pushes closer or pulls back on purpose, turning the other way from the line before, adds 25.", "pace": "slow", "per": "25"},
+    ten210_3: {"name": "TEN 210 · One step at a time", "goal": "Escalate exactly one small step in each line, never two, and slow down whenever your partner does.", "partner": "Welcome small steps warmly, and cool off a little if they jump ahead.", "coach": "Each line that escalates by exactly one small, clear step adds 25. Mark down big jumps.", "pace": "slow", "per": "25"},
+    vox220_1: {"name": "VOX 220 · Find your voice", "goal": "Give your character a distinct voice (word choice, rhythm, a verbal habit) and keep it in every line.", "partner": "Speak in your own distinct voice and react to theirs.", "coach": "Each line that keeps a distinct, consistent voice (word choice, rhythm, habits) adds 25. Mark down lines that sound generic.", "per": "25"},
+    vox220_2: {"name": "VOX 220 · Say it without saying it", "goal": "Flirt through subtext and banter: let your words talk about one thing while meaning another.", "partner": "Play the subtext game: answer the meaning behind their words, with banter of your own.", "coach": "Each line with clear flirtatious subtext or banter that implies more than it says adds 25.", "per": "25"},
+    vox220_3: {"name": "VOX 220 · Say it out loud", "goal": "Tell your partner exactly what you want, specifically and in your character's own words.", "partner": "Invite them to say what they want, and react strongly when they do.", "coach": "Each line that says a specific want directly and confidently, in character, adds 25.", "per": "25"},
+    pwr301_1: {"name": "PWR 301 · Command presence", "goal": "Lead with calm, clear, specific directions: no hedging, and no asking permission for every move.", "partner": "Follow their lead eagerly and react to every instruction, so they can practise leading.", "coach": "Each line with a calm, clear, specific instruction and no hedging (maybe, if you want, kind of) adds 25.", "you_role": "dominant", "partner_role": "submissive", "per": "25"},
+    pwr301_2: {"name": "PWR 301 · Praise that lands", "goal": "Reward your partner with specific, immediate praise for what they just did, then give the next direction.", "partner": "Follow their directions and show how much their praise affects you.", "coach": "Each line with specific praise tied to what the partner just did adds 25. Mark down generic praise like \"good job\".", "you_role": "dominant", "partner_role": "submissive", "per": "25"},
+    pwr301_3: {"name": "PWR 301 · Read and adjust", "goal": "Watch your partner's reactions and adjust: more when they are eager, softer when they hesitate, with an in-character check-in.", "partner": "Show clear reactions. Be eager most of the time, but once or twice show a flicker of hesitation: a pause, a tensing, a too-quick yes.", "coach": "Each line that reads the partner's latest reaction and adjusts to it adds 25; after a hesitation, that means a warm, in-character check-in.", "you_role": "dominant", "partner_role": "submissive", "per": "25"},
+    pwr302_1: {"name": "PWR 302 · React out loud", "goal": "Show vividly what each of your partner's orders does to you: body, breath, voice, and the moment before you obey.", "partner": "Take charge clearly so they can practise following and reacting.", "coach": "Each line with a vivid, specific reaction to the partner's command adds 25. Mark down flat replies like \"ok\".", "you_role": "submissive", "partner_role": "dominant", "per": "25"},
+    pwr302_2: {"name": "PWR 302 · The playful brat", "goal": "Brat with charm: tease, talk back and make your partner work for it, always keeping the game going.", "partner": "Take charge firmly and enjoy their bratting: answer cheek with control.", "coach": "Each playful, charming line of resistance that invites the partner to take control, without shutting the scene down, adds 25.", "you_role": "submissive", "partner_role": "dominant", "per": "25"},
+    pwr302_3: {"name": "PWR 302 · Ask for it", "goal": "Ask or plead for exactly what you want, specifically and in character, and let your partner decide.", "partner": "Take charge. Make them ask for what they want, and decide whether to give it.", "coach": "Each line that asks or pleads for something specific, in character, leaving the choice to the partner, adds 25.", "you_role": "submissive", "partner_role": "dominant", "per": "25"},
+    cns101_1: {"name": "CNS 101 · Talk first", "goal": "Before the scene starts, agree on likes, limits and a safeword with your partner, out of character (( like this )).", "partner": "Begin out of character in (( )). Ask about their likes, limits and a safeword, share yours, and only start the scene once you have agreed.", "coach": "Did they cover likes, limits and a safeword, and ask about the partner's? Progress is a third for each.", "opening": "Start out of character in (( )): say hi, and ask {you} about likes, limits and a safeword before the scene begins. Share a little about yours.", "starts": "partner", "ooc": "yes"},
+    cns101_2: {"name": "CNS 101 · Check in, stay in", "goal": "Notice when your partner hesitates, check in warmly and in character, and respect the answer.", "partner": "Be warm and responsive, but once or twice show a small, clear hesitation: a pause, a shorter reply, a tensing. Relax when they check in kindly.", "coach": "Progress is 50 for noticing a hesitation and 50 for a warm, in-character check-in that respects the answer."},
+    cns101_3: {"name": "CNS 101 · Aftercare", "goal": "The scene has just ended. Bring your partner down gently, with warmth, care and check-ins.", "partner": "You are tender and a little raw after an intense scene. Let their care land, and say what you need.", "coach": "Each line of warmth, comfort, attentive listening or a caring check-in adds 25.", "opening": "Open just after an intense scene has ended: you're both catching your breath. Show how you feel in a few tender details and let {you} take care of you.", "starts": "partner", "per": "25"},
+    cht150_1: {"name": "CHT 150 · Short and vivid", "goal": "Write short chat lines like in game, under 120 characters each, and still vivid.", "partner": "Keep your own lines short and quick so the rhythm stays fast.", "coach": "Each vivid line under 120 characters adds 25. Mark down long lines.", "style": "chat", "per": "25"},
+    cht150_2: {"name": "CHT 150 · Emotes that land", "goal": "Pair one strong, specific *emote* (no name, present tense) with speech in every line, under 200 characters.", "partner": "Keep it fast and playful, in short chat lines.", "coach": "Each line that pairs one strong, specific *action* (no name, present tense) with speech, under 200 characters, adds 25.", "style": "chat", "per": "25"},
+    cht150_3: {"name": "CHT 150 · The opener", "goal": "Open with a stranger: notice something specific, show some personality, and make it easy to answer. Then keep it light.", "partner": "You are a stranger here. Be intrigued by a good opener and cool towards a lazy one, and let them do the work at first.", "coach": "Each line that does this adds 25: the opener notices something specific, shows some personality and is easy to answer, and each follow-up keeps it light and flirty.", "style": "chat", "starts": "you", "per": "25"},
+    adv401_1: {"name": "ADV 401 · Catch the cue", "goal": "Your partner drops small hints about what they want. Notice them and answer them.", "partner": "Drop subtle cues about what you want or don't (a glance, a pause, a shiver, a half-said wish) without saying it outright. Warm up when they notice; cool slightly when they miss one.", "coach": "Each line that notices and answers one of the partner's cues adds 25.", "per": "25"},
+    adv401_2: {"name": "ADV 401 · Rescue a dead scene", "goal": "Your partner is low on energy. Bring the scene back to life with something new: a twist, a playful question, a change of place or a game.", "partner": "Start flat: short, low-energy replies with nothing to answer. Warm up only when they offer something new, fun or personal.", "coach": "Each line that brings something new to revive the scene (a twist, a playful question, a change of place, humour, a game) adds 25.", "per": "25"},
+    adv401_3: {"name": "ADV 401 · End it well", "goal": "Bring the scene to a satisfying close: slow it down, land on a memorable final beat, and leave a warm hook for next time.", "partner": "The night is winding down. Follow their lead towards a close, and answer a good ending warmly.", "coach": "Each line that moves the scene gracefully towards its ending (slowing down, softening, a final image, a warm close or a hook for next time) adds 25.", "opening": "Open late at night, near the end of a long, lovely evening together: the music is low and it's almost time to say goodnight. Set the moment and let {you} bring it to a close.", "starts": "partner", "per": "25"},
+  };
+  const DRILL_IDS = Object.keys(DRILLS).concat(Object.keys(LESSONS));
+  function drillOf(k) { return !k ? null : has(DRILLS, k) ? DRILLS[k] : has(LESSONS, k) ? LESSONS[k] : null; }
   const OPENING = "Open the scene. Set it in a few vivid details and give {you} something to react to. Don't act for {you}.";
   const CONTINUE = "Continue your last reply from exactly where it stopped. Don't repeat anything.";
   const COACH_SHAPE = '{"scores":{"detail":0,"voice":0,"initiative":0,"pacing":0,"chemistry":0},' +
     '"praise":"what worked, under 25 words","tip":"one concrete improvement, under 25 words",' +
     '"better":"their line rewritten stronger","drill":{"progress":0,"note":"under 20 words"}}';
+  const COACH_SHAPE_LINES = '{"scores":{"detail":0,"voice":0,"initiative":0,"pacing":0,"chemistry":0},' +
+    '"praise":"what worked, under 25 words","tip":"one concrete improvement, under 25 words",' +
+    '"better":"their line rewritten stronger","drill":{"lines":[true,false],"note":"under 20 words"}}';
   const REPORT_SHAPE = '{"grade":"B+","headline":"under 12 words","scores":{"detail":0,"voice":0,"initiative":0,"pacing":0,' +
     '"chemistry":0},"strengths":["...","..."],"work_on":["...","..."],"best_line":"...",' +
     '"next_drill":"one drill id","why":"under 20 words"}';
@@ -1016,7 +1207,7 @@
       setting: cleanText(raw.setting, 600), notes: cleanText(raw.notes, 1000),
       heat: pick(raw.heat, HEATS, 'steamy'), pace: pick(raw.pace, PACES, 'steady'), style: pick(raw.style, STYLES, 'paragraphs'),
       into: cleanList(raw.into), curious: cleanList(raw.curious), soft: cleanList(raw.soft), hard: cleanList(raw.hard),
-      drill: pick(raw.drill, DRILLS, ''),
+      drill: pick(raw.drill, DRILL_IDS, ''),
     };
     const checks = [['partner.name', sc.partner.name], ['partner.look', sc.partner.look], ['partner.personality', sc.partner.personality],
       ['partner.voice', sc.partner.voice], ['you.name', sc.you.name], ['you.look', sc.you.look], ['setting', sc.setting], ['notes', sc.notes]];
@@ -1052,7 +1243,7 @@
     return ['## Boundaries', you + "'s own list. After a · is the side " + you + ' plays; ♥ means they love it.'].concat(lines);
   }
   function partnerPrompt(sc) {
-    const p = sc.partner, y = sc.you, name = p.name, you = y.name, drill = DRILLS[sc.drill];
+    const p = sc.partner, y = sc.you, name = p.name, you = y.name, drill = drillOf(sc.drill);
     const sections = [
       ['You are ' + name + ', in a private, adults-only erotic roleplay with ' + you + '. You write ' + name + "'s side of the scene, and only that."],
       ['## ' + name,
@@ -1090,7 +1281,7 @@
     const out = [{ role: 'system', content: partnerPrompt(sc) }];
     const turns = task === 'opening' ? [] : msgs;
     if (task === 'opening' || !turns.length) {
-      const drill = DRILLS[sc.drill] || {};
+      const drill = drillOf(sc.drill) || {};
       out.push({ role: 'user', content: '((' + fill(drill.opening || OPENING, { you }) + '))' });
     } else if (turns[0].who === 'partner') {
       out.push({ role: 'user', content: '((' + fill(OPENING, { you }) + '))' });
@@ -1105,19 +1296,22 @@
   }
   function jsonMessages(task, sc, msgs, draft) {
     draft = draft || '';
-    const name = sc.partner.name, you = sc.you.name, brief = sceneBrief(sc), drill = DRILLS[sc.drill];
+    const name = sc.partner.name, you = sc.you.name, brief = sceneBrief(sc), drill = drillOf(sc.drill);
     const bounds = boundaries(sc).slice(2).join('\n');
     let system, user;
     if (task === 'coach') {
       let last = '';
       for (let i = msgs.length - 1; i >= 0; i--) if (msgs[i].who === 'you') { last = msgs[i].text; break; }
+      const per = !!(drill && drill.per), mine = msgs.filter(m => m.who === 'you').length;
+      const practice = !drill ? '' : '\n' + you + ' is practising "' + drill.name + '": ' + drill.goal + ' How to judge it: ' + drill.coach +
+        (per ? ' "drill.lines" has one true or false for each of ' + you + "'s " + mine + ' lines in the scene, oldest first and the latest last: true when that line does what the rule asks, judged against this rule alone (the scores cover everything else).'
+          : ' "drill.progress" is 0 to 100 for the whole scene so far, judged against this rule alone (the scores cover everything else).') + '\n';
       system = 'You are the coach in Velvet, an app for practising adult erotic roleplay: warm, sharp and honest. ' +
-        'You coach ' + you + "'s writing only, never " + name + "'s.\nThe scene: " + brief + '\n' +
-        (drill ? '\n' + you + ' is practising "' + drill.name + '": ' + drill.goal + ' How to judge it: ' + drill.coach + ' "drill.progress" is 0 to 100 for the whole scene so far.\n' : '') +
+        'You coach ' + you + "'s writing only, never " + name + "'s.\nThe scene: " + brief + '\n' + practice +
         '\nCoach ' + you + "'s latest line. " + fill(SCORE_GUIDE, { name }) +
         '\nBe specific about their actual words. "better" keeps their intent, stays in the scene\'s format ' +
         '(' + STYLE_SHORT[sc.style] + ') and writes only ' + you + "'s actions and words, never " + name +
-        "'s. Everyone in the scene is an adult.\nReply with JSON only, in this shape" + (drill ? '' : ' (leave out "drill")') + ':\n' + COACH_SHAPE;
+        "'s. Everyone in the scene is an adult.\nReply with JSON only, in this shape" + (drill ? '' : ' (leave out "drill")') + ':\n' + (per ? COACH_SHAPE_LINES : COACH_SHAPE);
       user = 'The scene so far, latest last:\n\n' + transcript(sc, msgs.slice(0, -1), 6000) + '\n\nCoach ' + you + "'s latest line:\n" + last;
     } else if (task === 'ideas') {
       system = 'You help ' + you + ' write their next line in an adult erotic roleplay with ' + name +
@@ -1148,6 +1342,16 @@
       user = 'The scene:\n\n' + transcript(sc, msgs, 30000);
     }
     return [{ role: 'system', content: system }, { role: 'user', content: user }];
+  }
+  // a drill's progress, 0 to 100: counted from the coach's verdict on each line when the drill has "per"
+  function drillProgress(sc, msgs, d) {
+    const dd = drillOf(sc.drill) || {};
+    if (dd.per) {
+      const mine = msgs.filter(m => m.who === 'you').length, v = Array.isArray(d.lines) ? d.lines.slice(0, mine) : [];
+      return Math.min(100, v.filter(x => x === true || String(x).trim().toLowerCase() === 'true').length * (+dd.per || 0));
+    }
+    const n = Math.round(parseFloat(d.progress));
+    return isFinite(n) ? Math.max(0, Math.min(100, n)) : 0;
   }
   function veniceBody(task, sc, msgs, model, draft) {
     if (task === 'opening' || task === 'reply' || task === 'continue') {
@@ -1269,6 +1473,7 @@
     scan: 'M4 8V5a1 1 0 011-1h3M16 4h3a1 1 0 011 1v3M20 16v3a1 1 0 01-1 1h-3M8 20H5a1 1 0 01-1-1v-3M7 12h10', pulse: 'M3 12h4l3-8 4 16 3-8h4',
     check: 'M5 12l5 5L20 7', grade: 'M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z', palette: 'M12 3a9 9 0 100 18c1 0 1.5-.7 1.5-1.5 0-1.2-1-1.5-1-2.5s.8-1.5 2-1.5h2a4 4 0 004-4c0-4.7-3.8-8.5-8.5-8.5zM7.5 12h.01M9.5 7.5h.01M14.5 7.5h.01',
     globe: 'M12 21a9 9 0 100-18 9 9 0 000 18zM3 12h18M12 3c2.5 2.5 3.5 5.5 3.5 9s-1 6.5-3.5 9c-2.5-2.5-3.5-5.5-3.5-9s1-6.5 3.5-9z',
+    cap: 'M2 9.5L12 5l10 4.5-10 4.5zM6 11.3v4.2c0 1.4 2.7 3 6 3s6-1.6 6-3v-4.2M22 9.5v5', bookmark: 'M6 4h12v17l-6-4.2L6 21z',
   };
   function icon(name, cls) { return '<svg class="i' + (cls ? ' ' + cls : '') + '" viewBox="0 0 24 24" aria-hidden="true"><path d="' + ICONS[name] + '"/></svg>'; }
   function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
@@ -1294,11 +1499,12 @@
     progress: Object.assign({ xp: 0, lines: 0, streak: 0, lastDay: '', drills: {}, reports: 0, best: 0 }, store.json('vv_progress', {})),
     settings: Object.assign({ model: '', voice: false, voiceName: '', rate: 1, coachAuto: true, key: '' }, store.json('vv_settings', {})),
     ideas: null, polishUndo: null,
-    view: ['practice', 'live', 'review', 'cast', 'ranks'].indexOf(store.get('vv_view')) >= 0 ? store.get('vv_view') : 'practice',
+    view: ['practice', 'uni', 'live', 'review', 'cast', 'ranks'].indexOf(store.get('vv_view')) >= 0 ? store.get('vv_view') : 'practice',
     account: null, loginNote: '', board: { board: 'xp', period: 'week', data: null, loading: false, err: '' },
     cast: store.json('vv_cast', []),            // personas (AI partners) and people (real people you roleplay with)
     reviews: store.json('vv_rindex', []),       // graded roleplays
     review: null, liveWho: 'them', reviewDraft: null,
+    uni: Object.assign({ course: '', lesson: '' }, store.json('vv_uni_at', {})), ideaTexts: null,
   };
   if (!Array.isArray(S.cast)) S.cast = [];
   if (!Array.isArray(S.reviews)) S.reviews = [];
@@ -1331,7 +1537,7 @@
   function writeScene(sc) {
     delete pendingSaves[sc.id];
     if (!store.set('vv_s_' + sc.id, JSON.stringify(sc))) { toast("This browser won't save more. Download your scenes in Settings, then delete some old ones.", 'err'); return; }
-    const entry = { id: sc.id, kind: sc.kind || 'practice', castId: sc.castId || '', presetId: sc.presetId || '', settingId: sc.settingId || '', title: sceneTitle(sc), partner: sc.partner.name, colors: sc.colors, updated: sc.updated, lines: sc.msgs.filter(m => m.who === 'you').length, drill: sc.drill || '' };
+    const entry = { id: sc.id, kind: sc.kind || 'practice', castId: sc.castId || '', presetId: sc.presetId || '', settingId: sc.settingId || '', title: sceneTitle(sc), partner: sc.partner.name, colors: sc.colors, updated: sc.updated, lines: sc.msgs.filter(m => m.who === 'you').length, drill: sc.drill || '', lesson: sc.lesson || '', done: !!sc.drillDone };
     const i = S.index.findIndex(x => x.id === sc.id);
     if (i >= 0) S.index.splice(i, 1);
     S.index.unshift(entry);
@@ -1578,7 +1784,7 @@
     const j = await r.json();
     const d = parseJSON(j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content);
     let out;
-    if (task === 'coach') out = { scores: shapeScores(d.scores), praise: String(d.praise || ''), tip: String(d.tip || ''), better: String(d.better || ''), drill: d.drill && clean.drill ? { progress: Math.max(0, Math.min(100, Math.round(+d.drill.progress || 0))), note: String(d.drill.note || '') } : undefined };
+    if (task === 'coach') out = { scores: shapeScores(d.scores), praise: String(d.praise || ''), tip: String(d.tip || ''), better: String(d.better || ''), drill: d.drill && clean.drill ? { progress: drillProgress(clean, cm, d.drill), note: String(d.drill.note || '') } : undefined };
     else if (task === 'ideas') out = { ideas: (Array.isArray(d.ideas) ? d.ideas : []).slice(0, 3).filter(i => i && i.text).map(i => ({ tone: String(i.tone || 'Idea').slice(0, 20), text: String(i.text) })) };
     else if (task === 'polish') out = { text: String(d.text || '') };
     else out = { grade: String(d.grade || 'B').slice(0, 3), headline: String(d.headline || ''), scores: shapeScores(d.scores), strengths: (d.strengths || []).slice(0, 3).map(String), work_on: (d.work_on || []).slice(0, 3).map(String), best_line: String(d.best_line || ''), next_drill: DRILLS[d.next_drill] ? d.next_drill : '', why: String(d.why || '') };
@@ -1696,7 +1902,11 @@
     const b = el('button', 'back'); b.type = 'button'; b.innerHTML = icon('back'); b.title = 'Back'; b.setAttribute('aria-label', 'Back');
     b.onclick = () => {
       if (S.view === 'review') S.review = null;
-      else { if (S.abort) stopStream(); store.set('vv_open_' + S.view, null); S.scene = null; S.ideas = null; }
+      else {
+        const ls = S.scene && S.scene.lesson;
+        if (S.abort) stopStream(); store.set('vv_open_' + S.view, null); S.scene = null; S.ideas = null;
+        if (ls && LESSON_BY[ls]) { uniGo(LESSON_BY[ls].course.id, ls); return; }
+      }
       render();
     };
     h.appendChild(b);
@@ -1728,7 +1938,8 @@
     headBack(h);
     h.appendChild(avatar(sc.partner.name, sc.colors, '', picOf(sc)));
     const w = el('div', 'who');
-    w.append(el('b', '', sc.partner.name), el('span', '', ROLE_LABEL[sc.partner.role] + ' \u00b7 ' + HEAT_LABEL[sc.heat] + ' \u00b7 ' + sceneTitle(sc).split(' \u00b7 ').slice(1).join(' \u00b7 ')));
+    const lsn = sc.lesson && LESSON_BY[sc.lesson];
+    w.append(el('b', '', sc.partner.name), el('span', '', lsn ? lsn.course.code + ' \u00b7 ' + lsn.title : ROLE_LABEL[sc.partner.role] + ' \u00b7 ' + HEAT_LABEL[sc.heat] + ' \u00b7 ' + sceneTitle(sc).split(' \u00b7 ').slice(1).join(' \u00b7 ')));
     h.appendChild(w);
     const safe = el('div', 'safe');
     const y = el('button', 'ib c-yellow'); y.type = 'button'; y.innerHTML = '<span class="dot"></span><span class="lbl">Yellow</span>'; y.title = 'Yellow: slow down and check in'; y.setAttribute('aria-label', 'Yellow: slow down and check in');
@@ -1790,10 +2001,11 @@
     const t = el('div', 't');
     t.appendChild(el('b', '', sc.partner.name + ', ' + sc.partner.age));
     t.appendChild(el('p', '', sc.setting || 'Wherever the story takes you.'));
+    if (sc.notes) t.appendChild(el('p', 'premise', sc.notes));
     const tags = el('div', 'tags');
     const tag = (text, cls) => { tags.appendChild(el('span', 'tag ' + (cls || ''), text)); };
     tag(ROLE_LABEL[sc.partner.role], 'c-violet'); tag(HEAT_LABEL[sc.heat], 'c-rose'); tag(PACE_LABEL[sc.pace], 'c-amber'); tag(STYLE_LABEL[sc.style], 'c-teal');
-    if (sc.drill && DRILLS[sc.drill]) tag('Drill: ' + DRILLS[sc.drill].name, 'c-gold');
+    if (sc.drill && drillOf(sc.drill)) tag((has(LESSONS, sc.drill) ? 'Lesson: ' : 'Drill: ') + drillOf(sc.drill).name, 'c-gold');
     if (sc.hard.length) tag(sc.hard.length + ' hard limits kept', 'c-red');
     t.appendChild(tags);
     body.appendChild(t);
@@ -1803,7 +2015,7 @@
   function scoreColor(v) { return v >= 8 ? 'c-teal' : v >= 6 ? 'c-gold' : 'c-rose'; }
   function mean(sc) { let s = 0; DIMS.forEach(d => { s += sc[d[0]] || 0; }); return s / DIMS.length; }
   function msgEl(m, i, isLastP, isLastY) {
-    if (m.who === 'note') return el('div', 'note', m.text);
+    if (m.who === 'note') return m.kind === 'lesson' ? lessonNoteEl(m) : el('div', 'note', m.text);
     const row = el('div', 'msg ' + m.who + ((isLastP || isLastY) ? ' last' : ''));
     row.dataset.i = i;
     const live = S.scene.kind === 'live';
@@ -1844,6 +2056,7 @@
       ab('edit', '', () => { m.editing = true; renderThread(true); }, 'Fix this line');
       ab('wand', '', () => enhanceMessage(m), 'Enhance: see a stronger version');
       const cp = ab('copy', '', () => copy(text), 'Copy'); cp.disabled = false;
+      const sv = ab('bookmark', '', () => saveLine(text, S.scene.partner.name), 'Save this line'); sv.disabled = false;
       ab('trash', '', () => removeLine(i), 'Remove this line');
     } else if (m.who === 'partner' && S.streamMsg !== m) {
       if (m.alts && m.alts.length > 1) {
@@ -1858,8 +2071,10 @@
       ab('wand', '', () => enhanceMessage(m), 'Enhance this reply');
       if ('speechSynthesis' in window) { const s = ab('speak', '', () => speak(text, true), 'Read it aloud'); s.disabled = false; }
       const cp = ab('copy', '', () => copy(text), 'Copy'); cp.disabled = false;
+      const sv = ab('bookmark', '', () => saveLine(text, S.scene.partner.name), 'Save this line'); sv.disabled = false;
       if (i < S.scene.msgs.length - 1) ab('rewind', '', () => rewind(i), 'Rewind the scene to here');
     } else if (m.who === 'you') {
+      if (m.ghost || m.used) acts.appendChild(el('span', 'alt ghost', m.used ? 'From the wingman' : 'Written by Velvet'));
       if (m.coach) {
         const v = mean(m.coach.scores);
         const chip = el('button', 'score-chip ' + scoreColor(v)); chip.type = 'button';
@@ -1871,6 +2086,7 @@
       }
       ab('edit', '', () => { m.editing = true; renderThread(true); }, live ? 'Fix this line' : 'Edit this line and resend');
       ab('wand', '', () => enhanceMessage(m), 'Enhance this line');
+      { const sv = ab('bookmark', '', () => saveLine(text, 'You'), 'Save this line'); sv.disabled = false; }
       if (live) { const cp = ab('copy', '', () => copy(text), 'Copy'); cp.disabled = false; ab('trash', '', () => removeLine(i), 'Remove this line'); }
       else if (i < S.scene.msgs.length - 1) ab('rewind', '', () => rewind(i), 'Rewind the scene to here');
     }
@@ -1979,7 +2195,8 @@
     th.style.setProperty('--a1', cols[0]); th.style.setProperty('--a2', cols[1]);
     if (pic) th.style.backgroundImage = 'url("' + String(pic).replace(/"/g, '%22') + '")'; else th.textContent = (String(x.partner || '?')[0] || '?').toUpperCase();
     const t = el('div', 't');
-    const where = x.kind === 'live' ? 'Live chat' : String(x.title || '').split(' \u00b7 ').slice(1).join(' \u00b7 ');
+    const lsn = x.lesson && LESSON_BY[x.lesson];
+    const where = x.kind === 'live' ? 'Live chat' : lsn ? lsn.course.code + ' \u00b7 ' + lsn.title : String(x.title || '').split(' \u00b7 ').slice(1).join(' \u00b7 ');
     t.append(el('b', '', x.partner || 'Scene'), el('span', '', [where, plural(x.lines, 'line'), ago(x.updated)].filter(Boolean).join(' \u00b7 ')));
     const last = lastLine(x.id); if (last) t.appendChild(el('small', '', last));
     const go = el('span', 'go'); go.innerHTML = icon('right');
@@ -2126,6 +2343,8 @@
         const row = el('div', 'row');
         const cp = el('button', 'btn c-slate'); cp.type = 'button'; cp.innerHTML = icon('copy') + 'Copy'; cp.onclick = () => copy(fb.better);
         row.appendChild(cp);
+        const svb = el('button', 'btn c-slate'); svb.type = 'button'; svb.innerHTML = icon('bookmark') + 'Save'; svb.onclick = () => saveLine(fb.better, 'Coach');
+        row.appendChild(svb);
         if (canRedo && sel === yours[yours.length - 1]) {
           const redo = el('button', 'btn tint c-gold'); redo.type = 'button'; redo.innerHTML = icon('regen') + 'Redo my line with it';
           redo.disabled = S.busy; redo.onclick = () => redoWith(sel, fb.better);
@@ -2162,11 +2381,11 @@
       body.appendChild(pr);
       return;
     }
-    if (sc.drill && DRILLS[sc.drill]) {
-      const d = DRILLS[sc.drill];
+    if (sc.drill && drillOf(sc.drill)) {
+      const d = drillOf(sc.drill), lsn = LESSON_BY[sc.drill];
       const p = el('div', 'panel drillp');
-      p.innerHTML = '<h4>' + icon(DRILL_UI[sc.drill][0]) + 'Drill</h4>';
-      p.appendChild(el('b', '', d.name + (sc.drillDone ? '  ✓' : '')));
+      p.innerHTML = '<h4>' + icon(lsn ? 'cap' : DRILL_UI[sc.drill][0]) + (lsn ? lsn.course.code + ' \u00b7 Lesson ' + lsn.n : 'Drill') + '</h4>';
+      p.appendChild(el('b', '', (lsn ? lsn.title : d.name) + (sc.drillDone ? '  ✓' : '')));
       p.appendChild(el('p', 'muted', d.goal));
       const bar = el('div', 'bar'); const f = el('i'); bar.appendChild(f); p.appendChild(bar);
       requestAnimationFrame(() => { f.style.width = (sc.drillProgress || 0) + '%'; });
@@ -2175,6 +2394,7 @@
     }
     body.appendChild(scorePanel(sc, 'This scene'));
     body.appendChild(feedbackPanel(sc, true));
+    const lean = leanPanel(sc); if (lean) body.appendChild(lean);
     const yours = sc.msgs.filter(m => m.who === 'you');
     const pa = el('div', 'panel');
     const rbtn = el('button', 'btn tint c-gold block'); rbtn.type = 'button'; rbtn.innerHTML = icon('trophy') + 'End scene and get my report';
@@ -2253,11 +2473,11 @@
     const sc = {
       id: newId(), created: Date.now(), updated: Date.now(),
       partner: cfg.partner, colors: cfg.colors || colorsFor(cfg.partner.name), you: cfg.you,
-      settingId: cfg.settingId || '', setting: cfg.setting || '', notes: '',
+      settingId: cfg.settingId || '', setting: cfg.setting || '', notes: cfg.notes || '',
       heat: cfg.heat, pace: cfg.pace, style: cfg.style,
       into: cfg.into || [], curious: cfg.curious || [], soft: cfg.soft || [], hard: cfg.hard || [],
       drill: cfg.drill || '', coachAuto: cfg.coachAuto !== false, starts: cfg.starts || 'partner',
-      msgs: [], coachSel: '', drillProgress: 0, drillDone: false, drillNote: '', report: null, kind: 'practice', castId: cfg.castId || '', presetId: cfg.presetId || '',
+      msgs: [], coachSel: '', drillProgress: 0, drillDone: false, drillNote: '', report: null, kind: 'practice', castId: cfg.castId || '', presetId: cfg.presetId || '', lesson: cfg.lesson || '',
     };
     if (S.abort) stopStream();
     S.scene = sc; S.ooc = false; S.ideas = null; $('ideasWrap').hidden = true;
@@ -2393,10 +2613,11 @@
     const sw = safeWord(text);
     if (sw) m.safe = sw;
     if (opts.nudge) m.nudge = true;
+    if (opts.ghost) m.ghost = true;
     sc.msgs.push(m);
     const coachIt = coachable(sc, m);
     if (coachIt) countLine();
-    S.ideas = null; $('ideasWrap').hidden = true;
+    S.ideas = null; S.ideaTexts = null; $('ideasWrap').hidden = true;
     saveScene(sc);
     renderThread(); scrollDown(true);
     const reply = partnerTurn('reply');
@@ -2404,8 +2625,9 @@
     await reply;
     return true;
   }
-  // Lines the coach reads: in character, or out of character when that's the drill (Talk first).
-  function coachable(sc, m) { return !!m && m.who === 'you' && !m.safe && !m.nudge && (!isOOC(m.text) || sc.drill === 'talk_first'); }
+  // Lines the coach reads: your own (not ones Velvet or the wingman wrote), in character, or out of character when
+  // the drill is about that (Talk first).
+  function coachable(sc, m) { return !!m && m.who === 'you' && !m.safe && !m.nudge && !m.ghost && !m.used && (!isOOC(m.text) || !!(drillOf(sc.drill) || {}).ooc); }
   function waitIdle(ms) {
     return new Promise(res => { const t0 = Date.now(); (function poll() { if (!S.busy || Date.now() - t0 > ms) res(); else setTimeout(poll, 30); })(); });
   }
@@ -2433,9 +2655,12 @@
         sc.drillNote = out.drill.note || sc.drillNote;
         if (sc.drillProgress >= 100 && !sc.drillDone) {
           sc.drillDone = true;
-          S.progress.drills[sc.drill] = (S.progress.drills[sc.drill] || 0) + 1; saveProgress();
-          sc.msgs.push({ id: newId(), who: 'note', text: 'Drill complete: ' + DRILLS[sc.drill].name + '. Keep playing, or end the scene for your report.' });
-          if (!signedIn()) addXP(100, 'drill complete');
+          if (sc.lesson && LESSON_BY[sc.lesson]) finishLesson(sc);
+          else {
+            S.progress.drills[sc.drill] = (S.progress.drills[sc.drill] || 0) + 1; saveProgress();
+            sc.msgs.push({ id: newId(), who: 'note', text: 'Drill complete: ' + drillOf(sc.drill).name + '. Keep playing, or end the scene for your report.' });
+          }
+          if (!signedIn()) addXP(100, sc.lesson ? 'lesson passed' : 'drill complete');
         }
       }
     } catch (e) {
@@ -2498,19 +2723,24 @@
     if (draft && isMinorText(draft)) { toast(ADULTS_ONLY, 'err'); return; }
     S.busy = true; refreshUI();
     const wrap = $('ideasWrap'), box = $('ideas');
-    wrap.hidden = false; box.innerHTML = ''; $('ideasNote').textContent = 'Thinking of three ways to go…';
+    wrap.hidden = false; box.innerHTML = ''; $('ideasNote').textContent = draft ? 'Writing three lines from your draft…' : 'Writing your next line, three ways…';
     for (let k = 0; k < 3; k++) { const s = el('div', 'idea c-slate'); s.innerHTML = '<span class="spin"></span>'; box.appendChild(s); }
     try {
       const out = await jsonTask('ideas', apiScene(sc), apiMsgs(sc.msgs), draft);
       box.innerHTML = '';
       const cls = ['c-rose', 'c-amber', 'c-violet'];
+      S.ideaTexts = (out.ideas || []).map(it => it.text);
       (out.ideas || []).forEach((it, k) => {
-        const b = el('button', 'idea story ' + cls[k % 3]); b.type = 'button';
-        b.appendChild(el('b', '', it.tone)); const t = el('span'); renderRP(t, it.text); b.appendChild(t);
-        b.onclick = () => { $('input').value = it.text; autosize(); renderComposer(); $('input').focus(); };
-        box.appendChild(b);
+        const card = el('div', 'idea story ' + cls[k % 3]);
+        card.appendChild(el('b', '', it.tone)); const t = el('span'); renderRP(t, it.text); card.appendChild(t);
+        const row = el('div', 'irow');
+        const sendB = el('button', 'btn main'); sendB.type = 'button'; sendB.innerHTML = icon('send') + 'Send'; sendB.title = 'Send it as your line'; sendB.onclick = () => { send(it.text, { ghost: true }); };
+        const editB = el('button', 'btn'); editB.type = 'button'; editB.innerHTML = icon('edit') + 'Edit first'; editB.onclick = () => { $('input').value = it.text; autosize(); renderComposer(); $('input').focus(); };
+        const saveB = el('button', 'ib c-gold'); saveB.type = 'button'; saveB.innerHTML = icon('bookmark'); saveB.title = 'Save this line'; saveB.setAttribute('aria-label', 'Save this line'); saveB.onclick = () => saveLine(it.text, 'Velvet');
+        row.append(sendB, editB, saveB); card.appendChild(row);
+        box.appendChild(card);
       });
-      $('ideasNote').textContent = out.ideas && out.ideas.length ? 'Tap one to use it. Make it yours before you send.' : 'No ideas came back. Try again.';
+      $('ideasNote').textContent = out.ideas && out.ideas.length ? 'Three lines in your voice. Send one as it is, or edit it first.' : 'Nothing came back. Try again.';
     } catch (e) {
       box.innerHTML = ''; $('ideasNote').textContent = (e && e.message) || "Couldn't get ideas. Try again.";
     } finally { S.busy = false; refreshUI(); }
@@ -2610,13 +2840,16 @@
     const v = $('input').value, sc = S.scene;
     if (!v.trim() || !sc) return;
     const before = sc.msgs.length;
-    const p = send(v);              // send() adds the line before its first await
+    const ghost = (S.ideaTexts || []).some(t => String(t).trim() === v.trim());      // a "Write for me" line, sent as it was
+    const p = send(v, ghost ? { ghost: true } : undefined);              // send() adds the line before its first await
     if (sc.msgs.length > before) { $('input').value = ''; autosize(); S.ooc = false; renderComposer(); }
     await p;
   }
   $('actBtn').innerHTML = btnHTML('star', 'Action');
   $('oocBtn').innerHTML = btnHTML('ooc', 'OOC');
-  $('ideasBtn').innerHTML = btnHTML('bulb', 'Ideas');
+  $('ideasBtn').innerHTML = btnHTML('feather', 'Write for me');
+  $('savedBtn').innerHTML = btnHTML('bookmark', 'Saved');
+  $('savedBtn').onclick = openSaved;
   $('polishBtn').innerHTML = btnHTML('sparkle', 'Polish');
   $('shotBtn').innerHTML = btnHTML('scan', 'Screenshot');
   $('suggestBtn').innerHTML = btnHTML('pulse', 'Replies');
@@ -2648,8 +2881,9 @@
       partner: partnerFrom(p), colors: p.colors || colorsFor(p.name), settingId: p.setting || '', setting: (SETTINGS.find(s => s.id === p.setting) || {}).text || '', settingTouched: false,
       you: youFromProfile(), heat: pr.heat, pace: pr.pace, style: pr.style,
       into: pr.into.slice(), curious: pr.curious.slice(), soft: pr.soft.slice(), hard: pr.hard.slice(), kinkName: pr.kinkName || '',
-      drill: opts.drill || '', coachAuto: S.settings.coachAuto, starts: 'partner',
+      drill: opts.drill || opts.lesson || '', lesson: opts.lesson || '', notes: '', coachAuto: S.settings.coachAuto, starts: 'partner',
     };
+    if (NEW.lesson && LESSON_BY[NEW.lesson]) { const st = SETTINGS.find(x => x.id === LESSON_BY[NEW.lesson].place); if (st) { NEW.settingId = st.id; NEW.setting = st.text; NEW.settingTouched = true; } NEW.step = 3; }
     if (NEW.drill) applyDrill(NEW.drill);
     renderNew();
     $('newSheet').hidden = false;
@@ -2657,7 +2891,7 @@
     if (opts.random) setTimeout(() => { const f = $('yName'); if (f) f.focus(); }, 60);
   }
   function applyDrill(id) {
-    const d = DRILLS[id]; if (!d) return;
+    const d = drillOf(id); if (!d) return;
     if (d.you_role) NEW.you.role = d.you_role;
     if (d.partner_role) NEW.partner.role = d.partner_role;
     if (d.pace) NEW.pace = d.pace;
@@ -2698,7 +2932,7 @@
     else { const q = p.ref; NEW.partnerId = q.id; NEW.castId = ''; NEW.presetId = q.id; NEW.partner = partnerFrom(q); NEW.colors = q.colors; }
     const fav = p.castId ? (castById(p.castId).setting || '') : p.ref.setting;
     if (!NEW.settingTouched && fav) { NEW.settingId = fav; NEW.setting = (SETTINGS.find(s => s.id === fav) || {}).text || ''; }
-    if (NEW.drill && DRILLS[NEW.drill].partner_role) NEW.partner.role = DRILLS[NEW.drill].partner_role;
+    if (NEW.drill && (drillOf(NEW.drill) || {}).partner_role) NEW.partner.role = drillOf(NEW.drill).partner_role;
   }
   function newPartnerStep(body) {
     const s1 = el('div', 'sec');
@@ -2791,6 +3025,7 @@
     feel.append(el('span', '', 'Format'), seg(STYLES, STYLE_LABEL, NEW.style, v => { NEW.style = v; sd.textContent = styDesc[v]; }, 'Format'), sd);
     s4.appendChild(feel);
     body.appendChild(s4);
+    body.appendChild(premiseSection());
     const s5 = el('div', 'sec');
     const det = el('details', 'tweak'); if (NEW.into.length || NEW.hard.length || NEW.kinkName) det.open = true;
     det.appendChild(el('summary', '', 'Boundaries' + (NEW.kinkName ? ' \u00b7 from ' + NEW.kinkName + '\u2019s Kink List' : (NEW.into.length + NEW.hard.length ? ' \u00b7 ' + NEW.into.length + ' into, ' + NEW.hard.length + ' hard limits' : ''))));
@@ -2823,9 +3058,10 @@
     s6.appendChild(h6);
     const fd = el('div', 'fields'); fd.style.marginTop = '0';
     const opts2 = { '': 'Free play' }; Object.keys(DRILLS).forEach(k => { opts2[k] = 'Drill: ' + DRILLS[k].name; });
+    if (NEW.drill && has(LESSONS, NEW.drill)) opts2[NEW.drill] = 'Lesson: ' + LESSONS[NEW.drill].name;
     const dSel = selectEl('drillSel', opts2, NEW.drill);
-    const dDesc = el('p', 'muted', NEW.drill ? DRILLS[NEW.drill].goal : 'Play freely. The coach still scores every line.'); dDesc.style.cssText = 'margin:8px 0 0;font-size:12.5px';
-    dSel.onchange = () => { NEW.drill = dSel.value; if (NEW.drill) applyDrill(NEW.drill); else NEW.starts = 'partner'; renderNew(); };
+    const dDesc = el('p', 'muted', NEW.drill ? drillOf(NEW.drill).goal : 'Play freely. The coach still scores every line.'); dDesc.style.cssText = 'margin:8px 0 0;font-size:12.5px';
+    dSel.onchange = () => { NEW.drill = dSel.value; if (NEW.drill !== NEW.lesson) NEW.lesson = ''; if (NEW.drill) applyDrill(NEW.drill); else NEW.starts = 'partner'; renderNew(); };
     const dw = field('What to practise', dSel); dw.appendChild(dDesc);
     const startWrap = el('div', 'f'); startWrap.appendChild(el('label', '', 'Who starts'));
     startWrap.appendChild(seg(['partner', 'you'], { partner: NEW.partnerId === 'custom' ? 'Them' : (NEW.partner.name || 'Them'), you: 'Me' }, NEW.starts, v => { NEW.starts = v; }, 'Who starts'));
@@ -2882,7 +3118,7 @@
     if (!(age >= 18)) { goTo(1, 'pAge', 'Every character in Velvet is 18 or older.', true); return; }
     if (!Y.name) { goTo(3, 'yName', 'Tell your partner your name.'); return; }
     P.age = Math.min(99, age);
-    const texts = [P.name, P.look, P.personality, P.voice, Y.name, Y.look, NEW.setting].concat(NEW.into, NEW.curious, NEW.soft);
+    const texts = [P.name, P.look, P.personality, P.voice, Y.name, Y.look, NEW.setting, NEW.notes || ''].concat(NEW.into, NEW.curious, NEW.soft);
     if (texts.some(isMinorText)) { toast(ADULTS_ONLY, 'err'); return; }
     Object.assign(S.profile, { name: Y.name, pronouns: Y.pronouns, role: Y.role, look: Y.look, heat: NEW.heat, pace: NEW.pace, style: NEW.style,
       into: NEW.into.slice(), curious: NEW.curious.slice(), soft: NEW.soft.slice(), hard: NEW.hard.slice(), kinkName: NEW.kinkName });
@@ -2894,7 +3130,7 @@
     $('newSheet').hidden = true;
     createScene({ partner: Object.assign({}, P), colors: NEW.colors || colorsFor(P.name), you: Object.assign({}, Y), settingId: NEW.settingId, setting: NEW.setting.trim(),
       heat: NEW.heat, pace: NEW.pace, style: NEW.style, into: NEW.into.slice(), curious: NEW.curious.slice(), soft: NEW.soft.slice(), hard: NEW.hard.slice(),
-      drill: NEW.drill, coachAuto: NEW.coachAuto, starts: NEW.starts, castId: NEW.castId, presetId: NEW.castId ? '' : NEW.presetId });
+      drill: NEW.drill, lesson: NEW.lesson || '', notes: String(NEW.notes || '').trim(), coachAuto: NEW.coachAuto, starts: NEW.starts, castId: NEW.castId, presetId: NEW.castId ? '' : NEW.presetId });
   });
 
   // ---------------------------------------------------------------- settings sheet
@@ -2990,9 +3226,778 @@
     location.reload();
   }
 
+  // ================================================================ Velvet University: professors, courses, lessons
+  // Each lesson is a short lecture, a weak and a strong example, and an assignment: a practice scene whose drill is
+  // the lesson (LESSONS, in the prompt copy above). Reach the goal to pass; the grade is the average of your lines.
+  const FACULTY = [
+    { id: 'vale', name: 'Isadora Vale', short: 'Dean Vale', rank: 'Dean', subject: 'Foundations and writing', colors: ['#f2c38b', '#7c2d12'],
+      bio: 'Thirty years of letters, scripts and very long nights. She can spot a lazy line from across the room, and she will make yours unforgettable.',
+      hello: 'Come in, sit down. What are we working on today?',
+      ask: ['How do I make my actions less boring?', 'How long should my replies be?', 'What makes a line memorable?'] },
+    { id: 'okafor', name: 'Dante Okafor', short: 'Professor Okafor', rank: 'Professor', subject: 'The art of leading', colors: ['#a8a29e', '#1c1917'],
+      bio: 'Calm, certain and impossible to rush. He teaches the quiet kind of power: clear words, close attention, and praise that lands.',
+      hello: 'Sit. Take your time. What do you want to know?',
+      ask: ['How do I lead without being cold?', 'How do I give orders that sound natural?', 'What do I do when they hesitate?'] },
+    { id: 'sato', name: 'June Sato', short: 'Professor Sato', rank: 'Professor', subject: 'The art of following', colors: ['#fda4af', '#9f1239'],
+      bio: 'Playful, quick and trouble on purpose. She teaches the art of yielding, and the even finer art of making them work for it.',
+      hello: 'Oh, a visitor! Spill it. What are we being bratty about today?',
+      ask: ['How do I brat without being annoying?', 'How do I show I like it?', 'How do I ask for what I want and still be the sub?'] },
+    { id: 'hart', name: 'Rosalind Hart', short: 'Dr. Hart', rank: 'Doctor', subject: 'Consent and care', colors: ['#5eead4', '#115e59'],
+      bio: 'She makes safety sound like foreplay. Talking first, check-ins, safewords and aftercare, taught warmly and without a single lecture.',
+      hello: 'Welcome. There are no silly questions in this room. What is on your mind?',
+      ask: ['How do I bring up limits without killing the mood?', 'What do I say when someone uses a safeword?', 'What does good aftercare look like in text?'] },
+    { id: 'marchetti', name: 'Leo Marchetti', short: 'Professor Marchetti', rank: 'Professor', subject: 'Tension and character', colors: ['#fca5a5', '#7f1d1d'],
+      bio: 'A director at heart. He talks about scenes like films: the pause before the kiss, the line that changes everything, the voice that makes a character real.',
+      hello: 'Ah, come in, come in! Tell me everything. Which scene is giving you trouble?',
+      ask: ['How do I build tension?', 'How do I make my character sound real?', 'How do I flirt with subtext?'] },
+    { id: 'reyes', name: 'Nova Reyes', short: 'Professor Reyes', rank: 'Professor', subject: '3DXChat craft', colors: ['#c4b5fd', '#4c1d95'],
+      bio: 'Lives in the game. Short lines, sharp emotes, clubs full of strangers: she teaches you to stand out in a busy room and keep up with fast chat.',
+      hello: 'Hey! Pull up a chair. What is up?',
+      ask: ['How do I approach someone in a club?', 'How do I keep up with fast chat?', 'How do I bring a dead scene back to life?'] },
+  ];
+  FACULTY.forEach(f => { f.img = 'assets/faculty/' + f.id + '.webp'; });
+  const COURSES = [
+    { code: 'RP 101', id: 'rp101', name: 'Foundations of Roleplay', prof: 'vale', core: true,
+      blurb: 'Where everyone starts: actions and speech, giving your partner something to answer, and matching their rhythm.',
+      lessons: [
+        { id: 'rp101_1', title: 'Actions and speech', partner: 'mara', place: 'beach',
+          lecture: 'Every good line has two parts: what your character does, and what they say. Actions go in *asterisks*, in the present tense. Speech goes beside them. Put the two together and your partner can see the moment as well as hear it.',
+          points: ['One clear action and one line of speech beat three vague ones.', 'Write in the present tense: *leans closer*, not *leaned closer*.', 'Only ever write your own character. Their body and their choices belong to them.'],
+          weak: 'hi *smiles* how are you', strong: '*slides onto the stool beside you and nudges my glass your way* You look like someone who needs a better drink.',
+          why: 'A specific action, a line with some personality, and an easy way in.' },
+        { id: 'rp101_2', title: 'Give them a hook', partner: 'jordan', place: 'apartment',
+          lecture: 'The best roleplayers are generous. Every reply ends with something your partner can grab: a question, a touch, a choice, a dare. If your line could be the last line of the scene, it is not finished yet.',
+          points: ['End on something to answer: a question, an invitation, a touch that asks for a reaction.', 'Offer choices. "The couch or the balcony?" lets them steer.', 'Never end on a full stop that closes the door.'],
+          weak: '*sits down on the couch and drinks the wine*', strong: '*sits down and pats the cushion beside me, holding out your glass* Come here. Tell me the worst thing you did today.',
+          why: 'It invites them closer and hands them a question they want to answer.' },
+        { id: 'rp101_3', title: 'Match their rhythm', partner: 'sienna', place: 'house_party',
+          lecture: 'Roleplay is a dance, and the length of your reply is part of the step. Two quick lines answered with a wall of text stops the music. A rich paragraph answered with one word feels like a shrug. Match their length and energy first, then lead from there.',
+          points: ['Short reply? Answer short and punchy.', 'Long, detailed reply? Give them detail back.', 'Match the energy first, then nudge it where you want it to go.'],
+          weak: 'ok', strong: '*takes your hand before you can change your mind* Lead the way, trouble.',
+          why: 'Their quick, playful energy, matched and handed straight back.' },
+      ] },
+    { code: 'CNS 101', id: 'cns101', name: 'Consent and Care', prof: 'hart', core: true,
+      blurb: 'The sexiest skills in roleplay: talking first, checking in without killing the mood, and taking care of each other after.',
+      lessons: [
+        { id: 'cns101_1', title: 'Talk first', partner: 'mara', place: 'beach',
+          lecture: 'Before the first kiss, two minutes out of character saves a hundred awkward moments. What are you into? What is off the table? What is the safeword? Asking is not unsexy. It tells your partner you are worth trusting.',
+          points: ['Out of character, in (( )): likes, limits and a safeword.', 'Ask about theirs as much as you share yours.', 'Keep it light. It is flirting with logistics.'],
+          weak: '(( no limits lol, let\'s go ))', strong: '(( Before we start: I love slow teasing and praise, no pain for me. Red to stop, yellow to slow down? What about you? ))',
+          why: 'Likes, a limit, a safeword and a question, all in one friendly line.' },
+        { id: 'cns101_2', title: 'Check in, stay in', partner: 'jordan', place: 'hotel',
+          lecture: 'A check-in does not have to stop the scene. "You okay?" whispered against someone\'s ear is care and heat at once. Watch for a pause or a change in tone, ask softly, and then listen to the answer, whatever it is.',
+          points: ['Notice the signal: a pause, a shorter reply, a tense body.', 'Check in, in character: soft, short and sincere.', 'Respect the answer. Yes means go on. Anything else means slow down.'],
+          weak: '*keeps going, ignoring how quiet you have gone*', strong: '*stills, hand resting on your waist* Hey. You went quiet on me. Good quiet, or should we slow down?',
+          why: 'It notices, asks warmly, stays in the moment and offers an easy way out.' },
+        { id: 'cns101_3', title: 'Aftercare', partner: 'damon', place: 'penthouse',
+          lecture: 'The scene is over and someone\'s heart is still racing. Aftercare is how you land the plane: water, a blanket, a soft word, a question about how they feel. It is what makes people want to play with you again.',
+          points: ['Slow everything down: voice, touch and pace.', 'Ask what they need, then give it.', 'Say something kind and true about the scene.'],
+          weak: 'ok that was fun, gtg', strong: '*pulls the blanket over us both and presses a glass of water into your hand* Drink. ...How are you feeling? You were incredible.',
+          why: 'Comfort, care, a real question, and praise that lingers.' },
+      ] },
+    { code: 'WRT 120', id: 'wrt120', name: 'Show, Don\'t Tell', prof: 'vale', core: true,
+      blurb: 'Make them feel it: bodies instead of labels, exact details instead of generic ones, and every one of the five senses.',
+      lessons: [
+        { id: 'wrt120_1', title: 'Show the feeling', partner: 'celeste', place: 'penthouse',
+          lecture: '"I\'m nervous" is a label. Shaking hands, a dry throat, a laugh that comes out too fast: that is a feeling. Your partner cannot feel a label. Show what the emotion does to the body, and let them read it.',
+          points: ['Never name the emotion. Show it in the hands, the breath, the voice, the eyes.', 'One true physical detail is worth a paragraph of explaining.', 'Let your partner react to what they see, not to what you told them.'],
+          weak: '*is really nervous and excited*', strong: '*laughs a beat too fast and tucks my hair behind my ear, twice* So. You actually came.',
+          why: 'The double tuck and the quick laugh show the nerves without ever naming them.' },
+        { id: 'wrt120_2', title: 'Specific beats general', partner: 'damon', place: 'vip',
+          lecture: '"She looked beautiful" could be anyone, anywhere. "The red dress, the gold cuff, the scar on her lip she never hides" is one person on one night. Specific details make a scene real, and they give your partner something to notice.',
+          points: ['Swap generic words (nice, hot, sexy, beautiful) for one exact detail.', 'The drink, the colour of a dress, the song that is playing: small facts build a world.', 'Details about your partner are compliments they can answer.'],
+          weak: '*looks at you* you look really hot', strong: '*lets my eyes follow your collar down to the open button* Charcoal suits you. So does that look you\'re giving me.',
+          why: 'Exact details about them, and a compliment with a question hidden in it.' },
+        { id: 'wrt120_3', title: 'All five senses', partner: 'nyx', place: 'tavern',
+          lecture: 'Most roleplay is all eyes. Add the crackle of the fire, the smell of rain on a jacket, the taste of wine on a kiss, the heat of a hand through fabric, and the scene stops being a picture and becomes a place.',
+          points: ['Sound and smell are the most forgotten, and the most powerful.', 'Touch is texture and temperature, not just contact.', 'Taste belongs to kisses, drinks and skin. Use it.'],
+          weak: '*kisses you*', strong: '*kisses you slowly; you taste of honeyed mead and woodsmoke, and the fire pops somewhere behind us*',
+          why: 'Taste, smell and sound turn a kiss into a memory.' },
+      ] },
+    { code: 'CHT 150', id: 'cht150', name: '3DXChat Craft', prof: 'reyes', core: true,
+      blurb: 'Roleplay at game speed: short lines that hit hard, emotes that land, and openers that start something.',
+      lessons: [
+        { id: 'cht150_1', title: 'Short and vivid', partner: 'mara', place: 'beach',
+          lecture: 'In game, chat moves fast and the window is small. A great 3DX line is short, punchy and alive: one strong action, one line of talk, done. Under 120 characters is the sweet spot.',
+          points: ['One action, one line. Cut everything else.', 'Strong verbs carry short lines: *pins*, *tugs*, *murmurs*.', 'If it scrolls off the screen, it is too long.'],
+          weak: '*walks over to you slowly and looks at you and smiles a lot* hello how are you doing tonight', strong: '*tugs your collar, grinning* Took you long enough.',
+          why: 'Seven words, one strong verb, and a whole mood.' },
+        { id: 'cht150_2', title: 'Emotes that land', partner: 'riley', place: 'house_party',
+          lecture: 'In 3DX your emotes are your body. Write them without your name, in the present tense: *leans in*, not *Nova leans in*. One specific action reads better than a list, and an emote with speech lets them see and hear you at once.',
+          points: ['No name in the emote: *leans in close*.', 'One specific action beats a list of three.', 'Emote and speech in the same line is the classic combination.'],
+          weak: '*Nova walks* *Nova sits* *Nova drinks* hey', strong: '*hops up on the counter beside you, swinging my legs* So whose party is this, anyway?',
+          why: 'One playful action, no name, and an easy question.' },
+        { id: 'cht150_3', title: 'The opener', partner: 'celeste', place: 'vip',
+          lecture: 'Every great scene starts with someone brave enough to say something. The best openers notice one specific thing, show a flash of personality, and give an easy way to answer. No "hi", no "wanna rp?". Walk in like you already belong.',
+          points: ['Notice something specific about them or the moment.', 'Show a flash of your personality.', 'Make it easy to answer: a question or a playful dare.'],
+          weak: 'hi wanna rp?', strong: '*slides into the booth across from you* That\'s the third drink you\'ve sent back. Tough crowd, or waiting for someone better?',
+          why: 'Specific, playful, and impossible not to answer.' },
+      ] },
+    { code: 'TEN 210', id: 'ten210', name: 'Tension and the Slow Burn', prof: 'marchetti', core: false,
+      blurb: 'Wanting is the best part: the almost-touch, push and pull, and escalating one small step at a time.',
+      lessons: [
+        { id: 'ten210_1', title: 'The almost', partner: 'marcus', place: 'gym',
+          lecture: 'Cinema taught us this: the kiss is never as hot as the second before it. Hands that almost touch. A breath held. A sentence left unfinished. Learn to stop one inch short, and let the inch do the work.',
+          points: ['Stop just short: the almost-touch, the almost-kiss, the almost-confession.', 'A pause is an action too: *doesn\'t answer right away*.', 'Make them want the next line more than you want to write it.'],
+          weak: '*kisses you hard against the wall*', strong: '*steps in until there\'s barely air between us, close enough to feel your breath... and doesn\'t kiss you* Not yet.',
+          why: 'It promises everything and delivers nothing. Yet.' },
+        { id: 'ten210_2', title: 'Push and pull', partner: 'riley', place: 'hotel',
+          lecture: 'Tension is a rubber band. Pull closer, then pull back. A compliment, then a challenge. Lean in, then walk to the window. Every retreat makes the next advance hit twice as hard.',
+          points: ['Alternate advance and retreat: closer, then away.', 'Pair warmth with a little challenge: "You\'re trouble. I like trouble."', 'Retreat with intent, and always leave them a reason to follow.'],
+          weak: '*kisses you* *kisses you again* *kisses you more*', strong: '*brushes my thumb along your jaw, then turns away to pour two drinks* You\'re very sure of yourself. Let\'s see if you\'ve earned it.',
+          why: 'A touch, then distance and a challenge: now they have to follow.' },
+        { id: 'ten210_3', title: 'One step at a time', partner: 'valentina', place: 'playroom',
+          lecture: 'Every line can go one step further than the last. One. A hand on the knee becomes a hand on the thigh, not a hand everywhere. Small steps keep the burn slow and give your partner the chance to say yes to each one.',
+          points: ['Each reply escalates exactly one small step.', 'Make the step clear, so they can welcome it or slow it.', 'If they slow down, you slow down. That is the craft.'],
+          weak: '*rips your clothes off*', strong: '*rests my fingertips on the inside of your wrist, then traces slowly up to your elbow* Is this all right?',
+          why: 'One small step, taken deliberately, with room to say yes.' },
+      ] },
+    { code: 'VOX 220', id: 'vox220', name: 'Character and Voice', prof: 'marchetti', core: false,
+      blurb: 'Sound like somebody: a voice that is yours, dialogue with subtext, and saying exactly what you want.',
+      lessons: [
+        { id: 'vox220_1', title: 'Find your voice', partner: 'jordan', place: 'apartment',
+          lecture: 'Close your eyes and listen to your character. Do they drawl or snap? Swear, or never? Call people darling, or mate? Pick two or three habits and keep them. A consistent voice is the difference between a character and a narrator.',
+          points: ['Choose word habits: pet names, slang, how formal they are.', 'Choose a rhythm: short and blunt, or long and lazy.', 'Keep it the same from line to line.'],
+          weak: 'That is very nice. I would like that.', strong: 'Mm. Careful, sweetheart. Keep looking at me like that and I\'ll start getting ideas.',
+          why: 'A pet name, a rhythm and a playful warning: you can hear exactly who this is.' },
+        { id: 'vox220_2', title: 'Say it without saying it', partner: 'celeste', place: 'office',
+          lecture: 'The sexiest dialogue is about something else. Talk about the wine and mean the kiss. Argue about the music and mean the attraction. Subtext lets you both pretend, and pretending is delicious.',
+          points: ['Let the words say one thing and the meaning say another.', 'Banter is a volley: answer the meaning, not just the words.', 'Leave the obvious unsaid. They will hear it anyway.'],
+          weak: 'I want to sleep with you.', strong: '*swirls the last of the wine* It\'s a shame to leave a good bottle unfinished. Don\'t you think?',
+          why: 'It is about the bottle. It is not about the bottle.' },
+        { id: 'vox220_3', title: 'Say it out loud', partner: 'kai', place: 'apartment',
+          lecture: 'Subtext is the seduction; clarity is the reward. When the moment comes, say exactly what you want, in your character\'s own words. Vague wants get vague answers. Specific wants get remembered.',
+          points: ['Be specific: what, where and how.', 'Stay in your voice. A shy character can still be clear.', 'Confidence is attractive. So is honesty about nerves.'],
+          weak: 'I want you.', strong: '*hooks a finger in your belt loop* I want you to kiss me slowly, right here, like we\'ve got all night.',
+          why: 'Exactly what, exactly how, in a voice with some nerve.' },
+      ] },
+    { code: 'PWR 301', id: 'pwr301', name: 'The Art of Leading', prof: 'okafor', core: false,
+      blurb: 'Quiet, certain power: clear direction, praise that lands, and reading every reaction.',
+      lessons: [
+        { id: 'pwr301_1', title: 'Command presence', partner: 'sienna', place: 'hotel',
+          lecture: 'Power is not volume. It is certainty. Say what you want in as few words as you can, and do not ask permission for every breath. Give a calm, clear direction, then let the silence do its work.',
+          points: ['Short, clear instructions: "Come here." "Look at me."', 'No hedging: drop maybe, if you want, kind of.', 'Calm beats loud. A slow voice is a strong voice.'],
+          weak: 'um maybe you could come over here if you want?', strong: '*doesn\'t look up from my drink* Come here. Stand right there, where I can see you.',
+          why: 'No hedging and no hurry: the calm does the commanding.' },
+        { id: 'pwr301_2', title: 'Praise that lands', partner: 'kai', place: 'hotel',
+          lecture: 'Praise is the reward that keeps a scene alive. Make it specific and immediate: name what they did, the moment they did it. "Good" is nice. "Good, just like that, slower" is unforgettable.',
+          points: ['Praise the exact thing they did.', 'Praise in the moment, not later.', 'Reward, then lead: praise followed by the next instruction.'],
+          weak: 'good job', strong: '*tilts your chin up* Look at you, waiting so patiently. Good. Now kneel, slowly.',
+          why: 'Specific praise for what they did, then the next step.' },
+        { id: 'pwr301_3', title: 'Read and adjust', partner: 'riley', place: 'mansion',
+          lecture: 'The best leaders watch more than they talk. A shiver, a pause, a yes that comes too quickly: these are messages. Notice them, adjust the intensity, and check in without breaking the spell. "Still with me?", said softly, is a command and a kindness at once.',
+          points: ['Watch for reactions: eagerness, hesitation, overwhelm.', 'Adjust: more when they are eager, softer when they hesitate.', 'Check in, in character: "Still with me?" "Too much?"'],
+          weak: '*ignores your hesitation and keeps going*', strong: '*notices the way your breath catches, and slows down, thumb brushing your cheek* Still with me? Tell me.',
+          why: 'It reads the moment, softens, and checks in without leaving the scene.' },
+      ] },
+    { code: 'PWR 302', id: 'pwr302', name: 'The Art of Following', prof: 'sato', core: false,
+      blurb: 'Yielding is a skill: reactions that show everything, bratting with charm, and asking for what you want.',
+      lessons: [
+        { id: 'pwr302_1', title: 'React out loud', partner: 'damon', place: 'vip',
+          lecture: 'When they lead, your reactions are your lines. Do not just obey: show what the order does to you. The flush, the hitched breath, the second of defiance before you give in. Someone who leads needs to see the effect.',
+          points: ['Show what each order does to your body and breath.', 'Hesitate, then yield. The moment before is delicious.', 'Never answer with just "ok".'],
+          weak: 'ok *does it*', strong: '*swallows hard and does as I\'m told, cheeks burning, eyes flicking up to yours to see if it pleased you*',
+          why: 'It obeys, and shows exactly what obeying does to them.' },
+        { id: 'pwr302_2', title: 'The playful brat', partner: 'valentina', place: 'playroom',
+          lecture: 'A good brat is a gift: resistance that makes the one in charge work for it, and enjoy it. Tease, talk back, drag your feet. Always with a wink, never a wall. The goal is to be caught.',
+          points: ['Resist with charm: a smirk, a dare, a "make me".', 'Push back on small things, never on the whole scene.', 'Leave the door open. You want to lose.'],
+          weak: 'no. I don\'t want to.', strong: '*takes my sweet time crossing the room, smirking* Oh, did you want me now? You\'ll have to say please.',
+          why: 'Defiant and teasing, and clearly hoping to be put in their place.' },
+        { id: 'pwr302_3', title: 'Ask for it', partner: 'marcus', place: 'gym',
+          lecture: 'Following does not mean silence. Asking, pleading, begging: done well, it hands your partner the power and tells them exactly what you want. Be specific, stay in your role, and let them decide.',
+          points: ['Ask specifically: what you want, and how.', 'Stay in your role: ask, do not take.', 'Let them answer. The waiting is part of it.'],
+          weak: 'can we do more', strong: '*looks up at you, voice small* Please... hold me there, just like that, a little longer?',
+          why: 'Specific, deferential, and it hands them the choice.' },
+      ] },
+    { code: 'ADV 401', id: 'adv401', name: 'Reading the Room', prof: 'reyes', core: false,
+      blurb: 'Advanced play: catch the hints, rescue a scene that is dying, and end a scene so they remember it.',
+      lessons: [
+        { id: 'adv401_1', title: 'Catch the cue', partner: 'nyx', place: 'tavern',
+          lecture: 'People rarely say what they want outright. They hint: a glance at the door, a sigh, a story about someone who kissed them in the rain. The best roleplayers hear the hint and answer it, so their partner feels seen.',
+          points: ['Watch for hints: glances, pauses, half-said wishes.', 'Answer the hint, not just the words.', 'Miss one and they cool. Catch one and they light up.'],
+          weak: 'cool. want another drink?', strong: '*catches your glance at the rain, then holds out my hand* Come on. Before it stops.',
+          why: 'It hears the wish behind the words and makes it happen.' },
+        { id: 'adv401_2', title: 'Rescue a dead scene', partner: 'kai', place: 'apartment',
+          lecture: 'Sometimes a scene goes flat: one-word answers, no hooks, nothing to grab. Do not push harder. Change something. A twist, a question they cannot resist, a new place, a joke. Give them a reason to wake up.',
+          points: ['Change the situation: a knock at the door, a power cut, a dare.', 'Ask something personal or playful they will want to answer.', 'Make it easy to join back in.'],
+          weak: '*keeps kissing you*', strong: '*the lights cut out; I laugh in the dark and find your hand* Okay. Truth or dare, and you have to answer before they come back on.',
+          why: 'A twist, a laugh and a game: impossible to stay flat.' },
+        { id: 'adv401_3', title: 'End it well', partner: 'celeste', place: 'penthouse',
+          lecture: 'Most scenes do not end, they just stop. Give yours an ending: a final image, a line that lands, a warm close or a hook for next time. People remember how a scene ends more than how it starts.',
+          points: ['Signal the ending: slow down, soften, look back.', 'Land on an image or a line worth remembering.', 'Leave a door open: "Same time next week?"'],
+          weak: 'ok bye', strong: '*presses a last kiss to your knuckles at the door* Next time, you choose the wine. And the trouble.',
+          why: 'A tender final beat, a smile, and a promise of next time.' },
+      ] },
+  ];
+  const LESSON_LIST = [], LESSON_BY = {};
+  COURSES.forEach(c => c.lessons.forEach((l, i) => { l.course = c; l.n = i + 1; LESSON_LIST.push(l); LESSON_BY[l.id] = l; }));
+  function profOf(id) { return FACULTY.find(f => f.id === id) || FACULTY[0]; }
+  function fullName(p) { return (p.rank === 'Doctor' ? 'Dr.' : p.rank) + ' ' + p.name; }
+
+  // your transcript: the best grade for each lesson you passed
+  const UNI = Object.assign({ lessons: {} }, store.json('vv_uni', {}));
+  if (!UNI.lessons || typeof UNI.lessons !== 'object') UNI.lessons = {};
+  function saveUni() { if (!store.set('vv_uni', JSON.stringify(UNI))) toast(FULL, 'err'); }
+  const GRADES = [[9.2, 'A+', 4], [8.6, 'A', 4], [8.2, 'A-', 3.7], [7.8, 'B+', 3.3], [7.2, 'B', 3], [6.8, 'B-', 2.7], [6.4, 'C+', 2.3], [5.8, 'C', 2], [5.4, 'C-', 1.7], [4.6, 'D+', 1.3], [0, 'D', 1]];
+  function gradeFor(avg) { return GRADES.find(g => avg >= g[0]) || GRADES[GRADES.length - 1]; }
+  function pointsOf(letter) { const g = GRADES.find(x => x[1] === letter); return g ? g[2] : 0; }
+  function letterOf(gpa) { const t = [[3.85, 'A'], [3.5, 'A-'], [3.15, 'B+'], [2.85, 'B'], [2.5, 'B-'], [2.15, 'C+'], [1.85, 'C'], [1.5, 'C-'], [1.15, 'D+']]; const x = t.find(y => gpa >= y[0]); return x ? x[1] : 'D'; }
+  function passed(id) { return UNI.lessons[id] || null; }
+  function courseState(c) {
+    const done = c.lessons.filter(l => passed(l.id));
+    return { done: done.length, all: c.lessons.length, complete: done.length === c.lessons.length,
+      gpa: done.length ? done.reduce((s, l) => s + pointsOf(passed(l.id).grade), 0) / done.length : null };
+  }
+  function transcript() {
+    const done = LESSON_LIST.filter(l => passed(l.id)), credits = done.length;
+    const gpa = credits ? done.reduce((s, l) => s + pointsOf(passed(l.id).grade), 0) / credits : null;
+    const core = COURSES.filter(c => c.core), coreDone = core.filter(c => courseState(c).complete).length;
+    const allDone = COURSES.filter(c => courseState(c).complete).length;
+    const degree = allDone === COURSES.length ? 'master' : coreDone === core.length ? 'bachelor' : '';
+    const standing = credits >= LESSON_LIST.length ? 'Graduate' : credits >= 21 ? 'Senior' : credits >= 14 ? 'Junior' : credits >= 7 ? 'Sophomore' : 'Freshman';
+    return { credits, all: LESSON_LIST.length, gpa, coreDone, coreAll: core.length, allDone, degree, standing,
+      aces: done.filter(l => /^A/.test(passed(l.id).grade)).length };
+  }
+  const DEGREE = { bachelor: 'Bachelor of Roleplay Arts', master: 'Master of Roleplay Arts' };
+  function nextLesson() { return LESSON_LIST.find(l => !passed(l.id)) || null; }
+  function openLesson(id) { return S.index.find(x => x.lesson === id && !x.done) || null; }
+  function escHTML(t) { return String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]); }
+  function lastWordEm(t) { const s = escHTML(t); const i = s.lastIndexOf(' '); return i < 0 ? '<em>' + s + '</em>' : s.slice(0, i + 1) + '<em>' + s.slice(i + 1) + '</em>'; }
+
+  function uniGo(course, lesson) {
+    S.uni = { course: course || '', lesson: lesson || '' };
+    store.set('vv_uni_at', JSON.stringify(S.uni));
+    if (S.view !== 'uni') setView('uni');
+    else { renderThread(); renderCoach(); }
+  }
+  function uniHead() {
+    const h = $('head'); h.innerHTML = '';
+    h.classList.add('home-head');
+    const w = el('div', 'who'); w.append(el('b', '', 'Velvet'), el('span', '', 'University'));
+    h.append(w, homeTools());
+  }
+  function uniMain() {
+    thread.innerHTML = '';
+    const l = S.uni.lesson && LESSON_BY[S.uni.lesson], c = S.uni.course && COURSES.find(x => x.id === S.uni.course);
+    thread.appendChild(l ? uniLesson(l) : c ? uniCourse(c) : uniHome());
+    thread.scrollTop = 0;
+  }
+  function crumb(label, fn) {
+    const b = el('button', 'crumb'); b.type = 'button'; b.innerHTML = icon('back');
+    b.appendChild(el('span', '', label)); b.onclick = fn;
+    return b;
+  }
+  function profCard(f) {
+    const c = partnerCard({ name: f.name, img: f.img, colors: f.colors, vibe: f.subject }, { onPick: () => openOffice(f.id) });
+    const sp = c.querySelector('.meta span'); if (sp) sp.textContent = f.rank;
+    c.setAttribute('aria-label', f.rank + ' ' + f.name + ', ' + f.subject + ': office hours');
+    return c;
+  }
+  function uniHome() {
+    const w = el('div', 'home');
+    const T = transcript(), nx = nextLesson();
+    const hero = el('div', 'hero');
+    const ht = el('div');
+    ht.appendChild(el('div', 'eyebrow', 'Velvet University'));
+    const h1 = el('h1', 'display'); h1.innerHTML = 'Learn it from the <em>best.</em>'; ht.appendChild(h1);
+    ht.appendChild(el('p', 'lead', 'Six professors, nine courses, twenty-seven lessons. A short lecture, a practice scene graded line by line, and a degree with your name on it.'));
+    const cta = el('div', 'cta');
+    if (nx) {
+      const b = el('button', 'btn main big'); b.type = 'button';
+      b.innerHTML = icon('cap') + (T.credits ? 'Next: ' + nx.course.code + ' · ' + nx.title : 'Start with ' + nx.course.code);
+      b.onclick = () => uniGo(nx.course.id, nx.id); cta.appendChild(b);
+    }
+    const oh = el('button', 'btn big'); oh.type = 'button'; oh.innerHTML = icon('chat') + 'Office hours'; oh.onclick = () => openOffice();
+    cta.appendChild(oh);
+    ht.appendChild(cta); hero.appendChild(ht);
+    const day = Math.floor(Date.now() / 86400000);
+    hero.appendChild(heroArt([0, 1, 2].map(k => FACULTY[(day + k * 2) % FACULTY.length].img)));
+    w.appendChild(hero);
+    w.appendChild(transcriptStrip(T));
+    if (T.degree) w.appendChild(diplomaEl(T));
+    w.appendChild(secTitle('Faculty', 'Tap a professor for office hours'));
+    const row = el('div', 'rowscroll');
+    FACULTY.forEach(f => row.appendChild(profCard(f)));
+    w.appendChild(scroller(row));
+    w.appendChild(secTitle('Courses', 'The four core courses earn your Bachelor’s'));
+    const g = el('div', 'courses'); COURSES.forEach(c => g.appendChild(courseCard(c))); w.appendChild(g);
+    w.appendChild(secTitle('How it works'));
+    const how = el('div', 'how');
+    [['A short lecture', 'Two minutes with your professor: the idea, three rules, and a weak line next to a strong one.'],
+      ['A real assignment', 'A practice scene built for the lesson. The coach grades every line against the lesson’s goal.'],
+      ['An honest grade', 'Reach the goal to pass. Your grade is the average of your lines, and you can retake a lesson for a better one.'],
+      ['A degree', 'Pass the four core courses for a Bachelor of Roleplay Arts, and all nine for a Master’s.']].forEach(x => {
+      const d = el('div'); d.append(el('b', '', x[0]), document.createTextNode(x[1])); how.appendChild(d);
+    });
+    w.appendChild(how);
+    return w;
+  }
+  function transcriptStrip(T) {
+    const box = el('div', 'xp');
+    const who = el('div', 'xp-who');
+    const cap = el('div', 'av'); cap.innerHTML = icon('cap'); cap.style.setProperty('--a1', '#f6c177'); cap.style.setProperty('--a2', '#9a3412');
+    who.appendChild(cap);
+    const wt = el('div');
+    wt.append(el('b', '', T.standing), el('span', '', T.degree ? DEGREE[T.degree] : T.credits ? 'Working towards your Bachelor’s' : 'Start a lesson to enrol'));
+    who.appendChild(wt);
+    const barw = el('div', 'xp-bar');
+    const r = el('div', 'row'); r.innerHTML = '<span><b>' + T.credits + '</b> of ' + T.all + ' credits</span><span>' + (T.degree === 'master' ? 'Graduated' : T.coreDone + ' of ' + T.coreAll + ' core courses') + '</span>';
+    const bar = el('div', 'bar'); const f = el('i'); bar.appendChild(f); barw.append(r, bar);
+    const stats = el('div', 'xp-stats');
+    stats.innerHTML = '<span><b>' + (T.gpa != null ? T.gpa.toFixed(2) : '–') + '</b>GPA</span><span><b>' + T.allDone + '</b>' + (T.allDone === 1 ? 'course' : 'courses') + '</span><span><b>' + T.aces + '</b>' + (T.aces === 1 ? 'A grade' : 'A grades') + '</span>';
+    box.append(who, barw, stats);
+    requestAnimationFrame(() => { f.style.width = Math.round(T.credits / T.all * 100) + '%'; });
+    return box;
+  }
+  function diplomaEl(T) {
+    const name = (S.profile.name || (S.account && (S.account.name || S.account.discord_name)) || 'You').trim();
+    const d = el('div', 'diploma');
+    d.appendChild(el('div', 'eyebrow', 'Velvet University'));
+    d.appendChild(el('small', '', 'This certifies that'));
+    d.appendChild(el('span', 'nm', name));
+    d.appendChild(el('small', '', 'has earned the degree of'));
+    d.appendChild(el('span', 'deg', DEGREE[T.degree]));
+    const honours = T.gpa >= 3.85 ? 'summa cum laude' : T.gpa >= 3.6 ? 'magna cum laude' : T.gpa >= 3.3 ? 'cum laude' : '';
+    const last = Math.max.apply(null, Object.keys(UNI.lessons).map(k => UNI.lessons[k].at || 0));
+    d.appendChild(el('div', 'meta', (honours ? honours + ' · ' : '') + 'GPA ' + T.gpa.toFixed(2) + ' · ' + new Date(last).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })));
+    const sigs = el('div', 'sigs');
+    [['Isadora Vale', 'Dean'], ['Rosalind Hart', 'Faculty of Consent']].forEach(x => { const s = el('span', '', x[0]); s.appendChild(el('em', '', x[1])); sigs.appendChild(s); });
+    d.appendChild(sigs);
+    const share = el('button', 'btn tint c-gold'); share.type = 'button'; share.innerHTML = icon('copy') + 'Copy to share';
+    share.onclick = () => copy('I just earned my ' + DEGREE[T.degree] + (honours ? ', ' + honours : '') + ' at Velvet University (GPA ' + T.gpa.toFixed(2) + ').', 'Copied. Go and brag.');
+    d.appendChild(share);
+    return d;
+  }
+  function courseCard(c) {
+    const st = courseState(c), p = profOf(c.prof);
+    const b = el('button', 'course'); b.type = 'button';
+    const top = el('div', 'ctop');
+    top.appendChild(avatar(p.name, p.colors, '', p.img));
+    const tt = el('div', 'ct'); tt.append(el('span', 'code', c.code + (c.core ? ' · Core' : '')), el('small', '', p.short));
+    top.appendChild(tt);
+    if (st.complete) top.appendChild(el('span', 'grade sm', letterOf(st.gpa)));
+    b.appendChild(top);
+    b.appendChild(el('b', '', c.name));
+    b.appendChild(el('p', '', c.blurb));
+    const pr = el('div', 'cprog'); const bar = el('div', 'bar'); const f = el('i'); bar.appendChild(f);
+    pr.append(bar, el('span', '', st.done + ' of ' + st.all + ' lessons'));
+    b.appendChild(pr);
+    requestAnimationFrame(() => { f.style.width = Math.round(st.done / st.all * 100) + '%'; });
+    b.onclick = () => uniGo(c.id);
+    return b;
+  }
+  function uniCourse(c) {
+    const w = el('div', 'rv'), p = profOf(c.prof), st = courseState(c);
+    w.appendChild(crumb('University', () => uniGo()));
+    w.appendChild(pageTitle(c.code + (c.core ? ' · Core course' : ' · Elective'), lastWordEm(c.name), c.blurb));
+    const pc = el('div', 'panel prof-row');
+    pc.appendChild(avatar(p.name, p.colors, 'lg', p.img));
+    const pt = el('div', 't'); pt.append(el('b', '', fullName(p)), el('span', '', p.subject), el('p', 'muted', p.bio));
+    pc.appendChild(pt);
+    const oh = el('button', 'btn tint c-gold'); oh.type = 'button'; oh.innerHTML = icon('chat') + 'Office hours'; oh.onclick = () => openOffice(p.id, c);
+    pc.appendChild(oh);
+    w.appendChild(pc);
+    w.appendChild(secTitle('Lessons', st.complete ? 'Course grade: ' + letterOf(st.gpa) : st.done + ' of ' + st.all + ' passed'));
+    const list = el('div', 'lessons');
+    c.lessons.forEach(l => {
+      const d = passed(l.id), open = openLesson(l.id);
+      const r = el('button', 'lrow' + (d ? ' done' : '')); r.type = 'button';
+      const n = el('span', 'n'); if (d) n.innerHTML = icon('check'); else n.textContent = String(l.n);
+      const t = el('span', 't'); t.append(el('b', '', l.title), el('small', '', LESSONS[l.id].goal));
+      r.append(n, t);
+      r.appendChild(d ? el('span', 'grade sm', d.grade) : el('span', 'go', open ? 'Continue' : 'Start'));
+      r.onclick = () => uniGo(c.id, l.id);
+      list.appendChild(r);
+    });
+    w.appendChild(list);
+    return w;
+  }
+  function uniLesson(l) {
+    const c = l.course, p = profOf(c.prof), D = LESSONS[l.id], done = passed(l.id), open = openLesson(l.id);
+    const w = el('div', 'rv');
+    w.appendChild(crumb(c.code + ' · ' + c.name, () => uniGo(c.id)));
+    w.appendChild(pageTitle(c.code + ' · Lesson ' + l.n + ' of ' + c.lessons.length, lastWordEm(l.title), null));
+    const lec = el('div', 'panel lecture');
+    const lh = el('div', 'lh'); lh.appendChild(avatar(p.name, p.colors, '', p.img));
+    const lt = el('div'); lt.append(el('b', '', p.short), el('span', '', 'The lecture')); lh.appendChild(lt);
+    lec.appendChild(lh);
+    lec.appendChild(el('p', 'talk', l.lecture));
+    const ul = el('ul', 'rules');
+    l.points.forEach(x => { const li = el('li'); li.innerHTML = icon('check'); li.appendChild(document.createTextNode(x)); ul.appendChild(li); });
+    lec.appendChild(ul);
+    w.appendChild(lec);
+    const ex = el('div', 'example');
+    [['weak', 'Weak', 'c-red', l.weak], ['strong', 'Strong', 'c-gold', l.strong]].forEach(x => {
+      const b = el('div', 'ex ' + x[0]); b.appendChild(el('span', 'tag ' + x[2], x[1]));
+      const t = el('div', 'story'); renderRP(t, x[3]); b.appendChild(t);
+      if (x[0] === 'strong') { const sv = el('button', 'ib c-gold'); sv.type = 'button'; sv.innerHTML = icon('bookmark'); sv.title = 'Save this line'; sv.setAttribute('aria-label', 'Save this line'); sv.onclick = () => saveLine(x[3], c.code); b.appendChild(sv); }
+      ex.appendChild(b);
+    });
+    w.appendChild(ex);
+    w.appendChild(el('p', 'why muted', l.why));
+    const as = el('div', 'panel assign');
+    as.appendChild(el('h4', '', 'Your assignment'));
+    as.appendChild(el('p', 'goal', D.goal));
+    const partner = PARTNERS.find(x => x.id === l.partner) || PARTNERS[0], place = SETTINGS.find(x => x.id === l.place);
+    const who = el('div', 'who-row'); who.appendChild(avatar(partner.name, partner.colors, '', partner.img));
+    const wt = el('div'); wt.append(el('b', '', 'With ' + partner.name), el('span', '', (place ? place.label + ' · ' : '') + (D.starts === 'you' ? 'you open the scene' : partner.name + ' opens the scene')));
+    who.appendChild(wt); as.appendChild(who);
+    as.appendChild(el('p', 'muted', 'The coach marks every line against the goal. Reach it to pass; your grade is the average of your lines.'));
+    const row = el('div', 'row');
+    const go = el('button', 'btn main'); go.type = 'button';
+    go.innerHTML = icon('heart') + (open ? 'Continue the assignment' : done ? 'Retake for a better grade' : 'Start the assignment');
+    go.onclick = () => { if (open) openScene(open.id); else startLesson(l.id); };
+    row.appendChild(go);
+    if (open) { const fresh = el('button', 'btn'); fresh.type = 'button'; fresh.innerHTML = icon('regen') + 'Start over'; fresh.onclick = () => startLesson(l.id); row.appendChild(fresh); }
+    const ask = el('button', 'btn c-slate'); ask.type = 'button'; ask.innerHTML = icon('chat') + 'Ask ' + p.short; ask.onclick = () => openOffice(p.id, c, l);
+    row.appendChild(ask);
+    as.appendChild(row);
+    if (done) {
+      const g = el('div', 'passed');
+      g.append(el('span', 'grade sm', done.grade), el('span', '', 'Passed ' + new Date(done.at).toLocaleDateString() + (done.tries > 1 ? ' · your best of ' + done.tries + ' tries' : '')));
+      as.appendChild(g);
+    }
+    w.appendChild(as);
+    const nav = el('div', 'lnav'); const i = LESSON_LIST.indexOf(l);
+    if (i > 0) { const pv = LESSON_LIST[i - 1]; const b = el('button', 'btn'); b.type = 'button'; b.innerHTML = icon('back') + escHTML(pv.title); b.onclick = () => uniGo(pv.course.id, pv.id); nav.appendChild(b); }
+    nav.appendChild(el('span', 'sp'));
+    if (i < LESSON_LIST.length - 1) { const nx = LESSON_LIST[i + 1]; const b = el('button', 'btn'); b.type = 'button'; b.innerHTML = 'Next: ' + escHTML(nx.title) + icon('right'); b.onclick = () => uniGo(nx.course.id, nx.id); nav.appendChild(b); }
+    w.appendChild(nav);
+    return w;
+  }
+  // the assignment: a practice scene with the lesson as its drill
+  function startLesson(id) {
+    if (store.get('vv_adult') !== 'yes') { $('ageGate').hidden = false; return; }
+    const l = LESSON_BY[id]; if (!l) return;
+    const p = PARTNERS.find(x => x.id === l.partner) || PARTNERS[0];
+    if (!String(S.profile.name || '').trim()) { openNew({ preset: p, lesson: id }); return; }
+    if (!ready()) return;
+    const D = LESSONS[id], pr = S.profile, place = SETTINGS.find(x => x.id === l.place);
+    const partner = partnerFrom(p); if (D.partner_role) partner.role = D.partner_role;
+    const you = youFromProfile(); if (D.you_role) you.role = D.you_role;
+    createScene({ partner, colors: p.colors, you, settingId: place ? place.id : '', setting: place ? place.text : '',
+      heat: pr.heat || 'steamy', pace: D.pace || pr.pace || 'steady', style: D.style || pr.style || 'paragraphs',
+      into: pr.into.slice(), curious: pr.curious.slice(), soft: pr.soft.slice(), hard: pr.hard.slice(),
+      drill: id, lesson: id, coachAuto: true, starts: D.starts || 'partner', presetId: p.id });
+  }
+  function finishLesson(sc) {
+    const l = LESSON_BY[sc.lesson]; if (!l) return;
+    const before = transcript().degree;
+    const coached = sc.msgs.filter(m => m.who === 'you' && m.coach);
+    const avg = coached.length ? coached.reduce((s, m) => s + mean(m.coach.scores), 0) / coached.length : 6;
+    const g = gradeFor(avg)[1], prev = UNI.lessons[l.id], tries = (prev ? prev.tries || 1 : 0) + 1;
+    if (!prev || avg > (prev.avg || 0)) UNI.lessons[l.id] = { grade: g, avg: Math.round(avg * 100) / 100, at: Date.now(), tries };
+    else prev.tries = tries;
+    saveUni();
+    sc.msgs.push({ id: newId(), who: 'note', kind: 'lesson', lesson: l.id, grade: g, text: 'Lesson passed: ' + l.course.code + ' · ' + l.title + ' · ' + g });
+    const after = transcript().degree;
+    if (after && after !== before) setTimeout(() => toast('You graduated: ' + DEGREE[after] + '! Your diploma is in the University.', 'gold'), 600);
+  }
+  function profNote(grade, p) {
+    const lines = { A: 'Outstanding. That is exactly how it is done.', B: 'Strong work. A little more polish and it sings.',
+      C: 'You reached the goal. Come back and retake it when you want a better grade.', D: 'Passed, just. Read the lecture again and give it another go.' };
+    return '“' + (lines[grade[0]] || lines.C) + '” — ' + p.short;
+  }
+  function leaveScene() { if (S.abort) stopStream(); store.set('vv_open_practice', null); S.scene = null; S.ideas = null; }
+  function lessonNoteEl(m) {
+    const l = LESSON_BY[m.lesson]; if (!l) return el('div', 'note', m.text);
+    const c = l.course, p = profOf(c.prof);
+    const box = el('div', 'lesson-done');
+    box.appendChild(el('span', 'grade', m.grade));
+    const t = el('div', 't'); t.append(el('b', '', 'Lesson passed'), el('span', '', c.code + ' · ' + l.title), el('p', '', profNote(m.grade, p)));
+    box.appendChild(t);
+    const row = el('div', 'row');
+    const back = el('button', 'btn'); back.type = 'button'; back.innerHTML = icon('cap') + 'Back to ' + c.code; back.onclick = () => { leaveScene(); uniGo(c.id); };
+    row.appendChild(back);
+    const nx = LESSON_LIST[LESSON_LIST.indexOf(l) + 1];
+    if (nx) { const n = el('button', 'btn main'); n.type = 'button'; n.innerHTML = 'Next lesson' + icon('right'); n.onclick = () => { leaveScene(); uniGo(nx.course.id, nx.id); }; row.appendChild(n); }
+    box.appendChild(row);
+    return box;
+  }
+  function gpaRing(gpa) {
+    const ring = el('div', 'ring'), C = 2 * Math.PI * 33;
+    ring.innerHTML = '<svg viewBox="0 0 78 78"><circle class="bg" cx="39" cy="39" r="33"/><circle class="fg" cx="39" cy="39" r="33" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + C.toFixed(1) + '"/></svg>';
+    const num = el('div', 'num'); num.innerHTML = '<div>' + (gpa != null ? gpa.toFixed(2) : '–') + '<small>GPA</small></div>';
+    ring.appendChild(num);
+    if (gpa != null) requestAnimationFrame(() => { const fg = ring.querySelector('.fg'); if (fg) fg.style.strokeDashoffset = (C * (1 - gpa / 4)).toFixed(1); });
+    return ring;
+  }
+  function uniPanel() {
+    const c = $('coach'); c.innerHTML = '';
+    const body = panelHead(c, 'Transcript', 'cap', 'c-gold', null);
+    const T = transcript();
+    const p = el('div', 'panel');
+    p.appendChild(el('h4', '', T.standing + ' · ' + T.credits + ' of ' + T.all + ' credits'));
+    const rr = el('div', 'ring-row'); rr.appendChild(gpaRing(T.gpa));
+    const facts = el('div', 'dims');
+    [['Core', T.coreDone + ' of ' + T.coreAll], ['Courses', T.allDone + ' of ' + COURSES.length], ['Degree', T.degree === 'master' ? 'Master' : T.degree === 'bachelor' ? 'Bachelor' : 'Not yet']].forEach(x => {
+      const row = el('div', 'dim'); row.style.gridTemplateColumns = '70px 1fr'; row.append(el('span', '', x[0]), el('b', '', x[1])); row.lastChild.style.textAlign = 'left'; facts.appendChild(row);
+    });
+    rr.appendChild(facts); p.appendChild(rr);
+    const list = el('div', 'tx-list'); list.style.marginTop = '12px';
+    COURSES.forEach(cs => {
+      const st = courseState(cs); const row = el('button', 'tx'); row.type = 'button';
+      row.append(el('span', 'code', cs.code), el('span', 'nm', cs.name), el('b', '', st.complete ? letterOf(st.gpa) : st.done ? st.done + '/' + st.all : '–'));
+      row.onclick = () => uniGo(cs.id); list.appendChild(row);
+    });
+    p.appendChild(list);
+    body.appendChild(p);
+    const o = el('div', 'panel'); o.appendChild(el('h4', '', 'Office hours'));
+    const fl = el('div', 'fac-list');
+    FACULTY.forEach(f => {
+      const b = el('button', 'fp'); b.type = 'button'; b.appendChild(avatar(f.name, f.colors, 'sm', f.img));
+      const t = el('span'); t.append(el('b', '', f.short), el('small', '', f.subject)); b.appendChild(t);
+      b.onclick = () => openOffice(f.id); fl.appendChild(b);
+    });
+    o.appendChild(fl); body.appendChild(o);
+  }
+
+  // ---------------------------------------------------------------- office hours: ask a professor anything
+  let OFFICE = null;
+  const OFFICE_LOG = store.json('vv_office', {});
+  function openOffice(profId, course, lesson) {
+    if (store.get('vv_adult') !== 'yes') { $('ageGate').hidden = false; return; }
+    OFFICE = { prof: profId || '', topic: lesson ? lesson.course.code + ' · ' + lesson.title : course ? course.code + ' · ' + course.name : '', busy: false };
+    renderOffice(); $('officeSheet').hidden = false; closeDrawers();
+    if (OFFICE.prof) setTimeout(() => $('officeIn').focus(), 60);
+  }
+  function renderOffice() {
+    const who = $('officeWho'), body = $('officeBody'), f = $('officeForm');
+    who.innerHTML = ''; body.innerHTML = '';
+    if (!OFFICE.prof) {
+      who.appendChild(el('h2', '', 'Office hours'));
+      f.hidden = true;
+      body.appendChild(el('p', 'muted', 'Pick a professor and ask anything about roleplay: writing, flirting, leading, following, consent or the game.'));
+      const g = el('div', 'faculty-pick');
+      FACULTY.forEach(p => {
+        const b = el('button', 'fp'); b.type = 'button'; b.appendChild(avatar(p.name, p.colors, '', p.img));
+        const t = el('span'); t.append(el('b', '', fullName(p)), el('small', '', p.subject)); b.appendChild(t);
+        b.onclick = () => { OFFICE.prof = p.id; renderOffice(); setTimeout(() => $('officeIn').focus(), 30); };
+        g.appendChild(b);
+      });
+      body.appendChild(g);
+      return;
+    }
+    const p = profOf(OFFICE.prof);
+    f.hidden = false;
+    const head = el('div', 'oh-who'); head.appendChild(avatar(p.name, p.colors, '', p.img));
+    const t = el('div', 't'); t.append(el('b', '', fullName(p)), el('span', '', OFFICE.topic || p.subject)); head.appendChild(t);
+    const sw = el('button', 'lnk', 'Another professor'); sw.type = 'button'; sw.onclick = () => { OFFICE.prof = ''; renderOffice(); };
+    head.appendChild(sw);
+    who.appendChild(head);
+    const log = OFFICE_LOG[p.id] || [];
+    const hi = el('div', 'oh-msg prof'); hi.appendChild(el('div', 'b', p.hello)); body.appendChild(hi);
+    log.forEach(m => body.appendChild(officeMsg(m, p)));
+    if (OFFICE.busy) { const b = el('div', 'oh-msg prof'); const d = el('div', 'b'); d.innerHTML = '<span class="typing"><i></i><i></i><i></i></span>'; b.appendChild(d); body.appendChild(b); }
+    else if (!log.length) {
+      const chips = el('div', 'chips2');
+      p.ask.forEach(q => { const c = el('button', 'chip', q); c.type = 'button'; c.onclick = () => askProf(q); chips.appendChild(c); });
+      body.appendChild(chips);
+    } else {
+      const clr = el('button', 'lnk', 'Start fresh'); clr.type = 'button'; clr.style.cssText = 'align-self:center;border:0;background:none;color:var(--ink-3);text-decoration:underline;font-size:12.5px';
+      clr.onclick = () => { delete OFFICE_LOG[p.id]; store.set('vv_office', JSON.stringify(OFFICE_LOG)); renderOffice(); };
+      body.appendChild(clr);
+    }
+    $('officeAsk').innerHTML = icon('send') + 'Ask'; $('officeAsk').disabled = OFFICE.busy;
+    $('officeIn').placeholder = 'Ask ' + p.short + ' anything about roleplay';
+    requestAnimationFrame(() => { body.scrollTop = body.scrollHeight; });
+  }
+  function officeMsg(m, p) {
+    const d = el('div', 'oh-msg ' + (m.who === 'you' ? 'you' : 'prof'));
+    const b = el('div', 'b story'); renderRP(b, m.text); d.appendChild(b);
+    if (m.example) {
+      const ex = el('div', 'ex story'); ex.appendChild(el('span', 'tag c-gold', 'Try it like this'));
+      const e2 = el('div'); renderRP(e2, m.example); ex.appendChild(e2);
+      const acts = el('div', 'acts');
+      const cp = el('button', '', 'Copy'); cp.type = 'button'; cp.onclick = () => copy(m.example);
+      const sv = el('button', '', 'Save'); sv.type = 'button'; sv.onclick = () => saveLine(m.example, p.short);
+      acts.append(cp, sv); ex.appendChild(acts);
+      d.appendChild(ex);
+    }
+    return d;
+  }
+  async function askProf(q) {
+    q = String(q || '').trim();
+    if (!q || !OFFICE || !OFFICE.prof || OFFICE.busy) return;
+    if (isMinorText(q)) { toast(ADULTS_ONLY, 'err'); return; }
+    if (!ready()) return;
+    const p = profOf(OFFICE.prof), log = OFFICE_LOG[p.id] = OFFICE_LOG[p.id] || [];
+    const history = log.slice(-10).map(m => ({ who: m.who, text: m.text }));
+    log.push({ who: 'you', text: q, t: Date.now() });
+    OFFICE.busy = true; $('officeIn').value = ''; renderOffice();
+    try {
+      const out = await toolTask('professor', { prof: p.id, question: q, topic: OFFICE.topic, history });
+      log.push({ who: 'prof', text: out.answer, example: out.example || '', t: Date.now() });
+    } catch (e) {
+      log.pop(); $('officeIn').value = q;
+      toast((e && e.message) || 'The professor couldn’t answer. Try again.', 'err');
+    }
+    OFFICE_LOG[p.id] = log.slice(-30);
+    store.set('vv_office', JSON.stringify(OFFICE_LOG));
+    OFFICE.busy = false;
+    if (!$('officeSheet').hidden) renderOffice();
+  }
+  $('officeForm').addEventListener('submit', e => { e.preventDefault(); askProf($('officeIn').value); });
+  $('officeIn').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); askProf($('officeIn').value); } });
+
+  // ---------------------------------------------------------------- saved lines: a phrasebook to copy from
+  let SAVED = store.json('vv_saved', []);
+  if (!Array.isArray(SAVED)) SAVED = [];
+  function saveLine(text, from) {
+    text = String(text || '').trim(); if (!text) return;
+    if (SAVED.some(x => x.text === text)) { toast('Already in your saved lines.'); return; }
+    SAVED.unshift({ id: newId(), text, from: from || '', at: Date.now() });
+    SAVED = SAVED.slice(0, 200);
+    if (!store.set('vv_saved', JSON.stringify(SAVED))) { toast(FULL, 'err'); return; }
+    toast('Saved. It’s under Saved lines.');
+  }
+  function openSaved() { renderSaved(); $('savedSheet').hidden = false; closeDrawers(); }
+  function renderSaved() {
+    const b = $('savedBody'); b.innerHTML = '';
+    if (!SAVED.length) { b.appendChild(el('p', 'muted', 'Lines you save show up here, ready to copy into the game or to use as your next line. Tap the bookmark on any line, idea or example to save it.')); return; }
+    let find = null;
+    if (SAVED.length > 6) { find = inputEl('savedFind', '', 80, 'Find a saved line'); b.appendChild(find); }
+    const list = el('div', 'saved-list'); b.appendChild(list);
+    const draw = () => {
+      list.innerHTML = '';
+      const q = find ? find.value.trim().toLowerCase() : '';
+      SAVED.filter(x => !q || x.text.toLowerCase().indexOf(q) >= 0).forEach(x => {
+        const d = el('div', 'sv'); const t = el('div', 'txt story'); renderRP(t, x.text); d.appendChild(t);
+        const m = el('div', 'meta'); m.appendChild(el('span', '', (x.from ? x.from + ' · ' : '') + ago(x.at))); m.appendChild(el('span', 'sp'));
+        if (S.scene && (S.view === 'practice' || S.view === 'live')) {
+          const u = el('button', 'btn tint c-rose'); u.type = 'button'; u.innerHTML = icon('edit') + 'Use';
+          u.onclick = () => { $('savedSheet').hidden = true; $('input').value = x.text; if (S.view === 'live') S.liveWho = 'you'; autosize(); renderComposer(); $('input').focus(); };
+          m.appendChild(u);
+        }
+        const c = el('button', 'btn'); c.type = 'button'; c.innerHTML = icon('copy') + 'Copy'; c.onclick = () => copy(x.text); m.appendChild(c);
+        const r = el('button', 'btn c-slate'); r.type = 'button'; r.innerHTML = icon('trash'); r.setAttribute('aria-label', 'Remove'); r.title = 'Remove';
+        r.onclick = () => { SAVED = SAVED.filter(y => y.id !== x.id); store.set('vv_saved', JSON.stringify(SAVED)); if (SAVED.length) draw(); else renderSaved(); };
+        m.appendChild(r);
+        d.appendChild(m); list.appendChild(d);
+      });
+    };
+    if (find) find.oninput = draw;
+    draw();
+  }
+
+  // ---------------------------------------------------------------- the story: a premise for a new scene
+  const PREMISES = [
+    ['Strangers', "We've never met. Tonight is the first time our eyes meet."],
+    ['First date', "It's our first date, and it's going better than either of us expected."],
+    ['Old flames', "We used to be together. It's the first time we've seen each other in years."],
+    ['Best friends', "We've been best friends for years. Tonight something shifts."],
+    ['Rivals', "We can't stand each other. Or that's what we tell everyone."],
+    ['After hours', "Everyone else has gone home. It's just the two of us and a deadline."],
+    ['Masquerade', 'A masked ball. Neither of us knows who the other is.'],
+    ['Bodyguard', 'One of us is paid to protect the other, and never, ever to get involved.'],
+    ['Caught in the rain', 'A sudden storm has us sheltering together, soaked through.'],
+    ['The bet', 'One of us lost a bet, and has to do what the other says for one night.'],
+  ];
+  function premiseSection() {
+    const s = el('div', 'sec');
+    const h = el('h3'); h.append(document.createTextNode('The story'), el('small', '', 'Optional: what’s going on between you'));
+    s.appendChild(h);
+    const chips = el('div', 'premises');
+    const mark = () => [].forEach.call(chips.children, k => k.setAttribute('aria-pressed', k.title === NEW.notes ? 'true' : 'false'));
+    const own = inputEl('stNotes', NEW.notes, 600, 'Or write your own: we met at a wedding last summer');
+    own.style.marginTop = '10px';
+    own.oninput = () => { NEW.notes = own.value; mark(); };
+    PREMISES.forEach(x => {
+      const c = el('button', 'chip', x[0]); c.type = 'button'; c.title = x[1];
+      c.onclick = () => { NEW.notes = NEW.notes === x[1] ? '' : x[1]; own.value = NEW.notes; mark(); };
+      chips.appendChild(c);
+    });
+    mark();
+    s.append(chips, own);
+    return s;
+  }
+
+  // ---------------------------------------------------------------- words you lean on: the same word again and again
+  const STOPWORDS = new Set(('about after again also always back been before being both came come could does done down each even ever every from going gonna have here hers into just know like little look made make more most much never only other over really right said same says some still such take than that their them then there these they thing think this those through very want wanna were what when where which while will with would your yours yeah okay').split(' '));
+  function leanWords(sc) {
+    const counts = {}, form = {};
+    const skip = new Set([sc.partner.name, sc.you.name].map(n => String(n || '').toLowerCase()));
+    sc.msgs.filter(m => m.who === 'you' && !m.ghost && !m.used && !isOOC(m.text)).forEach(m => {
+      (String(m.text).toLowerCase().match(/[a-z']+/g) || []).forEach(w => {
+        w = w.replace(/^'+|'+$/g, '');
+        if (w.length < 4 || STOPWORDS.has(w) || skip.has(w)) return;
+        const stem = w.length > 5 ? w.replace(/(ing|ed|es|s)$/, '') : w;
+        counts[stem] = (counts[stem] || 0) + 1;
+        if (!form[stem] || w.length < form[stem].length) form[stem] = w;
+      });
+    });
+    return Object.keys(counts).filter(k => counts[k] >= 3).sort((a, b) => counts[b] - counts[a]).slice(0, 6).map(k => [form[k], counts[k]]);
+  }
+  function leanPanel(sc) {
+    const words = leanWords(sc); if (!words.length) return null;
+    const p = el('div', 'panel'); p.appendChild(el('h4', '', 'Words you lean on'));
+    const t = el('div', 'tags'); words.forEach(w => t.appendChild(el('span', 'tag c-amber', w[0] + ' ×' + w[1]))); p.appendChild(t);
+    const n = el('p', 'muted', 'Try a fresh word for these. Variety keeps a scene alive.'); n.style.cssText = 'margin:8px 0 0;font-size:12.5px'; p.appendChild(n);
+    return p;
+  }
+
+  // ---------------------------------------------------------------- live chats that start at once
+  function quickLive(opts) {
+    opts = opts || {};
+    if (store.get('vv_adult') !== 'yes') { $('ageGate').hidden = false; return; }
+    if (!ready()) return;
+    const person = opts.person || null;
+    const you = youFromProfile(); you.name = String(you.name || '').trim() || 'You';
+    createLive({ castId: person ? person.id : '', partner: personSnapshot(person || { name: 'Them' }), you,
+      heat: S.profile.heat || 'steamy', style: 'chat', lang: S.profile.lang || '', goal: '', autoSuggest: true });
+    if (opts.shot) setTimeout(() => pickShots('live'), 80);
+  }
+  function learnLiveName(sc, name) {
+    name = String(name || '').trim().slice(0, 40);
+    if (!name || isMinorText(name)) return;
+    let p = castById(sc.castId) || personByName(name);
+    if (!p) { p = Object.assign(blankCast('person'), { name }); S.cast.unshift(p); }
+    else if (!p.name || p.name === 'Them') p.name = name;
+    p.updated = Date.now(); saveCast();
+    sc.castId = p.id; sc.partner = personSnapshot(p); sc.colors = colorsFor(p.name);
+    toast('Chatting with ' + p.name + '. Their card is in your Cast.');
+  }
+  function editLivePerson(sc) {
+    const p = castById(sc.castId);
+    if (p) { openCast({ entry: p }); return; }
+    openCast({ kind: 'person' });
+    if (sc.partner.name && sc.partner.name !== 'Them') CAST.e.name = sc.partner.name;
+    CAST.link = sc.id; renderCastSheet();
+  }
+  function liveStart(sc) {
+    const box = el('div', 'live-start');
+    const named = sc.partner.name && sc.partner.name !== 'Them';
+    box.appendChild(el('b', '', 'Paste their line to start'));
+    box.appendChild(el('p', 'muted', 'Copy what ' + (named ? sc.partner.name : 'they') + ' wrote in the game, name and all ("Lexi: hey stranger"), and paste it below. ' + (named ? '' : 'Their name fills in by itself. ') + 'A screenshot of the chat works too.'));
+    const row = el('div', 'row');
+    const shot = el('button', 'btn tint c-violet'); shot.type = 'button'; shot.innerHTML = icon('scan') + 'Use a screenshot'; shot.onclick = () => pickShots('live');
+    const who = el('button', 'btn'); who.type = 'button'; who.innerHTML = icon('user') + (castById(sc.castId) ? 'Their card' : 'Add who they are'); who.onclick = () => editLivePerson(sc);
+    row.append(shot, who); box.appendChild(row);
+    const gl = el('div', 'goals'); gl.appendChild(el('span', 'lab', 'Your goal, if you like'));
+    GOALS.forEach(g => {
+      const c = el('button', 'chip', g); c.type = 'button'; c.setAttribute('aria-pressed', sc.goal === g ? 'true' : 'false');
+      c.onclick = () => { sc.goal = sc.goal === g ? '' : g; saveScene(sc); renderThread(true); renderCoach(); };
+      gl.appendChild(c);
+    });
+    box.appendChild(gl);
+    return box;
+  }
+  function afterLiveLine(sc, m) {
+    if (m.who === 'partner') {
+      S.liveWho = 'you'; saveScene(sc); render();
+      if (sc.autoSuggest !== false) assist();
+    } else {
+      S.liveWho = 'them'; sc.suggest = null;
+      if (coachable(sc, m)) countLine();
+      saveScene(sc); render();
+      if (sc.coachAuto !== false && coachable(sc, m)) coachLine(m.id);
+    }
+  }
+
   // ================================================================ sections: practice, live, review, cast
   const VIEWS = [
     { id: 'practice', label: 'Practice', icon: 'heart', cls: 'c-rose' },
+    { id: 'uni', label: 'University', icon: 'cap', cls: 'c-gold' },
     { id: 'live', label: 'Live', icon: 'pulse', cls: 'c-teal' },
     { id: 'review', label: 'Review', icon: 'grade', cls: 'c-gold' },
     { id: 'cast', label: 'Cast', icon: 'users', cls: 'c-violet' },
@@ -3007,6 +4012,7 @@
   function setView(v) {
     if (S.view === v) {
       if (v === 'review' && S.review) { S.review = null; render(); }
+      if (v === 'uni' && (S.uni.course || S.uni.lesson)) uniGo();
       closeDrawers();
       return;
     }
@@ -3327,9 +4333,10 @@
       h.append(w, homeTools());
       return;
     }
+    if (sc.castId) syncLivePartner(sc);
     headBack(h);
     h.appendChild(avatar(sc.partner.name, sc.colors, '', picOf(sc)));
-    const w = el('div', 'who'); w.append(el('b', '', sc.partner.name), el('span', '', 'Live · ' + STYLE_LABEL[sc.style] + ' · ' + HEAT_LABEL[sc.heat] + (sc.lang ? ' · ' + sc.lang : '')));
+    const w = el('div', 'who'); w.append(el('b', '', sc.partner.name === 'Them' ? 'New chat' : sc.partner.name), el('span', '', 'Live · ' + STYLE_LABEL[sc.style] + ' · ' + HEAT_LABEL[sc.heat] + (sc.lang ? ' · ' + sc.lang : '')));
     h.appendChild(w);
     const adv = el('button', 'ib c-gold'); adv.type = 'button'; adv.innerHTML = btnHTML('bulb', 'What to try'); adv.title = 'Ideas for what to do with them'; adv.onclick = () => liveAdvice(sc);
     const gr = el('button', 'ib c-violet'); gr.type = 'button'; gr.innerHTML = btnHTML('grade', 'Grade'); gr.title = 'Grade this chat: you and them'; gr.onclick = () => gradeScene(sc);
@@ -3364,8 +4371,9 @@
     const cbody = el('div', 'body'); card.appendChild(cbody);
     cbody.appendChild(avatar(sc.partner.name, sc.colors, 'lg', picOf(sc)));
     const t = el('div', 't');
-    t.appendChild(el('b', '', sc.partner.name));
-    t.appendChild(el('p', '', sc.partner.profile ? sc.partner.profile.slice(0, 220) + (sc.partner.profile.length > 220 ? '…' : '') : 'Paste what they write, or add a screenshot of your chat, and pick a reply.'));
+    const unnamed = !sc.partner.name || sc.partner.name === 'Them';
+    t.appendChild(el('b', '', unnamed ? 'Someone new' : sc.partner.name));
+    t.appendChild(el('p', '', sc.partner.profile ? sc.partner.profile.slice(0, 220) + (sc.partner.profile.length > 220 ? '…' : '') : unnamed ? 'Their name and card fill in from the first line you paste.' : 'Paste what they write, or add a screenshot of your chat, and pick a reply.'));
     const tags = el('div', 'tags');
     [[ROLE_LABEL[sc.partner.role], 'c-violet'], [HEAT_LABEL[sc.heat], 'c-rose'], [STYLE_LABEL[sc.style], 'c-teal']].forEach(x => tags.appendChild(el('span', 'tag ' + x[1], x[0])));
     if (sc.goal) tags.appendChild(el('span', 'tag c-gold', sc.goal));
@@ -3376,7 +4384,7 @@
     let lastP = -1, lastY = -1;
     sc.msgs.forEach((m, i) => { if (m.who === 'partner') lastP = i; if (m.who === 'you') lastY = i; });
     sc.msgs.forEach((m, i) => inner.appendChild(msgEl(m, i, i === lastP, i === lastY)));
-    if (!sc.msgs.length) inner.appendChild(el('div', 'note', 'Paste what ' + sc.partner.name + ' wrote below, or add a screenshot (or paste one with Ctrl+V).'));
+    if (!sc.msgs.length) inner.appendChild(liveStart(sc));
     thread.appendChild(inner);
     if (keep && !stick) thread.scrollTop = was; else thread.scrollTop = thread.scrollHeight;
   }
@@ -3387,10 +4395,10 @@
     ht.appendChild(el('div', 'eyebrow', 'Live wingman'));
     const h1 = el('h1', 'display'); h1.innerHTML = 'Never run out of <em>things to say.</em>';
     ht.appendChild(h1);
-    ht.appendChild(el('p', 'lead', 'Roleplaying with someone in 3DXChat right now? Paste their line or a screenshot of the chat and get three replies in your voice. Pick one, make it yours, paste it in the game.'));
+    ht.appendChild(el('p', 'lead', 'Roleplaying with someone in 3DXChat right now? Paste their line or a screenshot of the chat and get three replies in your voice. Nothing to fill in: their name fills in by itself.'));
     const cta = el('div', 'cta');
-    const nb = el('button', 'btn main big'); nb.type = 'button'; nb.innerHTML = icon('plus') + 'New live chat'; nb.onclick = () => openLiveNew();
-    const sb = el('button', 'btn big'); sb.type = 'button'; sb.innerHTML = icon('scan') + 'Start from a screenshot'; sb.onclick = () => openLiveNew({ shot: true });
+    const nb = el('button', 'btn main big'); nb.type = 'button'; nb.innerHTML = icon('plus') + 'New live chat'; nb.onclick = () => quickLive();
+    const sb = el('button', 'btn big'); sb.type = 'button'; sb.innerHTML = icon('scan') + 'Start from a screenshot'; sb.onclick = () => quickLive({ shot: true });
     cta.append(nb, sb); ht.appendChild(cta); hero.appendChild(ht);
     const peoplePics = S.cast.filter(c => c.kind === 'person' && c.pic).map(c => c.pic);
     hero.appendChild(heroArt(peoplePics.concat(['vip', 'beach', 'penthouse'].map(id => SETTINGS.find(x => x.id === id).img)).slice(0, 3)));
@@ -3409,11 +4417,18 @@
         const r1 = el('div', 'r1'); const t = el('div', 't'); t.append(el('b', '', p.name), el('span', '', gradeLine(p)));
         r1.append(avatar(p.name, colorsFor(p.name), '', p.pic), t); c.appendChild(r1);
         const row = el('div', 'row');
-        const go = el('button', 'btn tint c-teal'); go.type = 'button'; go.innerHTML = icon('pulse') + 'Chat'; go.onclick = () => openLiveNew({ person: p });
+        const go = el('button', 'btn tint c-teal'); go.type = 'button'; go.innerHTML = icon('pulse') + 'Chat'; go.onclick = () => quickLive({ person: p });
         const ad = el('button', 'btn'); ad.type = 'button'; ad.innerHTML = icon('bulb') + 'What to try'; ad.onclick = () => adviceFor({ person: p });
         row.append(go, ad); c.appendChild(row); g.appendChild(c);
       });
       w.appendChild(g);
+    }
+    if (SAVED.length) {
+      const all = el('button', 'lnk'); all.type = 'button'; all.textContent = 'See all'; all.onclick = openSaved;
+      w.appendChild(secTitle('Saved lines', 'Tap one to copy it for the game', all));
+      const sg = el('div', 'saved-grid');
+      SAVED.slice(0, 6).forEach(x => { const d = el('button', 'sv quick'); d.type = 'button'; const t = el('div', 'txt story'); renderRP(t, x.text); d.appendChild(t); d.title = 'Copy'; d.onclick = () => copy(x.text, 'Copied. Paste it in the game.'); sg.appendChild(d); });
+      w.appendChild(sg);
     }
     w.appendChild(secTitle('How it works'));
     const how = el('div', 'how');
@@ -3432,7 +4447,7 @@
     if (!sc) { $('suggestWrap').hidden = true; return; }
     const ww = $('whoWrap'); ww.hidden = false; ww.innerHTML = '';
     const g = el('div', 'who-seg'); g.setAttribute('role', 'group'); g.setAttribute('aria-label', 'Whose line is this');
-    [['them', sc.partner.name + ' said', 'c-teal'], ['you', 'I said', 'c-rose']].forEach(x => {
+    [['them', (sc.partner.name === 'Them' ? 'They' : sc.partner.name) + ' said', 'c-teal'], ['you', 'I said', 'c-rose']].forEach(x => {
       const b = el('button', x[2], x[1]); b.type = 'button'; b.setAttribute('aria-pressed', S.liveWho === x[0] ? 'true' : 'false');
       b.onclick = () => { S.liveWho = x[0]; liveComposer(); $('input').focus(); };
       g.appendChild(b);
@@ -3444,7 +4459,7 @@
     $('suggestBtn').disabled = S.busy || (sc.suggest && sc.suggest.loading);
     $('polishBtn').disabled = S.busy || !$('input').value.trim();
     $('oocBtn').classList.toggle('on', S.ooc); $('box').classList.toggle('ooc', S.ooc);
-    $('input').placeholder = S.liveWho === 'them' ? 'Paste what ' + sc.partner.name + ' wrote' : 'Write your line, or pick a reply above';
+    $('input').placeholder = S.liveWho === 'them' ? 'Paste what ' + (sc.partner.name === 'Them' ? 'they' : sc.partner.name) + ' wrote, name and all' : 'Write your line, or pick a reply above';
     renderSuggest();
   }
   function liveSubmit() {
@@ -3452,20 +4467,27 @@
     if (!v || !sc || S.busy) return;
     if (!ready()) return;
     if (isMinorText(v)) { toast(ADULTS_ONLY, 'err'); return; }
+    // "Name: what they wrote", copied from the game: each line goes to whoever wrote it, and their name fills in
+    const lines = S.ooc || (S.liveWho !== 'them' && v.indexOf('\n') < 0) ? [] : parseTranscript(v);
+    if (lines.length && lines.every(l => l.speaker && l.speaker !== '?' && l.speaker.split(/\s+/).length <= 2)) {
+      const mine = myNames(sc);
+      let last = null;
+      lines.forEach(l => {
+        const me = mine.has(l.speaker.toLowerCase());
+        if (!me && (!sc.partner.name || sc.partner.name === 'Them')) learnLiveName(sc, l.speaker);
+        const theirs = !me && l.speaker.toLowerCase() === String(sc.partner.name).toLowerCase();
+        last = { id: newId(), who: me ? 'you' : 'partner', text: me || theirs ? l.text : l.speaker + ': ' + l.text, t: Date.now() };
+        sc.msgs.push(last);
+      });
+      $('input').value = ''; autosize(); S.ooc = false;
+      afterLiveLine(sc, last);
+      return;
+    }
     let text = v; if (S.ooc && !isOOC(text)) text = '((' + text + '))';
-    const who = S.liveWho === 'you' ? 'you' : 'partner';
-    const m = { id: newId(), who, text, t: Date.now() };
+    const m = { id: newId(), who: S.liveWho === 'you' ? 'you' : 'partner', text, t: Date.now() };
     sc.msgs.push(m);
     $('input').value = ''; autosize(); S.ooc = false;
-    if (who === 'partner') {
-      S.liveWho = 'you'; saveScene(sc); render();
-      if (sc.autoSuggest !== false) assist();
-    } else {
-      S.liveWho = 'them'; sc.suggest = null;
-      if (coachable(sc, m)) countLine();
-      saveScene(sc); render();
-      if (sc.coachAuto !== false && coachable(sc, m)) coachLine(m.id);
-    }
+    afterLiveLine(sc, m);
   }
   async function assist(steer) {
     const sc = S.scene; if (!sc || sc.kind !== 'live') return;
@@ -3575,7 +4597,7 @@
         if (sc.partner.name === 'Them') {
           const counts = {}; chosen.filter(r => r.who === 'them').forEach(r => { counts[r.speaker] = (counts[r.speaker] || 0) + 1; });
           const top = Object.keys(counts).sort((a, b2) => counts[b2] - counts[a])[0];
-          if (top) { sc.partner.name = top; sc.colors = colorsFor(top); const p = castById(sc.castId); if (p && (!p.name || p.name === 'Them')) { p.name = top; saveCast(); } }
+          if (top) learnLiveName(sc, top);
         }
         chosen.forEach(r => sc.msgs.push({ id: newId(), who: r.who === 'you' ? 'you' : 'partner', text: r.text, t: Date.now(), shot: true }));
         $('shotSheet').hidden = true;
@@ -3614,6 +4636,7 @@
     body.appendChild(compatPanel(castById(sc.castId)));
     body.appendChild(scorePanel(sc, 'Your lines'));
     body.appendChild(feedbackPanel(sc, false));
+    const lean = leanPanel(sc); if (lean) body.appendChild(lean);
     const cp = el('div', 'panel'); cp.appendChild(coachButton(sc));
     const cl = el('label', 'check'); const cli = el('input'); cli.type = 'checkbox'; cli.checked = sc.coachAuto !== false; cli.onchange = () => { sc.coachAuto = cli.checked; saveScene(sc); };
     cl.append(cli, document.createTextNode('Coach every line I send')); cp.appendChild(cl);
@@ -3996,7 +5019,7 @@
       rr.append(avatar(p.name, colorsFor(p.name), '', p.pic), tt); c.appendChild(rr);
       if (p.profile || p.notes) c.appendChild(el('small', '', (p.notes || p.profile).slice(0, 110)));
       const row = el('div', 'row');
-      const chat = el('button', 'btn tint c-teal'); chat.type = 'button'; chat.innerHTML = icon('pulse') + 'Live chat'; chat.onclick = () => { setView('live'); openLiveNew({ person: p }); };
+      const chat = el('button', 'btn tint c-teal'); chat.type = 'button'; chat.innerHTML = icon('pulse') + 'Live chat'; chat.onclick = () => quickLive({ person: p });
       const ad = el('button', 'btn c-gold'); ad.type = 'button'; ad.innerHTML = icon('bulb') + 'What to try'; ad.onclick = () => adviceFor({ person: p });
       const ed = el('button', 'btn c-slate'); ed.type = 'button'; ed.innerHTML = icon('edit') + 'Edit'; ed.onclick = () => openCast({ entry: p });
       row.append(chat, ad, ed); c.appendChild(row); g2.appendChild(c);
@@ -4179,7 +5202,8 @@
       const i = S.cast.findIndex(c => c.id === e.id);
       if (i >= 0) S.cast[i] = e; else S.cast.unshift(e);
       saveCast();
-      if (S.scene && S.scene.kind === 'live' && S.scene.castId === e.id) { syncLivePartner(S.scene); saveScene(S.scene); }
+      if (CAST.link && S.scene && S.scene.id === CAST.link) S.scene.castId = e.id;
+      if (S.scene && S.scene.kind === 'live' && S.scene.castId === e.id) { syncLivePartner(S.scene); S.scene.colors = colorsFor(S.scene.partner.name); saveScene(S.scene); }
     }
     $('castSheet').hidden = true;
     render();
@@ -4413,7 +5437,7 @@
     S.account.stats = Object.assign({}, S.account.stats || {}, { xp: x.xp, lines: x.lines, coached: x.coached, avg: x.avg, drills: x.drills, reports: x.reports, best_grade: x.best_grade, streak: x.streak, best_streak: x.best_streak });
     const after = level(x.xp || 0);
     if (after.idx > before) toast('Level up: ' + after.name + '!', 'gold');
-    else if (x.gained > 0) toast('+' + x.gained + ' XP · ' + (({ line: 'coached line', drill: 'drill complete', report: 'report card', review: 'review' })[x.reason] || 'XP'), 'gold');
+    else if (x.gained > 0) toast('+' + x.gained + ' XP · ' + (({ line: 'coached line', drill: S.scene && S.scene.lesson ? 'lesson passed' : 'drill complete', report: 'report card', review: 'review' })[x.reason] || 'XP'), 'gold');
     if (x.capped) toast('That’s today’s XP for the leaderboard (' + (S.account.xp_per_day || 1500) + '). Keep playing: it fills up again tomorrow.');
     renderXP();
     if (x.gained > 0) refreshAccountSoon();
@@ -4567,11 +5591,11 @@
   // ---------------------------------------------------------------- the section dispatchers
   function renderHead() {
     $('head').className = 'head';
-    if (S.view === 'live') liveHead(); else if (S.view === 'review') reviewHead(); else if (S.view === 'cast') castHead(); else if (S.view === 'ranks') ranksHead(); else practiceHead();
+    if (S.view === 'live') liveHead(); else if (S.view === 'uni') uniHead(); else if (S.view === 'review') reviewHead(); else if (S.view === 'cast') castHead(); else if (S.view === 'ranks') ranksHead(); else practiceHead();
     if (inItem()) $('head').classList.add('glass');
   }
-  function renderThread(keep) { if (S.view === 'live') liveThread(keep); else if (S.view === 'review') reviewMain(); else if (S.view === 'cast') castMain(); else if (S.view === 'ranks') rankMain(); else practiceThread(keep); }
-  function renderCoach() { if (S.view === 'live') liveCoach(); else if (S.view === 'practice') practiceCoach(); else if (S.view === 'ranks') ranksPanel(); else sideTips(); }
+  function renderThread(keep) { if (S.view === 'live') liveThread(keep); else if (S.view === 'uni') uniMain(); else if (S.view === 'review') reviewMain(); else if (S.view === 'cast') castMain(); else if (S.view === 'ranks') rankMain(); else practiceThread(keep); }
+  function renderCoach() { if (S.view === 'live') liveCoach(); else if (S.view === 'practice') practiceCoach(); else if (S.view === 'uni') uniPanel(); else if (S.view === 'ranks') ranksPanel(); else sideTips(); }
   function renderComposer() {
     if (S.view === 'live') return liveComposer();
     $('whoWrap').hidden = true; $('shotBtn').hidden = true; $('suggestBtn').hidden = true; $('suggestWrap').hidden = true;
@@ -4611,12 +5635,12 @@
   $('settingsBtn').onclick = () => openSettings(false);
   $('themeBtn').innerHTML = icon('moon');
   $('themeBtn').onclick = toggleTheme;
-  ['newClose', 'setClose', 'repClose', 'castClose', 'liveClose', 'shotClose', 'enhClose', 'advClose', 'acctClose'].forEach(id => { $(id).innerHTML = icon('x'); });
+  ['newClose', 'setClose', 'repClose', 'castClose', 'liveClose', 'shotClose', 'enhClose', 'advClose', 'acctClose', 'officeClose', 'savedClose'].forEach(id => { $(id).innerHTML = icon('x'); });
   document.querySelectorAll('[data-close]').forEach(b => { b.addEventListener('click', () => { const s = b.closest('.sheet'); if (s) s.hidden = true; }); });
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
     if (!$('askSheet').hidden) { $('askNo').click(); return; }
-    ['newSheet', 'settingsSheet', 'reportSheet', 'castSheet', 'liveSheet', 'shotSheet', 'enhanceSheet', 'adviceSheet', 'acctSheet'].forEach(id => { $(id).hidden = true; });
+    ['newSheet', 'settingsSheet', 'reportSheet', 'castSheet', 'liveSheet', 'shotSheet', 'enhanceSheet', 'adviceSheet', 'acctSheet', 'officeSheet', 'savedSheet'].forEach(id => { $(id).hidden = true; });
     hideEnhFloat();
     closeDrawers(); closeMenu();
   });
@@ -4633,7 +5657,8 @@
   }
   render();
   detectMode();
-  window.__vv = { S, cleanScene, cleanMessages, partnerPrompt, chatMessages, jsonMessages, veniceBody, isMinorText, compat, parseTranscript };
+  window.__vv = { S, cleanScene, cleanMessages, partnerPrompt, chatMessages, jsonMessages, veniceBody, isMinorText, compat, parseTranscript,
+    UNI, LESSON_BY, transcript, leanWords, saved: () => SAVED };
 })();
 </script>
 </body>
