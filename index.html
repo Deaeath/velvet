@@ -3253,13 +3253,29 @@
   }
 
   // ================================================================ review: grade a roleplay
+  // Reads a pasted roleplay in the usual shapes: "Name: text" (with or without a space), "[21:04] Name: text",
+  // "<Name> text", "[Name] text", and Discord copies ("Name — Today at 9:41 PM" over the message). Lines without a name
+  // join the line before. What it can't read, the server's "split" works out (gradeRoleplay).
   function parseTranscript(text) {
     const lines = [];
-    String(text || '').split(/\r?\n/).forEach(raw => {
-      const line = raw.trim(); if (!line) return;
-      const m = /^(?:\[?\d{1,2}:\d{2}(?::\d{2})?\]?\s*)?([^:\n]{1,40}?)\s*:\s+(.+)$/.exec(line);
-      if (m && !/^(https?|www)$/i.test(m[1])) lines.push({ speaker: m[1].trim(), text: m[2].trim() });
-      else if (lines.length) lines[lines.length - 1].text += '\n' + line;
+    let under = null;
+    const HEADER = /^(.{1,40}?)\s+[\u2014\u2013-]\s+(?:today|yesterday|\d{1,2}[\/.]\d{1,2}[\/.]\d{2,4}|\d{1,2}:\d{2})/i;
+    const TIME = /^(?:\[|\()?(?:\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4},?\s*)?\d{1,2}:\d{2}(?::\d{2})?\s*(?:[ap]\.?m\.?)?(?:\]|\))?\s*/i;
+    String(text || '').replace(/\r\n?/g, '\n').split('\n').forEach(raw => {
+      let line = raw.trim();
+      if (!line) return;
+      const h = HEADER.exec(line);
+      if (h && h[1].indexOf(':') < 0) { under = h[1].trim(); return; }
+      line = line.replace(TIME, '');
+      if (!line) return;
+      let m = /^<([^>\n]{1,40})>\s*(.+)$/.exec(line) || /^\[([^\]\n]{1,40})\]\s*(.+)$/.exec(line) || /^([^:\n]{1,40}?)\s*:\s*(.+)$/.exec(line);
+      if (m) {
+        const name = m[1].trim();
+        if (!name || /^(https?|www|\d+)$/i.test(name) || /^[*("'\u201c\u2018]/.test(name) || name.split(/\s+/).length > 4) m = null;
+      }
+      if (m) { lines.push({ speaker: m[1].trim(), text: m[2].trim() }); under = null; return; }
+      if (under) { lines.push({ speaker: under, text: line }); return; }
+      if (lines.length) lines[lines.length - 1].text += '\n' + line;
       else lines.push({ speaker: '?', text: line });
     });
     return lines;
@@ -3421,8 +3437,12 @@
     const ctx = inputEl('rvCtx', '', 600, 'Optional: our first time talking, at the beach club');
     const ctxF = field('Anything to know?', ctx);
     const go = el('button', 'btn main'); go.type = 'button'; go.innerHTML = icon('grade') + 'Grade it';
+    const found = el('p', 'muted'); found.style.cssText = 'margin:-6px 0 0;font-size:12.5px';
     const fillMe = () => {
-      const sp = speakersOf(parseTranscript(ta.value)).filter(x => x !== '?');
+      const parsed = parseTranscript(ta.value);
+      const sp = speakersOf(parsed).filter(x => x !== '?');
+      found.textContent = !ta.value.trim() ? '' : sp.length ? 'Found ' + parsed.length + ' line' + (parsed.length === 1 ? '' : 's') + ' from ' + sp.slice(0, 4).join(', ') + (sp.length > 4 ? ' and ' + (sp.length - 4) + ' more' : '') + '.'
+        : 'No names found yet. That’s fine: Velvet will work out who said what when you grade it.';
       const cur = meSel.value, mine = myNames(null);
       meSel.innerHTML = '';
       const none = el('option', '', 'None of them, just grade'); none.value = ''; meSel.appendChild(none);
@@ -3432,16 +3452,31 @@
     };
     ta.oninput = () => { S.reviewDraft = ta.value; fillMe(); };
     fillMe();
-    go.onclick = () => {
-      const lines = parseTranscript(ta.value);
-      if (lines.length < 2) { toast('Paste at least two lines, one per line: "Name: what they wrote".', 'err'); ta.focus(); return; }
-      if (lines.some(l => isMinorText(l.text))) { toast(ADULTS_ONLY, 'err'); return; }
+    go.onclick = async () => {
+      const raw = ta.value.trim();
+      if (raw.length < 10) { toast('Paste the roleplay first, or add screenshots of it.', 'err'); ta.focus(); return; }
+      if (isMinorText(raw)) { toast(ADULTS_ONLY, 'err'); return; }
+      if (!ready()) return;
+      let lines = parseTranscript(raw);
+      if (lines.length < 2 || speakersOf(lines).filter(x => x !== '?').length < 1) {
+        // no names it could read: the server works out who said what, then it is graded as usual
+        spinBtn(go, true); found.textContent = 'Working out who said what…';
+        try {
+          const out = await toolTask('split', { raw });
+          lines = (out.lines || []).filter(l => l.text);
+        } catch (e) { spinBtn(go, false); fillMe(); toast(e.message, 'err'); return; }
+        spinBtn(go, false);
+        if (lines.length < 2) { fillMe(); toast('Couldn’t tell who said what. Put each line as "Name: what they wrote" and try again.', 'err'); return; }
+        ta.value = lines.map(l => l.speaker + ': ' + l.text.replace(/\n/g, ' ')).join('\n');
+        S.reviewDraft = ta.value; fillMe();
+      }
       const others = speakersOf(lines).filter(x => x !== meSel.value);
       runReview({ lines, me: meSel.value, context: ctx.value.trim(), title: (others.length ? others.slice(0, 2).join(' & ') : 'A roleplay') + (meSel.value ? ' and you' : '') });
       S.reviewDraft = '';
     };
     row.append(shots, meF, ctxF, go);
     w.appendChild(row);
+    w.appendChild(found);
     const recent = S.index.slice(0, 6);
     if (recent.length) {
       const h = el('h4', '', 'Or grade one of your chats'); h.style.cssText = 'margin:10px 0 0;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)'; w.appendChild(h);
