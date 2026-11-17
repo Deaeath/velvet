@@ -254,6 +254,7 @@
   .sec-title small { font-family: var(--font-ui); font-size: 13px; font-weight: 500; color: var(--ink-3); letter-spacing: 0; }
   .sec-title .sp { flex: 1; }
   .sec-title .lnk { font-family: var(--font-ui); font-size: 13px; font-weight: 650; color: var(--accent); background: none; border: 0; padding: 0; }
+  .sec-title .sec-acts { display: inline-flex; align-items: baseline; gap: 16px; white-space: nowrap; }
   @media (max-width: 560px) { .sec-title { font-size: 23px; margin-top: 34px; } .sec-title small { display: none; } }
   .xp { display: grid; grid-template-columns: auto minmax(180px, 1fr) auto; align-items: center; gap: 10px 22px; margin-top: 30px; padding: 16px 20px; border-radius: 22px;
     background: var(--glass); border: 1px solid var(--line); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
@@ -834,6 +835,11 @@
   .lesson-done.fail { border-color: var(--line-2); background: var(--glass); }
   .pfilters { display: flex; flex-direction: column; gap: 8px; margin: 0 0 14px; }
   .pfilters .seg { align-self: flex-start; }
+  @media (max-width: 560px) {               /* one row on a phone, like a pill should be: a swipe if it still runs over */
+    .pfilters .seg { flex-wrap: nowrap; max-width: 100%; overflow-x: auto; gap: 2px; scrollbar-width: none; }
+    .pfilters .seg::-webkit-scrollbar { display: none; }
+    .pfilters .seg button { flex: none; padding: 8px 11px; }
+  }
   .suggest-flag { position: absolute; top: 10px; left: 10px; z-index: 2; padding: 3px 9px; border-radius: 999px; background: var(--grad); color: #fff; font-size: 10.5px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; }
   #pickBody .portraits { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
   @media (min-width: 761px) { .head.home-head { display: none; } }
@@ -1194,7 +1200,8 @@
     '- initiative: gives {name} something to answer and moves the scene on\n' +
     "- pacing: fits the scene's pace and heat, neither rushing nor stalling\n" +
     "- chemistry: answers {name}'s cues, builds tension, reads the room and consent\n" +
-    'Use the whole range: 5 is fine, 8 is strong, 10 is rare.';
+    'Score like an encouraging coach: 6 is a decent line, 7 good, 8 strong, 9 excellent and 10 rare. Keep 5 and below ' +
+    'for a line with a real problem.';
 
   const CONTROL = /[\x00-\x08\x0b-\x1f\x7f]+/g;
   function fill(t, vals) { return t.replace(/\{(you|name)\}/g, (m, k) => vals[k]); }
@@ -1327,7 +1334,7 @@
       for (let i = msgs.length - 1; i >= 0; i--) if (msgs[i].who === 'you') { last = msgs[i].text; break; }
       const per = !!(drill && drill.per), mine = msgs.filter(m => m.who === 'you').length;
       const practice = !drill ? '' : '\n' + you + ' is practising "' + drill.name + '": ' + drill.goal + ' How to judge it: ' + drill.coach +
-        (drill.ooc ? COACH_OOC : '') + (per ? ' "drill.lines" has one true or false for each of ' + you + "'s " + mine + ' lines in the scene, oldest first and the latest last: true when that line does what the rule asks, judged against this rule alone (the scores cover everything else).'
+        (drill.ooc ? COACH_OOC : '') + (per ? ' "drill.lines" has one true or false for each of ' + you + "'s " + mine + ' lines in the scene, oldest first and the latest last: true when that line does what the rule asks, even if it could be stronger, judged against this rule alone (the scores cover everything else).'
           : ' "drill.progress" is 0 to 100 for the whole scene so far, judged against this rule alone (the scores cover everything else).') + '\n';
       system = 'You are the coach in Velvet, an app for practising adult erotic roleplay: warm, sharp and honest. ' +
         'You coach ' + you + "'s writing only, never " + name + "'s.\nThe scene: " + brief + '\n' + practice +
@@ -1359,7 +1366,8 @@
         'Write ' + you + "'s report card: warm, honest and specific, about " + you + "'s writing only.\n" +
         'The scene: ' + brief + '\n' +
         (drill ? 'The drill was "' + drill.name + '": ' + drill.goal + '\n' : '') +
-        fill(SCORE_GUIDE, { name }) + '\nThe scores are for the whole scene. "best_line" quotes one of ' +
+        fill(SCORE_GUIDE, { name }) + '\nThe scores are for the whole scene, and the grade sums them up kindly: mostly 8s ' +
+        'and up is an A, mostly 7s a B+, mostly 6s a B-. "best_line" quotes one of ' +
         you + "'s own lines exactly. \"next_drill\" is the drill that would help most, one of: " +
         Object.keys(DRILLS).join(', ') + '.\nReply with JSON only, in this shape:\n' + REPORT_SHAPE;
       user = 'The scene:\n\n' + transcript(sc, msgs, 30000);
@@ -1500,6 +1508,34 @@
   ];
   PARTNERS.forEach(p => { p.img = 'assets/partners/' + p.id + '.webp'; });
   SETTINGS.forEach(st => { st.img = 'assets/places/' + st.id + '.webp'; });
+  // ---- cast order start
+  // the cast in a mixed order, so any run of cards shows women, men and non-binary partners alike: the fifty added on
+  // 11-17 came in blocks, and one day's home row was fourteen men in a row. Each group keeps its own order.
+  function mixCast(list) {
+    const groups = {}, keys = [], taken = {}, out = [];
+    list.forEach(p => { const k = p.pronouns || ''; if (!groups[k]) { groups[k] = []; keys.push(k); taken[k] = 0; } groups[k].push(p); });
+    while (out.length < list.length) {
+      let best = '', gap = -Infinity;                 // the group furthest behind its share goes next
+      keys.forEach(k => { if (taken[k] >= groups[k].length) return; const g = (out.length + 1) * groups[k].length / list.length - taken[k]; if (g > gap) { gap = g; best = k; } });
+      out.push(groups[best][taken[best]++]);
+    }
+    return out;
+  }
+  // ---- cast order end
+  PARTNERS.splice(0, PARTNERS.length, ...mixCast(PARTNERS));
+  // who you want to see first (Settings, "Your partners"): likes is '' for everyone, or the groups, like 'she,they';
+  // likeRole is '' or one role. The home screen, new scenes, assignments, the Cast and Surprise me start from these.
+  const LIKES = { '': 'Everyone', she: 'Women', he: 'Men', they: 'Non-binary people', 'she,he': 'Women and men',
+    'she,they': 'Women and non-binary people', 'he,they': 'Men and non-binary people' };
+  const LIKE_ROLES = { '': 'Any role', dominant: 'Dominant partners', submissive: 'Submissive partners', switch: 'Switches' };
+  function likesWho(p) { const l = S.settings.likes; return !l || l.split(',').indexOf(p.pronouns) >= 0; }
+  function likesRole(p) { return !S.settings.likeRole || p.role === S.settings.likeRole; }
+  function preferred() {                              // never empty: drop the role, then the whole preference, if nobody fits
+    const both = PARTNERS.filter(p => likesWho(p) && likesRole(p)), who = PARTNERS.filter(likesWho);
+    return both.length ? both : who.length ? who : PARTNERS.slice();
+  }
+  function prefFilter(withRole) { return { q: '', g: S.settings.likes, r: withRole === false ? '' : S.settings.likeRole }; }
+  function likesText() { return [S.settings.likes ? LIKES[S.settings.likes] : '', S.settings.likeRole ? LIKE_ROLES[S.settings.likeRole] : ''].filter(Boolean).join(' · '); }
   const DRILL_UI = {
     first_move: ['spark', 'c-rose'], five_senses: ['eye', 'c-violet'], slow_burn: ['flame', 'c-amber'], talk_first: ['chat', 'c-teal'],
     lead: ['crown', 'c-gold'], surrender: ['feather', 'c-violet'], say_it: ['mic', 'c-rose'], read_room: ['radar', 'c-teal'],
@@ -1571,7 +1607,7 @@
     ooc: false,
     profile: Object.assign({ name: '', pronouns: 'they', role: 'switch', look: '', heat: 'steamy', pace: 'steady', style: 'paragraphs', into: [], curious: [], soft: [], hard: [], kinkName: '' }, store.json('vv_profile', {})),
     progress: Object.assign({ xp: 0, lines: 0, streak: 0, lastDay: '', drills: {}, reports: 0, best: 0 }, store.json('vv_progress', {})),
-    settings: Object.assign({ model: '', voice: false, voiceName: '', rate: 1, coachAuto: true, key: '' }, store.json('vv_settings', {})),
+    settings: Object.assign({ model: '', voice: false, voiceName: '', rate: 1, coachAuto: true, key: '', likes: '', likeRole: '' }, store.json('vv_settings', {})),
     ideas: null, polishUndo: null,
     view: ['practice', 'uni', 'live', 'review', 'cast', 'ranks'].indexOf(store.get('vv_view')) >= 0 ? store.get('vv_view') : 'practice',
     account: null, loginNote: '', board: { board: 'xp', period: 'week', data: null, loading: false, err: '' },
@@ -1582,6 +1618,8 @@
   };
   if (!Array.isArray(S.cast)) S.cast = [];
   if (!Array.isArray(S.reviews)) S.reviews = [];
+  if (!Object.prototype.hasOwnProperty.call(LIKES, S.settings.likes)) S.settings.likes = '';
+  if (!Object.prototype.hasOwnProperty.call(LIKE_ROLES, S.settings.likeRole)) S.settings.likeRole = '';
   ['kinkItems', 'aliases'].forEach(k => { if (!Array.isArray(S.profile[k])) S.profile[k] = []; });
   if (typeof S.profile.pic !== 'string') S.profile.pic = '';
   if (typeof S.profile.lang !== 'string') S.profile.lang = '';
@@ -1837,7 +1875,14 @@
     t = String(t || '').trim();
     try { return JSON.parse(t); } catch (e) { const a = t.indexOf('{'), b = t.lastIndexOf('}'); try { return a >= 0 && b > a ? JSON.parse(t.slice(a, b + 1)) : {}; } catch (e2) { return {}; } }
   }
-  function shapeScores(v) { const o = {}; DIMS.forEach(d => { const n = Math.round(parseFloat((v || {})[d[0]])); o[d[0]] = isFinite(n) ? Math.max(1, Math.min(10, n)) : 5; }); return o; }
+  // a score the model left out or broke gets the average of the others, 7 if there are none (a 5 marked good lines down)
+  function shapeScores(v) {
+    const o = {}, got = [];
+    DIMS.forEach(d => { const n = Math.round(parseFloat((v || {})[d[0]])); if (isFinite(n)) got.push(o[d[0]] = Math.max(1, Math.min(10, n))); });
+    const fill = got.length ? Math.floor(got.reduce((a, b) => a + b, 0) / got.length + 0.5) : 7;
+    DIMS.forEach(d => { if (o[d[0]] == null) o[d[0]] = fill; });
+    return o;
+  }
   async function jsonTask(task, sc, msgs, draft, extra) {
     let r;
     if (viaServer()) {
@@ -2294,7 +2339,8 @@
     cta.append(nb, qb);
     ht.appendChild(cta);
     hero.appendChild(ht);
-    const pool = S.cast.filter(c => c.kind === 'persona' && c.pic).map(c => c.pic).concat(PARTNERS.map(p => p.img));
+    const fav = preferred();
+    const pool = S.cast.filter(c => c.kind === 'persona' && c.pic).map(c => c.pic).concat(fav.map(p => p.img));
     const day = Math.floor(Date.now() / 86400000), pics = [];
     for (let k = 0; k < Math.min(3, pool.length); k++) pics.push(pool[(day * 3 + k) % pool.length]);
     hero.appendChild(heroArt(pics, 'heart'));
@@ -2305,10 +2351,13 @@
       w.appendChild(secTitle('Continue', 'Pick up where you left off'));
       const cards = el('div', 'cards'); recent.forEach(x => cards.appendChild(sceneCardSmall(x))); w.appendChild(cards);
     }
-    const all = el('button', 'lnk'); all.type = 'button'; all.textContent = 'See all ' + PARTNERS.length; all.onclick = () => openNew();
-    w.appendChild(secTitle('Partners', 'Tap one to start', all));
-    const row = el('div', 'rowscroll');
-    const everyone = personasAndPresets(), mine = everyone.filter(p => p.castId), presets = everyone.filter(p => !p.castId), from = (day * 7) % presets.length;
+    const acts = el('span', 'sec-acts');
+    const type = el('button', 'lnk'); type.type = 'button'; type.textContent = 'Your type'; type.title = 'Who Velvet shows you first'; type.onclick = () => openSettings(false, 'likes');
+    const all = el('button', 'lnk'); all.type = 'button'; all.textContent = 'See all ' + fav.length; all.onclick = () => openNew();
+    acts.append(type, all);
+    w.appendChild(secTitle('Partners', likesText() ? likesText() + ' · tap one to start' : 'Tap one to start', acts));
+    const row = el('div', 'rowscroll'), favIds = fav.map(p => p.id);
+    const everyone = personasAndPresets(), mine = everyone.filter(p => p.castId), presets = everyone.filter(p => !p.castId && favIds.indexOf(p.presetId) >= 0), from = (day * 7) % presets.length;
     mine.concat(presets.slice(from).concat(presets.slice(0, from)).slice(0, 18))
       .forEach(p => row.appendChild(partnerCard(p, { onPick: () => openNew(p.castId ? { persona: castById(p.castId) } : { preset: p.ref }) })));
     w.appendChild(scroller(row));
@@ -2580,7 +2629,7 @@
   }
   function quickStart() {
     if (!S.profile.name) { openNew({ random: true }); toast('Tell your partner your name first.'); return; }
-    const p = PARTNERS[Math.floor(Math.random() * PARTNERS.length)];
+    const fav = preferred(), p = fav[Math.floor(Math.random() * fav.length)];
     const st = SETTINGS.find(s => s.id === p.setting) || SETTINGS[0];
     if (!ready()) return;
     createScene({ partner: partnerFrom(p), colors: p.colors, presetId: p.id, you: youFromProfile(), settingId: st.id, setting: st.text,
@@ -3025,7 +3074,7 @@
     const h = el('h3'); h.append(document.createTextNode('Who do you want tonight?'), el('small', '', 'Your personas, or one of ours'));
     s1.appendChild(h);
     const grid = el('div', 'portraits');
-    NEW.f = NEW.f || { q: '', g: '', r: '' };
+    NEW.f = NEW.f || prefFilter();
     const drawPartners = () => {
       grid.innerHTML = '';
       const all = personasAndPresets().map(p => Object.assign({ pronouns: (p.ref && p.ref.pronouns) || (castById(p.castId) || {}).pronouns || 'she',
@@ -3228,8 +3277,16 @@
   });
 
   // ---------------------------------------------------------------- settings sheet
-  function openSettings(focusKey) {
+  function openSettings(focusKey, section) {
     const b = $('setBody'); b.innerHTML = '';
+    const sec0 = el('div', 'sec'); sec0.appendChild(el('h3', '', 'Your partners'));
+    const lSel = selectEl('setLikes', LIKES, S.settings.likes), rSel = selectEl('setLikeRole', LIKE_ROLES, S.settings.likeRole);
+    lSel.onchange = rSel.onchange = () => { S.settings.likes = lSel.value; S.settings.likeRole = rSel.value; saveSettings(); S.castF = null; renderThread(); };
+    sec0.appendChild(field('Show me', lSel));
+    const rf = field('Their role', rSel); rf.style.marginTop = '8px'; sec0.appendChild(rf);
+    const lHint = el('p', 'muted', 'Your home screen, new scenes, assignments, the Cast and Surprise me start with these. You can still pick anyone.');
+    lHint.style.cssText = 'margin:6px 0 0;font-size:12px'; sec0.appendChild(lHint);
+    b.appendChild(sec0);
     const models = (S.status && S.status.models) ? S.status.models.map(m => [m.id, m.label, m.in, m.out]) : MODELS;
     const mOpts = {}; models.forEach(m => { mOpts[m[0]] = m[1] + (S.mode === 'byok' ? ' (about $' + ((3000 * m[2] + 250 * m[3]) / 1e6).toFixed(4) + ' a reply)' : ''); });
     const mSel = selectEl('setModel', mOpts, model());
@@ -3283,6 +3340,7 @@
     sec4.appendChild(row);
     b.appendChild(sec4);
     $('settingsSheet').hidden = false;
+    if (section === 'likes') setTimeout(() => lSel.focus(), 30);
   }
   $('settingsForm').addEventListener('submit', e => { e.preventDefault(); $('settingsSheet').hidden = true; renderLeft(); });
   function exportAll() {
@@ -3622,8 +3680,19 @@
   function lessonPartner(l) {
     const pick = UNI.picks[l.id];
     if (pick && pick.cast) { const c = castById(pick.cast); if (c && c.kind === 'persona') return { name: c.name, img: c.pic, colors: c.colors || colorsFor(c.name), cast: c, ref: null }; }
-    const p = PARTNERS.find(x => x.id === (pick && pick.preset)) || PARTNERS.find(x => x.id === l.partner) || PARTNERS[0];
-    return { name: p.name, img: p.img, colors: p.colors, cast: null, ref: p, suggested: p.id === l.partner && !(pick && pick.preset && pick.preset !== l.partner) };
+    const def = lessonDefault(l), p = PARTNERS.find(x => x.id === (pick && pick.preset)) || def;
+    return { name: p.name, img: p.img, colors: p.colors, cast: null, ref: p, suggested: p.id === def.id };
+  }
+  // the partner a lesson suggests: its own, or, when that one isn't your type, one who is: someone from the lesson's
+  // place if there is one, the same pick for the same lesson every time (the lesson sets the role either way)
+  function lessonDefault(l) {
+    const own = PARTNERS.find(x => x.id === l.partner) || PARTNERS[0];
+    if (likesWho(own)) return own;
+    const pool = PARTNERS.filter(likesWho);
+    if (!pool.length) return own;
+    const here = pool.filter(p => p.setting === l.place), from = here.length ? here : pool;
+    let h = 0; for (const c of l.id) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+    return from[h % from.length];
   }
   function uniLesson(l) {
     const c = l.course, p = profOf(c.prof), D = LESSONS[l.id] || {}, done = passed(l.id), open = openLesson(l.id), mine = UNI.lessons[l.id];
@@ -3659,7 +3728,7 @@
     who.appendChild(wt);
     const ch = el('button', 'btn c-slate'); ch.type = 'button'; ch.innerHTML = icon('users') + 'Choose partner';
     ch.onclick = () => openPicker({ title: 'Your partner for this assignment', sub: 'Anyone in the cast can play it' + (D.partner_role ? ': for this lesson they play ' + ROLE_LABEL[D.partner_role].toLowerCase() + '.' : '.'),
-      suggested: l.partner, current: UNI.picks[l.id] || { preset: l.partner },
+      suggested: lessonDefault(l).id, current: UNI.picks[l.id] || { preset: lessonDefault(l).id },
       onPick: pick => { UNI.picks[l.id] = pick; saveUni(); renderThread(); } });
     who.appendChild(ch);
     as.appendChild(who);
@@ -3806,18 +3875,20 @@
     const box = el('div', 'pfilters');
     const find = el('input'); find.type = 'search'; find.value = F.q || ''; find.placeholder = 'Find someone: a name, a vibe, a place'; find.setAttribute('aria-label', 'Find a partner'); find.className = 'pfind';
     find.oninput = () => { F.q = find.value; redraw(); };
-    const g = seg(['', 'she', 'he', 'they'], { '': 'Anyone', she: 'Women', he: 'Men', they: 'Non-binary' }, F.g || '', v => { F.g = v; redraw(); }, 'Who');
+    const who = ['', 'she', 'he', 'they'], whoL = { '': 'Anyone', she: 'Women', he: 'Men', they: 'Non-binary' }, likes = S.settings.likes;
+    if (likes.indexOf(',') > 0) { who.splice(1, 0, likes); whoL[likes] = 'Your type'; }      // two groups: one button for both
+    const g = seg(who, whoL, F.g || '', v => { F.g = v; redraw(); }, 'Who');
     const r = seg(['', 'dominant', 'submissive', 'switch'], { '': 'Any role', dominant: 'Dominant', submissive: 'Submissive', switch: 'Switch' }, F.r || '', v => { F.r = v; redraw(); }, 'Role');
     box.append(find, g, r);
     return box;
   }
   function filterPartners(list, F) {
     const q = String(F.q || '').trim().toLowerCase();
-    return list.filter(p => (!F.g || p.pronouns === F.g) && (!F.r || p.role === F.r) &&
+    return list.filter(p => (!F.g || String(F.g).split(',').indexOf(p.pronouns) >= 0) && (!F.r || p.role === F.r) &&
       (!q || [p.name, p.vibe, p.look, p.personality, (SETTINGS.find(s => s.id === p.setting) || {}).label].join(' ').toLowerCase().indexOf(q) >= 0));
   }
   let PICK = null;
-  function openPicker(o) { PICK = Object.assign({ q: '', g: '', r: '' }, o); renderPicker(); $('pickSheet').hidden = false; closeDrawers(); }
+  function openPicker(o) { PICK = Object.assign(prefFilter(false), o); renderPicker(); $('pickSheet').hidden = false; closeDrawers(); }   // the lesson sets the role
   function renderPicker() {
     const b = $('pickBody'); b.innerHTML = '';
     $('pickTitle').textContent = PICK.title || 'Choose your partner';
@@ -5158,7 +5229,7 @@
       : addCard('Add someone you roleplay with', 'Their profile and Kink List, your notes and their grades. The live wingman reads their card when you chat with them.', 'c-teal', true, () => openCast({ kind: 'person' })));
     w.appendChild(g2);
     h2('Ready-made partners', [el('span', 'count', PARTNERS.length + ' to play with')]);
-    const CF = S.castF || (S.castF = { q: '', g: '', r: '' });
+    const CF = S.castF || (S.castF = prefFilter());
     const g3 = el('div', 'cgrid');
     w.appendChild(partnerFilters(CF, () => drawCast()));
     const drawCast = () => { g3.innerHTML = ''; filterPartners(PARTNERS, CF).forEach(p => {
@@ -5792,7 +5863,8 @@
   detectMode();
   if (S.view === 'uni' || (S.scene && S.scene.lesson)) ensureUni().then(() => render()).catch(() => { /* the page shows a retry */ });
   window.__vv = { S, cleanScene, cleanMessages, partnerPrompt, chatMessages, jsonMessages, veniceBody, isMinorText, compat, parseTranscript,
-    UNI, uni: () => ({ LESSON_BY, COURSES, FACULTY }), transcript, leanWords, saved: () => SAVED, ensureUni, handIn };
+    UNI, uni: () => ({ LESSON_BY, COURSES, FACULTY }), transcript, leanWords, saved: () => SAVED, ensureUni, handIn,
+    PARTNERS, preferred, lessonDefault };
 })();
 </script>
 </body>
