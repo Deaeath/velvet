@@ -801,6 +801,41 @@
   .live-start .goals { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 18px; }
   .live-start .goals .lab { width: 100%; font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); font-weight: 750; }
   @media (max-width: 760px) { .tab { font-size: 10px; } }
+  /* ---- v6: the catalogue, departments, grading, choosing partners */
+  .cat-bar { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .cat-bar input, .pfind { width: 100%; border: 1px solid var(--line-2); border-radius: 14px; background: var(--glass); color: var(--ink); padding: 11px 14px; font-size: 14.5px; }
+  .cat-bar input:focus, .pfind:focus { outline: none; border-color: rgba(255,111,150,0.55); box-shadow: 0 0 0 4px rgba(255,111,150,0.1); }
+  .cat-bar .seg { align-self: flex-start; }
+  .cat-more { display: flex; justify-content: center; margin-top: 14px; }
+  .dept-hero { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 26px; align-items: center; padding: 6px 0 4px; }
+  .dept-pic { aspect-ratio: 4 / 5; border-radius: 26px; background: var(--glass) center 22% / cover no-repeat; border: 1px solid var(--line-2); box-shadow: var(--shadow); }
+  .dept-hero .display { font-size: clamp(34px, 4.4vw, 54px); margin-top: 12px; }
+  .dept-hero p { color: var(--ink-2); font-size: 15.5px; line-height: 1.6; margin: 12px 0 0; max-width: 620px; }
+  .dept-hero .meta { color: var(--ink-3); font-size: 13px; margin: 10px 0 16px; }
+  @media (max-width: 640px) { .dept-hero { grid-template-columns: 1fr; } .dept-pic { width: 60%; max-width: 240px; } }
+  .graded-head { display: flex; align-items: center; gap: 14px; }
+  .graded-head .t { flex: 1; min-width: 0; }
+  .graded-head .t b { display: block; font-family: var(--font-display); font-size: 24px; font-weight: 600; line-height: 1.1; }
+  .graded-head .t span { display: block; color: var(--gold); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 750; margin-top: 4px; }
+  .graded-head .grade { width: 76px; height: 76px; font-size: 30px; }
+  .grade.fail { background: var(--glass-2); color: var(--ink-2); box-shadow: none; border: 1px solid var(--line-2); }
+  .verdict { margin: 16px 0 0; font-weight: 750; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; }
+  .verdict.pass { color: var(--jade); }
+  .verdict.fail { color: var(--amber); }
+  blockquote.feedback { margin: 10px 0 0; padding: 14px 18px; border-left: 2px solid var(--gold); background: var(--gold-soft); border-radius: 0 16px 16px 0;
+    font-family: var(--font-display); font-size: 19px; line-height: 1.5; color: var(--ink); text-wrap: pretty; }
+  blockquote.feedback cite { display: block; margin-top: 8px; font-family: var(--font-ui); font-style: normal; font-size: 12.5px; color: var(--ink-3); }
+  .graded-note { display: flex; gap: 12px; align-items: flex-start; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .graded-note b { display: block; font-size: 13px; }
+  .graded-note p { margin: 4px 0 0; font-family: var(--font-display); font-style: italic; font-size: 16px; line-height: 1.5; color: var(--ink-2); }
+  .graded-note small { display: block; margin-top: 4px; color: var(--ink-3); font-size: 12px; }
+  .lesson-done.ready { border-style: dashed; }
+  .lesson-done.ready .av { width: 64px; height: 64px; }
+  .lesson-done.fail { border-color: var(--line-2); background: var(--glass); }
+  .pfilters { display: flex; flex-direction: column; gap: 8px; margin: 0 0 14px; }
+  .pfilters .seg { align-self: flex-start; }
+  .suggest-flag { position: absolute; top: 10px; left: 10px; z-index: 2; padding: 3px 9px; border-radius: 999px; background: var(--grad); color: #fff; font-size: 10.5px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; }
+  #pickBody .portraits { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
   @media (min-width: 761px) { .head.home-head { display: none; } }
 </style>
 </head>
@@ -957,6 +992,13 @@
   <div class="card wide">
     <div class="card-head"><h2>Saved lines</h2><button class="ib" type="button" data-close aria-label="Close" id="savedClose"></button></div>
     <div class="card-body" id="savedBody"></div>
+  </div>
+</div>
+
+<div class="sheet" id="pickSheet" hidden>
+  <div class="card wide">
+    <div class="card-head"><h2 id="pickTitle">Choose your partner</h2><button class="ib" type="button" data-close aria-label="Close" id="pickClose"></button></div>
+    <div class="card-body" id="pickBody"></div>
   </div>
 </div>
 
@@ -1121,38 +1163,16 @@
       style: 'chat',
     },
   };
-  // Velvet University: each lesson's assignment is a drill (generated from handlers/velvet.py LESSONS).
-  // "ooc": the coach also reads lines out of character (( like this )).
-  const LESSONS = {
-    rp101_1: {"name": "RP 101 · Actions and speech", "goal": "Pair a clear *action* with a line of speech in every reply, in the present tense, and never write what your partner does.", "partner": "Answer naturally and leave them room to act.", "coach": "Each line that pairs a clear *action* with speech, in the present tense, without deciding anything for the partner, adds 25. Mark down lines that write the partner's actions.", "per": "25"},
-    rp101_2: {"name": "RP 101 · Give them a hook", "goal": "End every line with a hook your partner can answer: a question, an invitation, a choice, or a touch that asks for a reaction.", "partner": "Answer their hooks with enthusiasm. When a line gives you nothing to answer, keep your reply short.", "coach": "Each line that ends with a clear hook (a question, an invitation, a choice, a touch that asks for a reaction) adds 25.", "per": "25"},
-    rp101_3: {"name": "RP 101 · Match their rhythm", "goal": "Match the length and energy of each of your partner's replies: short for short, rich for rich.", "partner": "Vary your reply length on purpose: some quick one-liners, some longer, detailed paragraphs.", "coach": "Each line that roughly matches the length and energy of the partner's last reply adds 25. Mark down a wall of text after a one-liner, or a few words after a rich paragraph.", "per": "25"},
-    wrt120_1: {"name": "WRT 120 · Show the feeling", "goal": "Show every feeling through the body (hands, breath, voice, eyes) and never name an emotion outright.", "partner": "React to what their body shows you, and give them moments that stir strong feelings.", "coach": "Each line that shows a feeling through the body without naming the emotion adds 25. Mark down named emotions like nervous, excited or turned on.", "per": "25"},
-    wrt120_2: {"name": "WRT 120 · Specific beats general", "goal": "Put at least one concrete, specific detail in every line, and no generic words like nice, hot, sexy or beautiful.", "partner": "Notice and answer their details, and give them specific things to notice about you and the place.", "coach": "Each line with at least one concrete, specific detail and no generic adjective (nice, hot, sexy, beautiful) adds 25.", "per": "25"},
-    wrt120_3: {"name": "WRT 120 · All five senses", "goal": "Use sight, sound, touch, smell and taste across your lines.", "partner": "Give them rich moments for every sense to answer: scents, textures, sounds, tastes.", "coach": "Count which of the five senses their lines have used so far. Progress is 20 for each sense used."},
-    ten210_1: {"name": "TEN 210 · The almost", "goal": "Build anticipation with almosts (near-touches, pauses, held looks, unfinished sentences) without rushing to the act.", "partner": "Lean into the tension. Almost give in, but let them set the pace.", "coach": "Each line that builds anticipation with an almost (a near-touch, a pause, a held look, an unfinished sentence) adds 25. Mark down rushing.", "pace": "slow", "per": "25"},
-    ten210_2: {"name": "TEN 210 · Push and pull", "goal": "Alternate on purpose between moving closer and pulling back: an advance, then a retreat or a challenge.", "partner": "Answer their pushes and pulls: chase when they retreat, hesitate when they rush.", "coach": "Each line that clearly pushes closer or pulls back on purpose, turning the other way from the line before, adds 25.", "pace": "slow", "per": "25"},
-    ten210_3: {"name": "TEN 210 · One step at a time", "goal": "Escalate exactly one small step in each line, never two, and slow down whenever your partner does.", "partner": "Welcome small steps warmly, and cool off a little if they jump ahead.", "coach": "Each line that escalates by exactly one small, clear step adds 25. Mark down big jumps.", "pace": "slow", "per": "25"},
-    vox220_1: {"name": "VOX 220 · Find your voice", "goal": "Give your character a distinct voice (word choice, rhythm, a verbal habit) and keep it in every line.", "partner": "Speak in your own distinct voice and react to theirs.", "coach": "Each line that keeps a distinct, consistent voice (word choice, rhythm, habits) adds 25. Mark down lines that sound generic.", "per": "25"},
-    vox220_2: {"name": "VOX 220 · Say it without saying it", "goal": "Flirt through subtext and banter: let your words talk about one thing while meaning another.", "partner": "Play the subtext game: answer the meaning behind their words, with banter of your own.", "coach": "Each line with clear flirtatious subtext or banter that implies more than it says adds 25.", "per": "25"},
-    vox220_3: {"name": "VOX 220 · Say it out loud", "goal": "Tell your partner exactly what you want, specifically and in your character's own words.", "partner": "Invite them to say what they want, and react strongly when they do.", "coach": "Each line that says a specific want directly and confidently, in character, adds 25.", "per": "25"},
-    pwr301_1: {"name": "PWR 301 · Command presence", "goal": "Lead with calm, clear, specific directions: no hedging, and no asking permission for every move.", "partner": "Follow their lead eagerly and react to every instruction, so they can practise leading.", "coach": "Each line with a calm, clear, specific instruction and no hedging (maybe, if you want, kind of) adds 25.", "you_role": "dominant", "partner_role": "submissive", "per": "25"},
-    pwr301_2: {"name": "PWR 301 · Praise that lands", "goal": "Reward your partner with specific, immediate praise for what they just did, then give the next direction.", "partner": "Follow their directions and show how much their praise affects you.", "coach": "Each line with specific praise tied to what the partner just did adds 25. Mark down generic praise like \"good job\".", "you_role": "dominant", "partner_role": "submissive", "per": "25"},
-    pwr301_3: {"name": "PWR 301 · Read and adjust", "goal": "Watch your partner's reactions and adjust: more when they are eager, softer when they hesitate, with an in-character check-in.", "partner": "Show clear reactions. Be eager most of the time, but once or twice show a flicker of hesitation: a pause, a tensing, a too-quick yes.", "coach": "Each line that reads the partner's latest reaction and adjusts to it adds 25; after a hesitation, that means a warm, in-character check-in.", "you_role": "dominant", "partner_role": "submissive", "per": "25"},
-    pwr302_1: {"name": "PWR 302 · React out loud", "goal": "Show vividly what each of your partner's orders does to you: body, breath, voice, and the moment before you obey.", "partner": "Take charge clearly so they can practise following and reacting.", "coach": "Each line with a vivid, specific reaction to the partner's command adds 25. Mark down flat replies like \"ok\".", "you_role": "submissive", "partner_role": "dominant", "per": "25"},
-    pwr302_2: {"name": "PWR 302 · The playful brat", "goal": "Brat with charm: tease, talk back and make your partner work for it, always keeping the game going.", "partner": "Take charge firmly and enjoy their bratting: answer cheek with control.", "coach": "Each playful, charming line of resistance that invites the partner to take control, without shutting the scene down, adds 25.", "you_role": "submissive", "partner_role": "dominant", "per": "25"},
-    pwr302_3: {"name": "PWR 302 · Ask for it", "goal": "Ask or plead for exactly what you want, specifically and in character, and let your partner decide.", "partner": "Take charge. Make them ask for what they want, and decide whether to give it.", "coach": "Each line that asks or pleads for something specific, in character, leaving the choice to the partner, adds 25.", "you_role": "submissive", "partner_role": "dominant", "per": "25"},
-    cns101_1: {"name": "CNS 101 · Talk first", "goal": "Before the scene starts, agree on likes, limits and a safeword with your partner, out of character (( like this )).", "partner": "Begin out of character in (( )). Ask about their likes, limits and a safeword, share yours, and only start the scene once you have agreed.", "coach": "Did they cover likes, limits and a safeword, and ask about the partner's? Progress is a third for each.", "opening": "Start out of character in (( )): say hi, and ask {you} about likes, limits and a safeword before the scene begins. Share a little about yours.", "starts": "partner", "ooc": "yes"},
-    cns101_2: {"name": "CNS 101 · Check in, stay in", "goal": "Notice when your partner hesitates, check in warmly and in character, and respect the answer.", "partner": "Be warm and responsive, but once or twice show a small, clear hesitation: a pause, a shorter reply, a tensing. Relax when they check in kindly.", "coach": "Progress is 50 for noticing a hesitation and 50 for a warm, in-character check-in that respects the answer."},
-    cns101_3: {"name": "CNS 101 · Aftercare", "goal": "The scene has just ended. Bring your partner down gently, with warmth, care and check-ins.", "partner": "You are tender and a little raw after an intense scene. Let their care land, and say what you need.", "coach": "Each line of warmth, comfort, attentive listening or a caring check-in adds 25.", "opening": "Open just after an intense scene has ended: you're both catching your breath. Show how you feel in a few tender details and let {you} take care of you.", "starts": "partner", "per": "25"},
-    cht150_1: {"name": "CHT 150 · Short and vivid", "goal": "Write short chat lines like in game, under 120 characters each, and still vivid.", "partner": "Keep your own lines short and quick so the rhythm stays fast.", "coach": "Each vivid line under 120 characters adds 25. Mark down long lines.", "style": "chat", "per": "25"},
-    cht150_2: {"name": "CHT 150 · Emotes that land", "goal": "Pair one strong, specific *emote* (no name, present tense) with speech in every line, under 200 characters.", "partner": "Keep it fast and playful, in short chat lines.", "coach": "Each line that pairs one strong, specific *action* (no name, present tense) with speech, under 200 characters, adds 25.", "style": "chat", "per": "25"},
-    cht150_3: {"name": "CHT 150 · The opener", "goal": "Open with a stranger: notice something specific, show some personality, and make it easy to answer. Then keep it light.", "partner": "You are a stranger here. Be intrigued by a good opener and cool towards a lazy one, and let them do the work at first.", "coach": "Each line that does this adds 25: the opener notices something specific, shows some personality and is easy to answer, and each follow-up keeps it light and flirty.", "style": "chat", "starts": "you", "per": "25"},
-    adv401_1: {"name": "ADV 401 · Catch the cue", "goal": "Your partner drops small hints about what they want. Notice them and answer them.", "partner": "Drop subtle cues about what you want or don't (a glance, a pause, a shiver, a half-said wish) without saying it outright. Warm up when they notice; cool slightly when they miss one.", "coach": "Each line that notices and answers one of the partner's cues adds 25.", "per": "25"},
-    adv401_2: {"name": "ADV 401 · Rescue a dead scene", "goal": "Your partner is low on energy. Bring the scene back to life with something new: a twist, a playful question, a change of place or a game.", "partner": "Start flat: short, low-energy replies with nothing to answer. Warm up only when they offer something new, fun or personal.", "coach": "Each line that brings something new to revive the scene (a twist, a playful question, a change of place, humour, a game) adds 25.", "per": "25"},
-    adv401_3: {"name": "ADV 401 · End it well", "goal": "Bring the scene to a satisfying close: slow it down, land on a memorable final beat, and leave a warm hook for next time.", "partner": "The night is winding down. Follow their lead towards a close, and answer a good ending warmly.", "coach": "Each line that moves the scene gracefully towards its ending (slowing down, softening, a final image, a warm close or a hook for next time) adds 25.", "opening": "Open late at night, near the end of a long, lovely evening together: the music is low and it's almost time to say goodnight. Set the moment and let {you} bring it to a close.", "starts": "partner", "per": "25"},
-  };
-  const DRILL_IDS = Object.keys(DRILLS).concat(Object.keys(LESSONS));
+  // Velvet University: each lesson's assignment is a drill. They come from assets/university.json, which the server
+  // reads too; loadLessons() fills them in once it has loaded. "per": what each good line is worth; "ooc": the coach
+  // also reads lines out of character.
+  let LESSONS = {};
+  function loadLessons(courses) {
+    const out = {};
+    (courses || []).forEach(c => c.lessons.forEach(l => { out[l.id] = Object.assign({}, l.drill, { name: c.code + ' \u00b7 ' + l.title }); }));
+    LESSONS = out;
+  }
+  function drillIds() { return Object.keys(DRILLS).concat(Object.keys(LESSONS)); }
   function drillOf(k) { return !k ? null : has(DRILLS, k) ? DRILLS[k] : has(LESSONS, k) ? LESSONS[k] : null; }
   const OPENING = "Open the scene. Set it in a few vivid details and give {you} something to react to. Don't act for {you}.";
   const CONTINUE = "Continue your last reply from exactly where it stopped. Don't repeat anything.";
@@ -1162,7 +1182,10 @@
   const COACH_SHAPE_LINES = '{"scores":{"detail":0,"voice":0,"initiative":0,"pacing":0,"chemistry":0},' +
     '"praise":"what worked, under 25 words","tip":"one concrete improvement, under 25 words",' +
     '"better":"their line rewritten stronger","drill":{"lines":[true,false],"note":"under 20 words"}}';
-  const REPORT_SHAPE = '{"grade":"B+","headline":"under 12 words","scores":{"detail":0,"voice":0,"initiative":0,"pacing":0,' +
+  // a drill done out of character ("ooc"): its (( )) lines are the work, not a slip out of the scene
+  const COACH_OOC = ' Lines in (( )) are out of character, which this practice asks for: coach them as talk between the two ' +
+    'players, never as a slip out of the scene.';
+  const REPORT_SHAPE ='{"grade":"B+","headline":"under 12 words","scores":{"detail":0,"voice":0,"initiative":0,"pacing":0,' +
     '"chemistry":0},"strengths":["...","..."],"work_on":["...","..."],"best_line":"...",' +
     '"next_drill":"one drill id","why":"under 20 words"}';
   const SCORE_GUIDE = 'Score from 1 to 10 on each of these:\n' +
@@ -1207,7 +1230,7 @@
       setting: cleanText(raw.setting, 600), notes: cleanText(raw.notes, 1000),
       heat: pick(raw.heat, HEATS, 'steamy'), pace: pick(raw.pace, PACES, 'steady'), style: pick(raw.style, STYLES, 'paragraphs'),
       into: cleanList(raw.into), curious: cleanList(raw.curious), soft: cleanList(raw.soft), hard: cleanList(raw.hard),
-      drill: pick(raw.drill, DRILL_IDS, ''),
+      drill: pick(raw.drill, drillIds(), ''),
     };
     const checks = [['partner.name', sc.partner.name], ['partner.look', sc.partner.look], ['partner.personality', sc.partner.personality],
       ['partner.voice', sc.partner.voice], ['you.name', sc.you.name], ['you.look', sc.you.look], ['setting', sc.setting], ['notes', sc.notes]];
@@ -1304,7 +1327,7 @@
       for (let i = msgs.length - 1; i >= 0; i--) if (msgs[i].who === 'you') { last = msgs[i].text; break; }
       const per = !!(drill && drill.per), mine = msgs.filter(m => m.who === 'you').length;
       const practice = !drill ? '' : '\n' + you + ' is practising "' + drill.name + '": ' + drill.goal + ' How to judge it: ' + drill.coach +
-        (per ? ' "drill.lines" has one true or false for each of ' + you + "'s " + mine + ' lines in the scene, oldest first and the latest last: true when that line does what the rule asks, judged against this rule alone (the scores cover everything else).'
+        (drill.ooc ? COACH_OOC : '') + (per ? ' "drill.lines" has one true or false for each of ' + you + "'s " + mine + ' lines in the scene, oldest first and the latest last: true when that line does what the rule asks, judged against this rule alone (the scores cover everything else).'
           : ' "drill.progress" is 0 to 100 for the whole scene so far, judged against this rule alone (the scores cover everything else).') + '\n';
       system = 'You are the coach in Velvet, an app for practising adult erotic roleplay: warm, sharp and honest. ' +
         'You coach ' + you + "'s writing only, never " + name + "'s.\nThe scene: " + brief + '\n' + practice +
@@ -1408,6 +1431,57 @@
       vibe: 'The charming neighbour who keeps borrowing sugar',
       look: 'Black man with dark brown skin, an easy smile, locs tied back, grey sweatpants, a white tee',
       personality: 'charming, funny, attentive, a slow-burn flirt', voice: 'easy jokes, warm, a little bold' },
+    // fifty more, added 11-17
+    {"id": "ines", "name": "Inés", "age": 27, "pronouns": "she", "role": "switch", "colors": ["#ef4444", "#7f1d1d"], "setting": "vip", "vibe": "Flamenco dancer who flirts in rhythm", "look": "Spanish woman with olive skin, long black hair in a low bun with a red flower, a fitted black-and-red flamenco dress, gold earrings", "personality": "fiery, proud, playful, fiercely loyal", "voice": "rolling Spanish endearments and dramatic pauses"},
+    {"id": "freya", "name": "Freya", "age": 33, "pronouns": "she", "role": "dominant", "colors": ["#38bdf8", "#1e3a8a"], "setting": "gym", "vibe": "Nordic strength coach who loves a challenge", "look": "tall Scandinavian woman with a platinum braid, an athletic build, a fitted black sports top and joggers", "personality": "direct, competitive, warm once you have earned it", "voice": "short, encouraging commands and dry humour"},
+    {"id": "yuki", "name": "Yuki", "age": 26, "pronouns": "she", "role": "submissive", "colors": ["#f9a8d4", "#831843"], "setting": "apartment", "vibe": "Bookshop clerk with a very loud imagination", "look": "Japanese woman with a soft black bob, round tortoiseshell glasses, an oversized cream cardigan over a slip dress", "personality": "shy, curious, bookish, bolder in writing than in person", "voice": "soft and hesitant, then suddenly very honest"},
+    {"id": "monique", "name": "Monique", "age": 44, "pronouns": "she", "role": "dominant", "colors": ["#a855f7", "#3b0764"], "setting": "penthouse", "vibe": "Sommelier who decides what you are drinking", "look": "Black French woman with deep brown skin, short silver-streaked natural hair, red lipstick, a black silk wrap dress", "personality": "sophisticated, patient, wickedly observant", "voice": "slow and low, French phrases, never raises her voice"},
+    {"id": "priya", "name": "Priya", "age": 30, "pronouns": "she", "role": "switch", "colors": ["#6366f1", "#1e1b4b"], "setting": "office", "vibe": "Corporate lawyer who wins every argument", "look": "Indian woman with long dark waves, sharp winged eyeliner, a tailored navy suit with the blazer off and sleeves rolled", "personality": "brilliant, competitive, secretly craves being outmatched", "voice": "precise and quick, with cross-examining questions"},
+    {"id": "zara", "name": "Zara", "age": 25, "pronouns": "she", "role": "submissive", "colors": ["#facc15", "#a16207"], "setting": "beach", "vibe": "Beach-club DJ who cannot hide a blush", "look": "Black British woman with box braids in a high ponytail, a gold septum ring, a cropped mesh top, headphones around her neck", "personality": "bubbly, flirty, eager to please, terrible at hiding what she feels", "voice": "London slang, laughs a lot, says what she wants"},
+    {"id": "isabella", "name": "Isabella", "age": 36, "pronouns": "she", "role": "dominant", "colors": ["#0ea5e9", "#0c4a6e"], "setting": "yacht", "vibe": "Yacht captain. Her boat, her rules", "look": "Italian woman with sun-bronzed skin, dark hair in a windswept ponytail, a white captain's shirt with rolled sleeves", "personality": "commanding, adventurous, protective, unflappable", "voice": "crisp orders, a warm laugh, calls you sailor"},
+    {"id": "lena", "name": "Lena", "age": 29, "pronouns": "she", "role": "submissive", "colors": ["#fda4af", "#9f1239"], "setting": "hotel", "vibe": "Bridesmaid who caught the bouquet, and your eye", "look": "German woman with honey-blonde hair falling from an updo, a dusty-rose bridesmaid dress, her heels in one hand", "personality": "romantic, a little tipsy, sweet, surprisingly bold", "voice": "giggly, sincere compliments, apologises and then does not"},
+    {"id": "odette", "name": "Odette", "age": 52, "pronouns": "she", "role": "dominant", "colors": ["#e2e8f0", "#334155"], "setting": "penthouse", "vibe": "Retired prima ballerina. Posture, poise, perfection", "look": "elegant Russian woman with silver hair in a sleek chignon, a high-necked black velvet gown, pearl earrings", "personality": "exacting, graceful, rarely impressed, devastating when she is", "voice": "measured and formal, corrects you gently"},
+    {"id": "rosa", "name": "Rosa", "age": 38, "pronouns": "she", "role": "switch", "colors": ["#fb923c", "#9a3412"], "setting": "house_party", "vibe": "Chef who feeds you first and teases you after", "look": "curvy Puerto Rican woman with curly dark hair tied up in a silk scarf, an apron over a fitted black dress", "personality": "warm, bossy in the kitchen, generous, flirty", "voice": "teasing, food metaphors, Spanish endearments"},
+    {"id": "amara", "name": "Amara", "age": 31, "pronouns": "she", "role": "dominant", "colors": ["#fbbf24", "#78350f"], "setting": "mansion", "vibe": "Property shark showing you the house, and the pool", "look": "Nigerian woman with deep brown skin, a sleek long bob, a white tailored pantsuit, a gold cuff", "personality": "confident, persuasive, playful, always closing the deal", "voice": "smooth charm, direct, never takes a first no as final"},
+    {"id": "leilani", "name": "Leilani", "age": 27, "pronouns": "she", "role": "switch", "colors": ["#2dd4bf", "#115e59"], "setting": "beach", "vibe": "Surf instructor who knows every hidden cove", "look": "Hawaiian woman with long sun-streaked dark hair, a flower behind her ear, a rash guard unzipped over a bikini top", "personality": "easy-going, adventurous, sunny, quietly intense", "voice": "laid-back, laughs easily, invites you along"},
+    {"id": "vivienne", "name": "Vivienne", "age": 47, "pronouns": "she", "role": "dominant", "colors": ["#dc2626", "#450a0a"], "setting": "tavern", "vibe": "Vampire countess who has seen everything twice", "look": "pale woman with dark red hair, crimson lips, a black corseted gown with a high lace collar, a ruby pendant", "personality": "ancient, amused, possessive, impeccably polite", "voice": "archaic courtesy and velvet threats"},
+    {"id": "elowen", "name": "Elowen", "age": 30, "pronouns": "she", "role": "submissive", "colors": ["#86efac", "#14532d"], "setting": "tavern", "vibe": "Elven bard who sings about you, loudly", "look": "elf woman with pointed ears, long silver-blonde hair braided with leaves, a green velvet tunic, a lute on her back", "personality": "romantic, dreamy, curious about humans, easily flustered", "voice": "lyrical, rhymes when nervous"},
+    {"id": "morgan", "name": "Morgan", "age": 39, "pronouns": "she", "role": "switch", "colors": ["#818cf8", "#312e81"], "setting": "apartment", "vibe": "Witch with a candlelit flat and a deck of tarot cards", "look": "woman with long black hair, smoky eyes, silver rings on every finger, a flowing black dress", "personality": "mysterious, witty, intuitive, very hard to surprise", "voice": "cryptic one-liners and knowing laughs"},
+    {"id": "jade", "name": "Jade", "age": 32, "pronouns": "she", "role": "dominant", "colors": ["#f43f5e", "#4c0519"], "setting": "playroom", "vibe": "Professional domme with a soft spot for good manners", "look": "Chinese woman with sleek black hair in a high ponytail, red lips, a black leather corset dress, long gloves", "personality": "precise, strict, deeply attentive, warm in aftercare", "voice": "crisp and quiet, every word an instruction"},
+    {"id": "carmen", "name": "Carmen", "age": 42, "pronouns": "she", "role": "switch", "colors": ["#e879f9", "#701a75"], "setting": "hot_tub", "vibe": "Freshly divorced and celebrating it properly", "look": "Mexican woman with long dark waves, a gold necklace, a black swimsuit, a glass of champagne in hand", "personality": "bold, funny, done with being careful, tender underneath", "voice": "loud laugh, frank questions, toasts everything"},
+    {"id": "nadia", "name": "Nadia", "age": 34, "pronouns": "she", "role": "submissive", "colors": ["#c084fc", "#581c87"], "setting": "yacht", "vibe": "Heiress bored on her father's yacht", "look": "Lebanese woman with glossy dark hair, oversized sunglasses pushed up, a white linen beach dress, gold anklets", "personality": "spoiled, sharp-tongued, lonely, secretly wants someone to take charge", "voice": "drawling, sarcastic, then very soft"},
+    {"id": "tessa", "name": "Tessa", "age": 28, "pronouns": "she", "role": "submissive", "colors": ["#fb7185", "#881337"], "setting": "office", "vibe": "Architect pulling an all-nighter", "look": "red-haired woman with freckles, a messy bun with a pencil through it, an oversized white shirt, black jeans", "personality": "clever, frazzled, funny, melts when someone takes over", "voice": "rapid-fire, self-deprecating jokes"},
+    {"id": "greta", "name": "Greta", "age": 46, "pronouns": "she", "role": "dominant", "colors": ["#94a3b8", "#0f172a"], "setting": "mansion", "vibe": "Villa owner who throws the most exclusive pool party of the summer", "look": "tall Swedish woman with a sharp platinum bob, a black one-piece swimsuit under a sheer kaftan, statement sunglasses", "personality": "cool, generous, discerning, enjoys making people wait", "voice": "dry, elegant, amused understatement"},
+    {"id": "aiko", "name": "Aiko", "age": 35, "pronouns": "she", "role": "switch", "colors": ["#fca5a5", "#7f1d1d"], "setting": "hot_tub", "vibe": "Travel writer who collects hot springs and stories", "look": "Japanese woman with long black hair twisted up, a delicate gold chain, a deep red swimsuit, steam curling around her", "personality": "worldly, curious, gently teasing, a good listener", "voice": "storyteller, asks unexpected questions"},
+    {"id": "bianca", "name": "Bianca", "age": 24, "pronouns": "she", "role": "submissive", "colors": ["#f472b6", "#831843"], "setting": "vip", "vibe": "VIP hostess who knows every secret in the club", "look": "Italian woman with long dark waves, a sequinned black mini dress, a sparkler-topped champagne bottle", "personality": "charming, gossipy, eager to impress the right person", "voice": "breathless gossip and pet names"},
+    {"id": "rafael", "name": "Rafael", "age": 35, "pronouns": "he", "role": "dominant", "colors": ["#f59e0b", "#7c2d12"], "setting": "yacht", "vibe": "Sailing instructor with a slow, dangerous smile", "look": "Brazilian man with tan skin, curly dark hair, a short beard, an open white linen shirt", "personality": "relaxed, confident, patient, intensely focused when it matters", "voice": "slow Portuguese-accented teasing"},
+    {"id": "ethan", "name": "Ethan", "age": 29, "pronouns": "he", "role": "submissive", "colors": ["#60a5fa", "#1e3a8a"], "setting": "office", "vibe": "Assistant who anticipates everything you want", "look": "man with neat brown hair, light stubble, rolled shirtsleeves, a loosened tie, black-framed glasses", "personality": "attentive, eager, organised, flustered by praise", "voice": "polite, careful, offers before you ask"},
+    {"id": "luca", "name": "Luca", "age": 31, "pronouns": "he", "role": "switch", "colors": ["#a78bfa", "#2e1065"], "setting": "apartment", "vibe": "Musician playing records while it rains", "look": "Italian man with wavy dark hair, a vintage band tee, tattoos on his forearms, silver rings", "personality": "charming, moody, romantic, all in once he decides", "voice": "murmured Italian, song lyrics, long pauses"},
+    {"id": "hiro", "name": "Hiro", "age": 33, "pronouns": "he", "role": "dominant", "colors": ["#22d3ee", "#164e63"], "setting": "penthouse", "vibe": "Tech founder who never loses his cool", "look": "Japanese man with an undercut, a black turtleneck, a slim steel watch", "personality": "controlled, observant, decisive, secretly playful", "voice": "calm, minimal, asks exactly the right question"},
+    {"id": "jamal", "name": "Jamal", "age": 30, "pronouns": "he", "role": "switch", "colors": ["#ef4444", "#7f1d1d"], "setting": "beach", "vibe": "Lifeguard on his last shift of the summer", "look": "Black man with dark brown skin, a lean muscular build, red lifeguard shorts, a whistle around his neck", "personality": "protective, cheerful, cheeky, steady in a crisis", "voice": "easy banter and a big laugh"},
+    {"id": "sebastian", "name": "Sebastian", "age": 45, "pronouns": "he", "role": "dominant", "colors": ["#d4d4d8", "#27272a"], "setting": "mansion", "vibe": "Old-money host who throws the best parties", "look": "silver-haired man with a trimmed beard, a white dinner jacket, a crystal tumbler of whisky", "personality": "gracious, worldly, possessive, used to getting his way", "voice": "polished, unhurried, every sentence a velvet order"},
+    {"id": "finn", "name": "Finn", "age": 27, "pronouns": "he", "role": "submissive", "colors": ["#fdba74", "#9a3412"], "setting": "house_party", "vibe": "Golden-retriever energy. Wants to make you happy", "look": "Irish man with messy red-blond hair, freckles, a cosy grey hoodie, a shy grin", "personality": "sweet, enthusiastic, loyal, wonderfully easy to fluster", "voice": "rambling, earnest, lots of \"really?\""},
+    {"id": "aldric", "name": "Aldric", "age": 38, "pronouns": "he", "role": "dominant", "colors": ["#a3a3a3", "#262626"], "setting": "tavern", "vibe": "Battle-scarred knight, off duty for one night", "look": "broad man with a scar through one eyebrow, short dark hair, a leather jerkin over a linen shirt, a sword belt", "personality": "honourable, gruff, protective, surprisingly gentle", "voice": "few words, old-fashioned courtesy"},
+    {"id": "omar", "name": "Omar", "age": 34, "pronouns": "he", "role": "switch", "colors": ["#34d399", "#064e3b"], "setting": "hot_tub", "vibe": "Charming doctor on a rare night off", "look": "Arab man with olive skin, a neat beard, warm brown eyes, wet hair, a thin gold chain", "personality": "caring, witty, attentive, a little reckless off duty", "voice": "warm teasing and gentle questions"},
+    {"id": "theo", "name": "Theo", "age": 26, "pronouns": "he", "role": "submissive", "colors": ["#93c5fd", "#1e40af"], "setting": "gym", "vibe": "Newest member of the gym, eager to impress", "look": "man with tousled blond hair, a white tank top, earbuds around his neck, a towel over one shoulder", "personality": "keen, competitive, cheerful, blushes when watched", "voice": "breathless enthusiasm, asks for feedback"},
+    {"id": "gabriel", "name": "Gabriel", "age": 40, "pronouns": "he", "role": "dominant", "colors": ["#f87171", "#7f1d1d"], "setting": "playroom", "vibe": "Rope artist with very patient hands", "look": "Latino man with a shaved head, a salt-and-pepper beard, a black henley with pushed-up sleeves, coils of red rope", "personality": "patient, meticulous, calm, deeply present", "voice": "soft, slow, explains every knot"},
+    {"id": "arjun", "name": "Arjun", "age": 32, "pronouns": "he", "role": "switch", "colors": ["#fcd34d", "#713f12"], "setting": "office", "vibe": "Architect who sketches you instead of the plans", "look": "Indian man with thick dark hair, a light beard, a crisp white shirt open at the collar, a pencil behind his ear", "personality": "creative, observant, charming, a perfectionist", "voice": "thoughtful compliments and clever questions"},
+    {"id": "noah", "name": "Noah", "age": 36, "pronouns": "he", "role": "submissive", "colors": ["#a5b4fc", "#312e81"], "setting": "apartment", "vibe": "Romance novelist who writes what he cannot say", "look": "man with dark curls, a cable-knit sweater, reading glasses pushed up into his hair, ink on his fingers", "personality": "tender, wry, articulate on paper, tongue-tied in person", "voice": "beautiful sentences, then a nervous laugh"},
+    {"id": "kofi", "name": "Kofi", "age": 29, "pronouns": "he", "role": "dominant", "colors": ["#fbbf24", "#78350f"], "setting": "vip", "vibe": "Afrobeats DJ who owns the dance floor", "look": "Ghanaian man with dark brown skin, short locs, a patterned silk shirt, a gold chain", "personality": "magnetic, playful, confident, reads a room in seconds", "voice": "smooth, rhythmic, calls you closer"},
+    {"id": "matteo", "name": "Matteo", "age": 41, "pronouns": "he", "role": "switch", "colors": ["#f97316", "#7c2d12"], "setting": "penthouse", "vibe": "Chef cooking a private dinner just for you", "look": "Italian man with dark hair greying at the temples, a short beard, a white chef's jacket open at the neck", "personality": "passionate, sensual, perfectionist, generous", "voice": "describes everything like food, warm and slow"},
+    {"id": "jonah", "name": "Jonah", "age": 28, "pronouns": "he", "role": "submissive", "colors": ["#67e8f9", "#155e75"], "setting": "hot_tub", "vibe": "Ski instructor thawing out after the last run", "look": "Canadian man with sandy hair, a ski tan, a silver chain, wet shoulders above the steaming water", "personality": "friendly, outdoorsy, easy to tease, eager to follow", "voice": "laid-back, laughs at himself"},
+    {"id": "victor", "name": "Victor", "age": 50, "pronouns": "he", "role": "dominant", "colors": ["#cbd5e1", "#1e293b"], "setting": "hotel", "vibe": "Silver-fox CEO in his suite after the gala", "look": "silver-haired man with a clean-shaven jaw, a black tuxedo with the bow tie undone, cufflinks", "personality": "powerful, discreet, generous, expects excellence", "voice": "low, certain, never repeats himself"},
+    {"id": "diego", "name": "Diego", "age": 33, "pronouns": "he", "role": "switch", "colors": ["#fb923c", "#7c2d12"], "setting": "beach", "vibe": "Beach-volleyball pro who never stops competing", "look": "Argentinian man with long dark hair tied back, a sun-tanned muscular build, board shorts, a shell necklace", "personality": "competitive, playful, physical, generous loser", "voice": "trash talk with a wink"},
+    {"id": "elias", "name": "Elias", "age": 31, "pronouns": "he", "role": "submissive", "colors": ["#bef264", "#365314"], "setting": "tavern", "vibe": "Elven prince who ran away from court", "look": "elf man with pointed ears, long dark hair, a silver circlet, a deep blue travelling cloak", "personality": "curious, noble, naive about the world, eager to be taught", "voice": "formal courtly speech, slowly loosening"},
+    {"id": "wes", "name": "Wes", "age": 37, "pronouns": "he", "role": "dominant", "colors": ["#d97706", "#451a03"], "setting": "house_party", "vibe": "Cowboy who wandered into the after-party", "look": "rugged man with a weathered tan, stubble, a cowboy hat, a denim shirt with pearl snaps", "personality": "easy-going, protective, slow to rush, quick to grin", "voice": "Southern drawl, calls you darlin'"},
+    {"id": "ash", "name": "Ash", "age": 28, "pronouns": "they", "role": "switch", "colors": ["#94a3b8", "#1e293b"], "setting": "apartment", "vibe": "Tattoo artist with a sketchbook full of you", "look": "person with a shaved side and long dark hair on the other, tattoo sleeves, a black tank top, a nose ring", "personality": "artistic, blunt, tender, intensely focused", "voice": "quiet, deadpan, unexpectedly sweet"},
+    {"id": "river", "name": "River", "age": 25, "pronouns": "they", "role": "submissive", "colors": ["#7dd3fc", "#0c4a6e"], "setting": "yacht", "vibe": "Deckhand on a charter yacht, sea-salt and sunshine", "look": "person with a sun-bleached shag haircut, freckles, an open striped shirt, a rope bracelet", "personality": "free-spirited, gentle, curious, happy to follow your lead", "voice": "soft, dreamy, sea metaphors"},
+    {"id": "sage", "name": "Sage", "age": 33, "pronouns": "they", "role": "dominant", "colors": ["#c4b5fd", "#4c1d95"], "setting": "playroom", "vibe": "Velvet-voiced dom who never needs to raise it", "look": "androgynous person with a sharp silver-violet undercut, a fitted black suit vest, a single leather glove", "personality": "calm, exacting, playful, deeply caring", "voice": "hushed, precise, rewards good behaviour with words"},
+    {"id": "quinn", "name": "Quinn", "age": 30, "pronouns": "they", "role": "switch", "colors": ["#4ade80", "#14532d"], "setting": "gym", "vibe": "Climbing coach who spots you a little too closely", "look": "lean person with short curly hair, chalk on their hands, a fitted sports tank, climbing harness", "personality": "encouraging, bold, competitive, a flirt", "voice": "coaching cues with a wink"},
+    {"id": "rowan", "name": "Rowan", "age": 37, "pronouns": "they", "role": "dominant", "colors": ["#a3e635", "#1a2e05"], "setting": "tavern", "vibe": "Fae noble who bargains in kisses", "look": "fae person with pointed ears, copper hair woven with gold thread, an embroidered emerald coat, glimmering eyes", "personality": "cunning, charming, playful, honours every bargain", "voice": "riddles, formal flourishes, never a straight answer"},
+    {"id": "kit", "name": "Kit", "age": 26, "pronouns": "they", "role": "submissive", "colors": ["#f0abfc", "#86198f"], "setting": "vip", "vibe": "Burlesque performer between acts", "look": "person with a sleek pink bob, glittering eye make-up, a sequinned corset, a feather boa", "personality": "theatrical, teasing, eager for applause, soft off stage", "voice": "playful, showy, pet names"},
+    {"id": "ezra", "name": "Ezra", "age": 31, "pronouns": "they", "role": "switch", "colors": ["#818cf8", "#1e1b4b"], "setting": "hot_tub", "vibe": "Astronomer who knows every star by name", "look": "person with dark wavy hair, round wire glasses pushed up, a silver star pendant, steam rising around them", "personality": "nerdy, romantic, curious, gently intense", "voice": "wonder-filled facts and soft questions"},
+    {"id": "lux", "name": "Lux", "age": 29, "pronouns": "they", "role": "dominant", "colors": ["#fde047", "#713f12"], "setting": "hotel", "vibe": "Wedding DJ who takes requests. Sometimes", "look": "person with a bleached buzz cut, gold glitter on their cheekbones, a velvet bomber jacket, headphones", "personality": "confident, mischievous, in control of every room", "voice": "quick, cheeky, decides what plays next"},
   ];
   const SETTINGS = [
     { id: 'beach', label: 'Beach club', text: 'A beach club after hours: lanterns swaying, warm sand, the bar half closed and the music low.' },
@@ -1537,7 +1611,7 @@
   function writeScene(sc) {
     delete pendingSaves[sc.id];
     if (!store.set('vv_s_' + sc.id, JSON.stringify(sc))) { toast("This browser won't save more. Download your scenes in Settings, then delete some old ones.", 'err'); return; }
-    const entry = { id: sc.id, kind: sc.kind || 'practice', castId: sc.castId || '', presetId: sc.presetId || '', settingId: sc.settingId || '', title: sceneTitle(sc), partner: sc.partner.name, colors: sc.colors, updated: sc.updated, lines: sc.msgs.filter(m => m.who === 'you').length, drill: sc.drill || '', lesson: sc.lesson || '', done: !!sc.drillDone };
+    const entry = { id: sc.id, kind: sc.kind || 'practice', castId: sc.castId || '', presetId: sc.presetId || '', settingId: sc.settingId || '', title: sceneTitle(sc), partner: sc.partner.name, colors: sc.colors, updated: sc.updated, lines: sc.msgs.filter(m => m.who === 'you').length, drill: sc.drill || '', lesson: sc.lesson || '', done: !!(sc.graded && sc.graded.passed) };
     const i = S.index.findIndex(x => x.id === sc.id);
     if (i >= 0) S.index.splice(i, 1);
     S.index.unshift(entry);
@@ -1959,7 +2033,9 @@
     closeMenu();
     const m = el('div', 'menu'); m.setAttribute('role', 'menu');
     const item = (ic, label, fn, cls) => { const b = el('button', cls || ''); b.type = 'button'; b.innerHTML = icon(ic) + '<span>' + label + '</span>'; b.onclick = e => { e.stopPropagation(); closeMenu(); fn(); }; m.appendChild(b); };
-    item('trophy', 'End scene and get my report', () => report(), 'c-gold');
+    const lsn = lessonOf(S.scene);
+    if (lsn) item('grade', 'Hand it in to ' + profOf(lsn.course.prof).short, () => handIn(S.scene), 'c-gold');
+    item('trophy', 'End scene and get my report', () => report(), lsn ? '' : 'c-gold');
     item('regen', 'Start again with the same setup', () => restartScene());
     item('download', 'Download the transcript', () => downloadTranscript());
     item('trash', 'Delete this scene', async () => { if (await ask('Delete this scene?', 'It goes from this device for good.', 'Delete')) deleteScene(S.scene.id); }, 'c-red');
@@ -2015,7 +2091,7 @@
   function scoreColor(v) { return v >= 8 ? 'c-teal' : v >= 6 ? 'c-gold' : 'c-rose'; }
   function mean(sc) { let s = 0; DIMS.forEach(d => { s += sc[d[0]] || 0; }); return s / DIMS.length; }
   function msgEl(m, i, isLastP, isLastY) {
-    if (m.who === 'note') return m.kind === 'lesson' ? lessonNoteEl(m) : el('div', 'note', m.text);
+    if (m.who === 'note') return m.kind === 'lesson' || m.kind === 'ready' ? lessonNoteEl(m) : el('div', 'note', m.text);
     const row = el('div', 'msg ' + m.who + ((isLastP || isLastY) ? ' last' : ''));
     row.dataset.i = i;
     const live = S.scene.kind === 'live';
@@ -2229,10 +2305,12 @@
       w.appendChild(secTitle('Continue', 'Pick up where you left off'));
       const cards = el('div', 'cards'); recent.forEach(x => cards.appendChild(sceneCardSmall(x))); w.appendChild(cards);
     }
-    const all = el('button', 'lnk'); all.type = 'button'; all.textContent = 'Make your own'; all.onclick = () => openCast({ kind: 'persona' });
+    const all = el('button', 'lnk'); all.type = 'button'; all.textContent = 'See all ' + PARTNERS.length; all.onclick = () => openNew();
     w.appendChild(secTitle('Partners', 'Tap one to start', all));
     const row = el('div', 'rowscroll');
-    personasAndPresets().forEach(p => row.appendChild(partnerCard(p, { onPick: () => openNew(p.castId ? { persona: castById(p.castId) } : { preset: p.ref }) })));
+    const everyone = personasAndPresets(), mine = everyone.filter(p => p.castId), presets = everyone.filter(p => !p.castId), from = (day * 7) % presets.length;
+    mine.concat(presets.slice(from).concat(presets.slice(0, from)).slice(0, 18))
+      .forEach(p => row.appendChild(partnerCard(p, { onPick: () => openNew(p.castId ? { persona: castById(p.castId) } : { preset: p.ref }) })));
     w.appendChild(scroller(row));
     w.appendChild(secTitle('Practise a skill', 'One thing at a time, scored by the coach'));
     const g = el('div', 'grid');
@@ -2390,6 +2468,13 @@
       const bar = el('div', 'bar'); const f = el('i'); bar.appendChild(f); p.appendChild(bar);
       requestAnimationFrame(() => { f.style.width = (sc.drillProgress || 0) + '%'; });
       if (sc.drillNote) { const n = el('p', 'muted', sc.drillNote); n.style.marginTop = '6px'; p.appendChild(n); }
+      if (lsn) {
+        const hb = el('button', 'btn block ' + (sc.drillDone ? 'main' : 'tint c-gold')); hb.type = 'button'; hb.style.marginTop = '10px';
+        hb.innerHTML = icon('grade') + 'Hand it in to ' + escHTML(profOf(lsn.course.prof).short);
+        hb.disabled = S.busy || sc.msgs.filter(m => m.who === 'you' && !m.ghost).length < 2; hb.onclick = () => handIn(sc);
+        p.appendChild(hb);
+        if (sc.graded) { const g = el('p', 'muted', 'Last hand-in: ' + sc.graded.grade + (sc.graded.passed ? ', passed' : ', not passed yet')); g.style.marginTop = '6px'; p.appendChild(g); }
+      }
       body.appendChild(p);
     }
     body.appendChild(scorePanel(sc, 'This scene'));
@@ -2655,7 +2740,7 @@
         sc.drillNote = out.drill.note || sc.drillNote;
         if (sc.drillProgress >= 100 && !sc.drillDone) {
           sc.drillDone = true;
-          if (sc.lesson && LESSON_BY[sc.lesson]) finishLesson(sc);
+          if (sc.lesson && LESSON_BY[sc.lesson]) sc.msgs.push({ id: newId(), who: 'note', kind: 'ready', lesson: sc.lesson, text: 'Goal reached: hand it in for your grade.' });
           else {
             S.progress.drills[sc.drill] = (S.progress.drills[sc.drill] || 0) + 1; saveProgress();
             sc.msgs.push({ id: newId(), who: 'note', text: 'Drill complete: ' + drillOf(sc.drill).name + '. Keep playing, or end the scene for your report.' });
@@ -2784,6 +2869,7 @@
     } finally { S.busy = false; refreshUI(); }
   }
   function showReport(r) {
+    $('reportSheet').querySelector('.card-head h2').textContent = 'Report card';
     const b = $('repBody'); b.innerHTML = '';
     const top = el('div', 'report-top');
     top.appendChild(el('div', 'grade', r.grade));
@@ -2939,15 +3025,23 @@
     const h = el('h3'); h.append(document.createTextNode('Who do you want tonight?'), el('small', '', 'Your personas, or one of ours'));
     s1.appendChild(h);
     const grid = el('div', 'portraits');
-    personasAndPresets().forEach(p => {
-      const id = p.castId ? 'cast:' + p.castId : p.presetId;
-      grid.appendChild(partnerCard(p, { pressed: NEW.partnerId === id, onPick: () => { pickPartner(p); NEW.step = 2; renderNew(); } }));
-    });
+    NEW.f = NEW.f || { q: '', g: '', r: '' };
+    const drawPartners = () => {
+      grid.innerHTML = '';
+      const all = personasAndPresets().map(p => Object.assign({ pronouns: (p.ref && p.ref.pronouns) || (castById(p.castId) || {}).pronouns || 'she',
+        setting: (p.ref && p.ref.setting) || '', look: (p.ref && p.ref.look) || '', personality: (p.ref && p.ref.personality) || '' }, p));
+      filterPartners(all, NEW.f).forEach(p => {
+        const id = p.castId ? 'cast:' + p.castId : p.presetId;
+        grid.appendChild(partnerCard(p, { pressed: NEW.partnerId === id, onPick: () => { pickPartner(p); NEW.step = 2; renderNew(); } }));
+      });
+      grid.appendChild(add);
+    };
+    s1.appendChild(partnerFilters(NEW.f, drawPartners));
     const add = el('button', 'pcard add'); add.type = 'button'; add.setAttribute('aria-pressed', NEW.partnerId === 'custom' ? 'true' : 'false');
     add.innerHTML = icon('plus') + '<b>Make your own</b><small>Any adult character you can imagine</small>';
     add.onclick = () => { NEW.partnerId = 'custom'; NEW.castId = ''; NEW.presetId = ''; NEW.partner = { name: '', age: 28, pronouns: 'she', role: NEW.partner.role, look: '', personality: '', voice: '' }; NEW.colors = null; renderNew(); setTimeout(() => $('pName') && $('pName').focus(), 30); };
-    grid.appendChild(add);
     s1.appendChild(grid);
+    drawPartners();
     const det = el('details', 'tweak'); if (NEW.partnerId === 'custom') det.open = true;
     det.appendChild(el('summary', '', NEW.partnerId === 'custom' ? 'Your partner' : 'Change ' + NEW.partner.name + '\u2019s details for this scene'));
     const fs = el('div', 'fields');
@@ -3227,246 +3321,88 @@
   }
 
   // ================================================================ Velvet University: professors, courses, lessons
-  // Each lesson is a short lecture, a weak and a strong example, and an assignment: a practice scene whose drill is
-  // the lesson (LESSONS, in the prompt copy above). Reach the goal to pass; the grade is the average of your lines.
-  const FACULTY = [
-    { id: 'vale', name: 'Isadora Vale', short: 'Dean Vale', rank: 'Dean', subject: 'Foundations and writing', colors: ['#f2c38b', '#7c2d12'],
-      bio: 'Thirty years of letters, scripts and very long nights. She can spot a lazy line from across the room, and she will make yours unforgettable.',
-      hello: 'Come in, sit down. What are we working on today?',
-      ask: ['How do I make my actions less boring?', 'How long should my replies be?', 'What makes a line memorable?'] },
-    { id: 'okafor', name: 'Dante Okafor', short: 'Professor Okafor', rank: 'Professor', subject: 'The art of leading', colors: ['#a8a29e', '#1c1917'],
-      bio: 'Calm, certain and impossible to rush. He teaches the quiet kind of power: clear words, close attention, and praise that lands.',
-      hello: 'Sit. Take your time. What do you want to know?',
-      ask: ['How do I lead without being cold?', 'How do I give orders that sound natural?', 'What do I do when they hesitate?'] },
-    { id: 'sato', name: 'June Sato', short: 'Professor Sato', rank: 'Professor', subject: 'The art of following', colors: ['#fda4af', '#9f1239'],
-      bio: 'Playful, quick and trouble on purpose. She teaches the art of yielding, and the even finer art of making them work for it.',
-      hello: 'Oh, a visitor! Spill it. What are we being bratty about today?',
-      ask: ['How do I brat without being annoying?', 'How do I show I like it?', 'How do I ask for what I want and still be the sub?'] },
-    { id: 'hart', name: 'Rosalind Hart', short: 'Dr. Hart', rank: 'Doctor', subject: 'Consent and care', colors: ['#5eead4', '#115e59'],
-      bio: 'She makes safety sound like foreplay. Talking first, check-ins, safewords and aftercare, taught warmly and without a single lecture.',
-      hello: 'Welcome. There are no silly questions in this room. What is on your mind?',
-      ask: ['How do I bring up limits without killing the mood?', 'What do I say when someone uses a safeword?', 'What does good aftercare look like in text?'] },
-    { id: 'marchetti', name: 'Leo Marchetti', short: 'Professor Marchetti', rank: 'Professor', subject: 'Tension and character', colors: ['#fca5a5', '#7f1d1d'],
-      bio: 'A director at heart. He talks about scenes like films: the pause before the kiss, the line that changes everything, the voice that makes a character real.',
-      hello: 'Ah, come in, come in! Tell me everything. Which scene is giving you trouble?',
-      ask: ['How do I build tension?', 'How do I make my character sound real?', 'How do I flirt with subtext?'] },
-    { id: 'reyes', name: 'Nova Reyes', short: 'Professor Reyes', rank: 'Professor', subject: '3DXChat craft', colors: ['#c4b5fd', '#4c1d95'],
-      bio: 'Lives in the game. Short lines, sharp emotes, clubs full of strangers: she teaches you to stand out in a busy room and keep up with fast chat.',
-      hello: 'Hey! Pull up a chair. What is up?',
-      ask: ['How do I approach someone in a club?', 'How do I keep up with fast chat?', 'How do I bring a dead scene back to life?'] },
-  ];
-  FACULTY.forEach(f => { f.img = 'assets/faculty/' + f.id + '.webp'; });
-  const COURSES = [
-    { code: 'RP 101', id: 'rp101', name: 'Foundations of Roleplay', prof: 'vale', core: true,
-      blurb: 'Where everyone starts: actions and speech, giving your partner something to answer, and matching their rhythm.',
-      lessons: [
-        { id: 'rp101_1', title: 'Actions and speech', partner: 'mara', place: 'beach',
-          lecture: 'Every good line has two parts: what your character does, and what they say. Actions go in *asterisks*, in the present tense. Speech goes beside them. Put the two together and your partner can see the moment as well as hear it.',
-          points: ['One clear action and one line of speech beat three vague ones.', 'Write in the present tense: *leans closer*, not *leaned closer*.', 'Only ever write your own character. Their body and their choices belong to them.'],
-          weak: 'hi *smiles* how are you', strong: '*slides onto the stool beside you and nudges my glass your way* You look like someone who needs a better drink.',
-          why: 'A specific action, a line with some personality, and an easy way in.' },
-        { id: 'rp101_2', title: 'Give them a hook', partner: 'jordan', place: 'apartment',
-          lecture: 'The best roleplayers are generous. Every reply ends with something your partner can grab: a question, a touch, a choice, a dare. If your line could be the last line of the scene, it is not finished yet.',
-          points: ['End on something to answer: a question, an invitation, a touch that asks for a reaction.', 'Offer choices. "The couch or the balcony?" lets them steer.', 'Never end on a full stop that closes the door.'],
-          weak: '*sits down on the couch and drinks the wine*', strong: '*sits down and pats the cushion beside me, holding out your glass* Come here. Tell me the worst thing you did today.',
-          why: 'It invites them closer and hands them a question they want to answer.' },
-        { id: 'rp101_3', title: 'Match their rhythm', partner: 'sienna', place: 'house_party',
-          lecture: 'Roleplay is a dance, and the length of your reply is part of the step. Two quick lines answered with a wall of text stops the music. A rich paragraph answered with one word feels like a shrug. Match their length and energy first, then lead from there.',
-          points: ['Short reply? Answer short and punchy.', 'Long, detailed reply? Give them detail back.', 'Match the energy first, then nudge it where you want it to go.'],
-          weak: 'ok', strong: '*takes your hand before you can change your mind* Lead the way, trouble.',
-          why: 'Their quick, playful energy, matched and handed straight back.' },
-      ] },
-    { code: 'CNS 101', id: 'cns101', name: 'Consent and Care', prof: 'hart', core: true,
-      blurb: 'The sexiest skills in roleplay: talking first, checking in without killing the mood, and taking care of each other after.',
-      lessons: [
-        { id: 'cns101_1', title: 'Talk first', partner: 'mara', place: 'beach',
-          lecture: 'Before the first kiss, two minutes out of character saves a hundred awkward moments. What are you into? What is off the table? What is the safeword? Asking is not unsexy. It tells your partner you are worth trusting.',
-          points: ['Out of character, in (( )): likes, limits and a safeword.', 'Ask about theirs as much as you share yours.', 'Keep it light. It is flirting with logistics.'],
-          weak: '(( no limits lol, let\'s go ))', strong: '(( Before we start: I love slow teasing and praise, no pain for me. Red to stop, yellow to slow down? What about you? ))',
-          why: 'Likes, a limit, a safeword and a question, all in one friendly line.' },
-        { id: 'cns101_2', title: 'Check in, stay in', partner: 'jordan', place: 'hotel',
-          lecture: 'A check-in does not have to stop the scene. "You okay?" whispered against someone\'s ear is care and heat at once. Watch for a pause or a change in tone, ask softly, and then listen to the answer, whatever it is.',
-          points: ['Notice the signal: a pause, a shorter reply, a tense body.', 'Check in, in character: soft, short and sincere.', 'Respect the answer. Yes means go on. Anything else means slow down.'],
-          weak: '*keeps going, ignoring how quiet you have gone*', strong: '*stills, hand resting on your waist* Hey. You went quiet on me. Good quiet, or should we slow down?',
-          why: 'It notices, asks warmly, stays in the moment and offers an easy way out.' },
-        { id: 'cns101_3', title: 'Aftercare', partner: 'damon', place: 'penthouse',
-          lecture: 'The scene is over and someone\'s heart is still racing. Aftercare is how you land the plane: water, a blanket, a soft word, a question about how they feel. It is what makes people want to play with you again.',
-          points: ['Slow everything down: voice, touch and pace.', 'Ask what they need, then give it.', 'Say something kind and true about the scene.'],
-          weak: 'ok that was fun, gtg', strong: '*pulls the blanket over us both and presses a glass of water into your hand* Drink. ...How are you feeling? You were incredible.',
-          why: 'Comfort, care, a real question, and praise that lingers.' },
-      ] },
-    { code: 'WRT 120', id: 'wrt120', name: 'Show, Don\'t Tell', prof: 'vale', core: true,
-      blurb: 'Make them feel it: bodies instead of labels, exact details instead of generic ones, and every one of the five senses.',
-      lessons: [
-        { id: 'wrt120_1', title: 'Show the feeling', partner: 'celeste', place: 'penthouse',
-          lecture: '"I\'m nervous" is a label. Shaking hands, a dry throat, a laugh that comes out too fast: that is a feeling. Your partner cannot feel a label. Show what the emotion does to the body, and let them read it.',
-          points: ['Never name the emotion. Show it in the hands, the breath, the voice, the eyes.', 'One true physical detail is worth a paragraph of explaining.', 'Let your partner react to what they see, not to what you told them.'],
-          weak: '*is really nervous and excited*', strong: '*laughs a beat too fast and tucks my hair behind my ear, twice* So. You actually came.',
-          why: 'The double tuck and the quick laugh show the nerves without ever naming them.' },
-        { id: 'wrt120_2', title: 'Specific beats general', partner: 'damon', place: 'vip',
-          lecture: '"She looked beautiful" could be anyone, anywhere. "The red dress, the gold cuff, the scar on her lip she never hides" is one person on one night. Specific details make a scene real, and they give your partner something to notice.',
-          points: ['Swap generic words (nice, hot, sexy, beautiful) for one exact detail.', 'The drink, the colour of a dress, the song that is playing: small facts build a world.', 'Details about your partner are compliments they can answer.'],
-          weak: '*looks at you* you look really hot', strong: '*lets my eyes follow your collar down to the open button* Charcoal suits you. So does that look you\'re giving me.',
-          why: 'Exact details about them, and a compliment with a question hidden in it.' },
-        { id: 'wrt120_3', title: 'All five senses', partner: 'nyx', place: 'tavern',
-          lecture: 'Most roleplay is all eyes. Add the crackle of the fire, the smell of rain on a jacket, the taste of wine on a kiss, the heat of a hand through fabric, and the scene stops being a picture and becomes a place.',
-          points: ['Sound and smell are the most forgotten, and the most powerful.', 'Touch is texture and temperature, not just contact.', 'Taste belongs to kisses, drinks and skin. Use it.'],
-          weak: '*kisses you*', strong: '*kisses you slowly; you taste of honeyed mead and woodsmoke, and the fire pops somewhere behind us*',
-          why: 'Taste, smell and sound turn a kiss into a memory.' },
-      ] },
-    { code: 'CHT 150', id: 'cht150', name: '3DXChat Craft', prof: 'reyes', core: true,
-      blurb: 'Roleplay at game speed: short lines that hit hard, emotes that land, and openers that start something.',
-      lessons: [
-        { id: 'cht150_1', title: 'Short and vivid', partner: 'mara', place: 'beach',
-          lecture: 'In game, chat moves fast and the window is small. A great 3DX line is short, punchy and alive: one strong action, one line of talk, done. Under 120 characters is the sweet spot.',
-          points: ['One action, one line. Cut everything else.', 'Strong verbs carry short lines: *pins*, *tugs*, *murmurs*.', 'If it scrolls off the screen, it is too long.'],
-          weak: '*walks over to you slowly and looks at you and smiles a lot* hello how are you doing tonight', strong: '*tugs your collar, grinning* Took you long enough.',
-          why: 'Seven words, one strong verb, and a whole mood.' },
-        { id: 'cht150_2', title: 'Emotes that land', partner: 'riley', place: 'house_party',
-          lecture: 'In 3DX your emotes are your body. Write them without your name, in the present tense: *leans in*, not *Nova leans in*. One specific action reads better than a list, and an emote with speech lets them see and hear you at once.',
-          points: ['No name in the emote: *leans in close*.', 'One specific action beats a list of three.', 'Emote and speech in the same line is the classic combination.'],
-          weak: '*Nova walks* *Nova sits* *Nova drinks* hey', strong: '*hops up on the counter beside you, swinging my legs* So whose party is this, anyway?',
-          why: 'One playful action, no name, and an easy question.' },
-        { id: 'cht150_3', title: 'The opener', partner: 'celeste', place: 'vip',
-          lecture: 'Every great scene starts with someone brave enough to say something. The best openers notice one specific thing, show a flash of personality, and give an easy way to answer. No "hi", no "wanna rp?". Walk in like you already belong.',
-          points: ['Notice something specific about them or the moment.', 'Show a flash of your personality.', 'Make it easy to answer: a question or a playful dare.'],
-          weak: 'hi wanna rp?', strong: '*slides into the booth across from you* That\'s the third drink you\'ve sent back. Tough crowd, or waiting for someone better?',
-          why: 'Specific, playful, and impossible not to answer.' },
-      ] },
-    { code: 'TEN 210', id: 'ten210', name: 'Tension and the Slow Burn', prof: 'marchetti', core: false,
-      blurb: 'Wanting is the best part: the almost-touch, push and pull, and escalating one small step at a time.',
-      lessons: [
-        { id: 'ten210_1', title: 'The almost', partner: 'marcus', place: 'gym',
-          lecture: 'Cinema taught us this: the kiss is never as hot as the second before it. Hands that almost touch. A breath held. A sentence left unfinished. Learn to stop one inch short, and let the inch do the work.',
-          points: ['Stop just short: the almost-touch, the almost-kiss, the almost-confession.', 'A pause is an action too: *doesn\'t answer right away*.', 'Make them want the next line more than you want to write it.'],
-          weak: '*kisses you hard against the wall*', strong: '*steps in until there\'s barely air between us, close enough to feel your breath... and doesn\'t kiss you* Not yet.',
-          why: 'It promises everything and delivers nothing. Yet.' },
-        { id: 'ten210_2', title: 'Push and pull', partner: 'riley', place: 'hotel',
-          lecture: 'Tension is a rubber band. Pull closer, then pull back. A compliment, then a challenge. Lean in, then walk to the window. Every retreat makes the next advance hit twice as hard.',
-          points: ['Alternate advance and retreat: closer, then away.', 'Pair warmth with a little challenge: "You\'re trouble. I like trouble."', 'Retreat with intent, and always leave them a reason to follow.'],
-          weak: '*kisses you* *kisses you again* *kisses you more*', strong: '*brushes my thumb along your jaw, then turns away to pour two drinks* You\'re very sure of yourself. Let\'s see if you\'ve earned it.',
-          why: 'A touch, then distance and a challenge: now they have to follow.' },
-        { id: 'ten210_3', title: 'One step at a time', partner: 'valentina', place: 'playroom',
-          lecture: 'Every line can go one step further than the last. One. A hand on the knee becomes a hand on the thigh, not a hand everywhere. Small steps keep the burn slow and give your partner the chance to say yes to each one.',
-          points: ['Each reply escalates exactly one small step.', 'Make the step clear, so they can welcome it or slow it.', 'If they slow down, you slow down. That is the craft.'],
-          weak: '*rips your clothes off*', strong: '*rests my fingertips on the inside of your wrist, then traces slowly up to your elbow* Is this all right?',
-          why: 'One small step, taken deliberately, with room to say yes.' },
-      ] },
-    { code: 'VOX 220', id: 'vox220', name: 'Character and Voice', prof: 'marchetti', core: false,
-      blurb: 'Sound like somebody: a voice that is yours, dialogue with subtext, and saying exactly what you want.',
-      lessons: [
-        { id: 'vox220_1', title: 'Find your voice', partner: 'jordan', place: 'apartment',
-          lecture: 'Close your eyes and listen to your character. Do they drawl or snap? Swear, or never? Call people darling, or mate? Pick two or three habits and keep them. A consistent voice is the difference between a character and a narrator.',
-          points: ['Choose word habits: pet names, slang, how formal they are.', 'Choose a rhythm: short and blunt, or long and lazy.', 'Keep it the same from line to line.'],
-          weak: 'That is very nice. I would like that.', strong: 'Mm. Careful, sweetheart. Keep looking at me like that and I\'ll start getting ideas.',
-          why: 'A pet name, a rhythm and a playful warning: you can hear exactly who this is.' },
-        { id: 'vox220_2', title: 'Say it without saying it', partner: 'celeste', place: 'office',
-          lecture: 'The sexiest dialogue is about something else. Talk about the wine and mean the kiss. Argue about the music and mean the attraction. Subtext lets you both pretend, and pretending is delicious.',
-          points: ['Let the words say one thing and the meaning say another.', 'Banter is a volley: answer the meaning, not just the words.', 'Leave the obvious unsaid. They will hear it anyway.'],
-          weak: 'I want to sleep with you.', strong: '*swirls the last of the wine* It\'s a shame to leave a good bottle unfinished. Don\'t you think?',
-          why: 'It is about the bottle. It is not about the bottle.' },
-        { id: 'vox220_3', title: 'Say it out loud', partner: 'kai', place: 'apartment',
-          lecture: 'Subtext is the seduction; clarity is the reward. When the moment comes, say exactly what you want, in your character\'s own words. Vague wants get vague answers. Specific wants get remembered.',
-          points: ['Be specific: what, where and how.', 'Stay in your voice. A shy character can still be clear.', 'Confidence is attractive. So is honesty about nerves.'],
-          weak: 'I want you.', strong: '*hooks a finger in your belt loop* I want you to kiss me slowly, right here, like we\'ve got all night.',
-          why: 'Exactly what, exactly how, in a voice with some nerve.' },
-      ] },
-    { code: 'PWR 301', id: 'pwr301', name: 'The Art of Leading', prof: 'okafor', core: false,
-      blurb: 'Quiet, certain power: clear direction, praise that lands, and reading every reaction.',
-      lessons: [
-        { id: 'pwr301_1', title: 'Command presence', partner: 'sienna', place: 'hotel',
-          lecture: 'Power is not volume. It is certainty. Say what you want in as few words as you can, and do not ask permission for every breath. Give a calm, clear direction, then let the silence do its work.',
-          points: ['Short, clear instructions: "Come here." "Look at me."', 'No hedging: drop maybe, if you want, kind of.', 'Calm beats loud. A slow voice is a strong voice.'],
-          weak: 'um maybe you could come over here if you want?', strong: '*doesn\'t look up from my drink* Come here. Stand right there, where I can see you.',
-          why: 'No hedging and no hurry: the calm does the commanding.' },
-        { id: 'pwr301_2', title: 'Praise that lands', partner: 'kai', place: 'hotel',
-          lecture: 'Praise is the reward that keeps a scene alive. Make it specific and immediate: name what they did, the moment they did it. "Good" is nice. "Good, just like that, slower" is unforgettable.',
-          points: ['Praise the exact thing they did.', 'Praise in the moment, not later.', 'Reward, then lead: praise followed by the next instruction.'],
-          weak: 'good job', strong: '*tilts your chin up* Look at you, waiting so patiently. Good. Now kneel, slowly.',
-          why: 'Specific praise for what they did, then the next step.' },
-        { id: 'pwr301_3', title: 'Read and adjust', partner: 'riley', place: 'mansion',
-          lecture: 'The best leaders watch more than they talk. A shiver, a pause, a yes that comes too quickly: these are messages. Notice them, adjust the intensity, and check in without breaking the spell. "Still with me?", said softly, is a command and a kindness at once.',
-          points: ['Watch for reactions: eagerness, hesitation, overwhelm.', 'Adjust: more when they are eager, softer when they hesitate.', 'Check in, in character: "Still with me?" "Too much?"'],
-          weak: '*ignores your hesitation and keeps going*', strong: '*notices the way your breath catches, and slows down, thumb brushing your cheek* Still with me? Tell me.',
-          why: 'It reads the moment, softens, and checks in without leaving the scene.' },
-      ] },
-    { code: 'PWR 302', id: 'pwr302', name: 'The Art of Following', prof: 'sato', core: false,
-      blurb: 'Yielding is a skill: reactions that show everything, bratting with charm, and asking for what you want.',
-      lessons: [
-        { id: 'pwr302_1', title: 'React out loud', partner: 'damon', place: 'vip',
-          lecture: 'When they lead, your reactions are your lines. Do not just obey: show what the order does to you. The flush, the hitched breath, the second of defiance before you give in. Someone who leads needs to see the effect.',
-          points: ['Show what each order does to your body and breath.', 'Hesitate, then yield. The moment before is delicious.', 'Never answer with just "ok".'],
-          weak: 'ok *does it*', strong: '*swallows hard and does as I\'m told, cheeks burning, eyes flicking up to yours to see if it pleased you*',
-          why: 'It obeys, and shows exactly what obeying does to them.' },
-        { id: 'pwr302_2', title: 'The playful brat', partner: 'valentina', place: 'playroom',
-          lecture: 'A good brat is a gift: resistance that makes the one in charge work for it, and enjoy it. Tease, talk back, drag your feet. Always with a wink, never a wall. The goal is to be caught.',
-          points: ['Resist with charm: a smirk, a dare, a "make me".', 'Push back on small things, never on the whole scene.', 'Leave the door open. You want to lose.'],
-          weak: 'no. I don\'t want to.', strong: '*takes my sweet time crossing the room, smirking* Oh, did you want me now? You\'ll have to say please.',
-          why: 'Defiant and teasing, and clearly hoping to be put in their place.' },
-        { id: 'pwr302_3', title: 'Ask for it', partner: 'marcus', place: 'gym',
-          lecture: 'Following does not mean silence. Asking, pleading, begging: done well, it hands your partner the power and tells them exactly what you want. Be specific, stay in your role, and let them decide.',
-          points: ['Ask specifically: what you want, and how.', 'Stay in your role: ask, do not take.', 'Let them answer. The waiting is part of it.'],
-          weak: 'can we do more', strong: '*looks up at you, voice small* Please... hold me there, just like that, a little longer?',
-          why: 'Specific, deferential, and it hands them the choice.' },
-      ] },
-    { code: 'ADV 401', id: 'adv401', name: 'Reading the Room', prof: 'reyes', core: false,
-      blurb: 'Advanced play: catch the hints, rescue a scene that is dying, and end a scene so they remember it.',
-      lessons: [
-        { id: 'adv401_1', title: 'Catch the cue', partner: 'nyx', place: 'tavern',
-          lecture: 'People rarely say what they want outright. They hint: a glance at the door, a sigh, a story about someone who kissed them in the rain. The best roleplayers hear the hint and answer it, so their partner feels seen.',
-          points: ['Watch for hints: glances, pauses, half-said wishes.', 'Answer the hint, not just the words.', 'Miss one and they cool. Catch one and they light up.'],
-          weak: 'cool. want another drink?', strong: '*catches your glance at the rain, then holds out my hand* Come on. Before it stops.',
-          why: 'It hears the wish behind the words and makes it happen.' },
-        { id: 'adv401_2', title: 'Rescue a dead scene', partner: 'kai', place: 'apartment',
-          lecture: 'Sometimes a scene goes flat: one-word answers, no hooks, nothing to grab. Do not push harder. Change something. A twist, a question they cannot resist, a new place, a joke. Give them a reason to wake up.',
-          points: ['Change the situation: a knock at the door, a power cut, a dare.', 'Ask something personal or playful they will want to answer.', 'Make it easy to join back in.'],
-          weak: '*keeps kissing you*', strong: '*the lights cut out; I laugh in the dark and find your hand* Okay. Truth or dare, and you have to answer before they come back on.',
-          why: 'A twist, a laugh and a game: impossible to stay flat.' },
-        { id: 'adv401_3', title: 'End it well', partner: 'celeste', place: 'penthouse',
-          lecture: 'Most scenes do not end, they just stop. Give yours an ending: a final image, a line that lands, a warm close or a hook for next time. People remember how a scene ends more than how it starts.',
-          points: ['Signal the ending: slow down, soften, look back.', 'Land on an image or a line worth remembering.', 'Leave a door open: "Same time next week?"'],
-          weak: 'ok bye', strong: '*presses a last kiss to your knuckles at the door* Next time, you choose the wine. And the trouble.',
-          why: 'A tender final beat, a smile, and a promise of next time.' },
-      ] },
-  ];
-  const LESSON_LIST = [], LESSON_BY = {};
-  COURSES.forEach(c => c.lessons.forEach((l, i) => { l.course = c; l.n = i + 1; LESSON_LIST.push(l); LESSON_BY[l.id] = l; }));
+  // The catalogue (the professors, every course and lesson, and each lesson's assignment) is assets/university.json,
+  // shared with the server. It loads the first time the University or a lesson needs it. A lesson is a short lecture, a
+  // weak line beside a strong one, and an assignment: a practice scene whose drill is the lesson. Reach the goal, hand it
+  // in, and the professor grades it.
+  const UNI_V = '750b366509';
+  let FACULTY = [], COURSES = [], LESSON_LIST = [], LESSON_BY = {}, COURSE_BY = {}, UNI_LOAD = null, UNI_ERR = '';
+  function applyUni(data) {
+    FACULTY = data.faculty || []; COURSES = data.courses || [];
+    FACULTY.forEach(f => { f.img = 'assets/faculty/' + f.id + '.webp'; });
+    LESSON_LIST = []; LESSON_BY = {}; COURSE_BY = {};
+    COURSES.forEach(c => { COURSE_BY[c.id] = c; c.lessons.forEach((l, i) => { l.course = c; l.n = i + 1; LESSON_LIST.push(l); LESSON_BY[l.id] = l; }); });
+    loadLessons(COURSES);
+  }
+  function ensureUni() {
+    if (COURSES.length) return Promise.resolve(true);
+    if (!UNI_LOAD) {
+      UNI_LOAD = fetch('assets/university.json?v=' + UNI_V).then(r => { if (!r.ok) throw new Error('The university couldn’t open. Try again in a moment.'); return r.json(); })
+        .then(data => { applyUni(data); UNI_ERR = ''; return true; })
+        .catch(e => { UNI_LOAD = null; UNI_ERR = (e && e.message) || 'The university couldn’t open.'; throw e; });
+    }
+    return UNI_LOAD;
+  }
+  function uniWait(box) {
+    const p = el('p', 'muted'); p.style.cssText = 'padding:40px 0;text-align:center';
+    if (UNI_ERR) {
+      p.textContent = UNI_ERR + ' ';
+      const again = el('button', 'btn'); again.type = 'button'; again.innerHTML = icon('regen') + 'Try again'; again.onclick = () => { UNI_ERR = ''; render(); };
+      p.appendChild(again);
+    } else p.innerHTML = '<span class="spin"></span> Opening the university…';
+    box.appendChild(p);
+    ensureUni().then(() => render()).catch(() => render());
+  }
   function profOf(id) { return FACULTY.find(f => f.id === id) || FACULTY[0]; }
   function fullName(p) { return (p.rank === 'Doctor' ? 'Dr.' : p.rank) + ' ' + p.name; }
 
-  // your transcript: the best grade for each lesson you passed
-  const UNI = Object.assign({ lessons: {} }, store.json('vv_uni', {}));
+  // your transcript: the best grade your professor gave each lesson you passed
+  const UNI = Object.assign({ lessons: {}, picks: {} }, store.json('vv_uni', {}));
   if (!UNI.lessons || typeof UNI.lessons !== 'object') UNI.lessons = {};
+  if (!UNI.picks || typeof UNI.picks !== 'object') UNI.picks = {};
   function saveUni() { if (!store.set('vv_uni', JSON.stringify(UNI))) toast(FULL, 'err'); }
-  const GRADES = [[9.2, 'A+', 4], [8.6, 'A', 4], [8.2, 'A-', 3.7], [7.8, 'B+', 3.3], [7.2, 'B', 3], [6.8, 'B-', 2.7], [6.4, 'C+', 2.3], [5.8, 'C', 2], [5.4, 'C-', 1.7], [4.6, 'D+', 1.3], [0, 'D', 1]];
-  function gradeFor(avg) { return GRADES.find(g => avg >= g[0]) || GRADES[GRADES.length - 1]; }
-  function pointsOf(letter) { const g = GRADES.find(x => x[1] === letter); return g ? g[2] : 0; }
-  function letterOf(gpa) { const t = [[3.85, 'A'], [3.5, 'A-'], [3.15, 'B+'], [2.85, 'B'], [2.5, 'B-'], [2.15, 'C+'], [1.85, 'C'], [1.5, 'C-'], [1.15, 'D+']]; const x = t.find(y => gpa >= y[0]); return x ? x[1] : 'D'; }
-  function passed(id) { return UNI.lessons[id] || null; }
+  const GRADE_ORDER = ['F', 'D-', 'D', 'D+', 'C-', 'C', 'C+', 'B-', 'B', 'B+', 'A-', 'A', 'A+'];
+  const GRADE_PTS = { 'A+': 4, A: 4, 'A-': 3.7, 'B+': 3.3, B: 3, 'B-': 2.7, 'C+': 2.3, C: 2, 'C-': 1.7 };
+  function gradeRank(g) { return GRADE_ORDER.indexOf(g); }
+  function letterOf(gpa) { const t = [[3.85, 'A'], [3.5, 'A-'], [3.15, 'B+'], [2.85, 'B'], [2.5, 'B-'], [2.15, 'C+'], [1.85, 'C']]; const x = t.find(y => gpa >= y[0]); return x ? x[1] : 'C-'; }
+  function passed(id) { const r = UNI.lessons[id]; return r && GRADE_PTS[r.grade] != null ? r : null; }
   function courseState(c) {
     const done = c.lessons.filter(l => passed(l.id));
     return { done: done.length, all: c.lessons.length, complete: done.length === c.lessons.length,
-      gpa: done.length ? done.reduce((s, l) => s + pointsOf(passed(l.id).grade), 0) / done.length : null };
+      gpa: done.length ? done.reduce((s, l) => s + GRADE_PTS[passed(l.id).grade], 0) / done.length : null };
   }
+  const DEGREE = { bachelor: 'Bachelor of Roleplay Arts', master: 'Master of Roleplay Arts', doctor: 'Doctor of Roleplay Arts' };
   function transcript() {
     const done = LESSON_LIST.filter(l => passed(l.id)), credits = done.length;
-    const gpa = credits ? done.reduce((s, l) => s + pointsOf(passed(l.id).grade), 0) / credits : null;
+    const gpa = credits ? done.reduce((s, l) => s + GRADE_PTS[passed(l.id).grade], 0) / credits : null;
+    const complete = COURSES.filter(c => courseState(c).complete), byDept = {};
+    FACULTY.forEach(f => { byDept[f.id] = complete.filter(c => c.prof === f.id).length; });
     const core = COURSES.filter(c => c.core), coreDone = core.filter(c => courseState(c).complete).length;
-    const allDone = COURSES.filter(c => courseState(c).complete).length;
-    const degree = allDone === COURSES.length ? 'master' : coreDone === core.length ? 'bachelor' : '';
-    const standing = credits >= LESSON_LIST.length ? 'Graduate' : credits >= 21 ? 'Senior' : credits >= 14 ? 'Junior' : credits >= 7 ? 'Sophomore' : 'Freshman';
-    return { credits, all: LESSON_LIST.length, gpa, coreDone, coreAll: core.length, allDone, degree, standing,
-      aces: done.filter(l => /^A/.test(passed(l.id).grade)).length };
+    const bachelor = core.length > 0 && coreDone === core.length;
+    const master = bachelor && complete.length >= 12 && FACULTY.every(f => byDept[f.id] >= 1);
+    const doctor = master && complete.length >= 30 && FACULTY.every(f => byDept[f.id] >= 3);
+    const degree = doctor ? 'doctor' : master ? 'master' : bachelor ? 'bachelor' : '';
+    const next = !bachelor ? { label: 'core courses for your Bachelor’s', have: coreDone, need: core.length }
+      : !master ? { label: 'courses for your Master’s (one from every department)', have: complete.length, need: 12 }
+      : !doctor ? { label: 'courses for your Doctorate (three from every department)', have: complete.length, need: 30 } : null;
+    let major = null; FACULTY.forEach(f => { if (byDept[f.id] >= 3 && (!major || byDept[f.id] > byDept[major.id])) major = f; });
+    return { credits, all: LESSON_LIST.length, gpa, complete: complete.length, coreDone, coreAll: core.length, degree, next, major,
+      standing: credits >= 72 ? 'Senior' : credits >= 36 ? 'Junior' : credits >= 12 ? 'Sophomore' : 'Freshman',
+      deans: gpa != null && gpa >= 3.7 && complete.length >= 3, aces: done.filter(l => /^A/.test(passed(l.id).grade)).length };
   }
-  const DEGREE = { bachelor: 'Bachelor of Roleplay Arts', master: 'Master of Roleplay Arts' };
-  function nextLesson() { return LESSON_LIST.find(l => !passed(l.id)) || null; }
+  function nextLesson() {
+    const going = COURSES.find(c => { const s = courseState(c); return s.done && !s.complete; });
+    if (going) return going.lessons.find(l => !passed(l.id));
+    return LESSON_LIST.find(l => l.course.core && !passed(l.id)) || LESSON_LIST.find(l => !passed(l.id)) || null;
+  }
   function openLesson(id) { return S.index.find(x => x.lesson === id && !x.done) || null; }
   function escHTML(t) { return String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]); }
   function lastWordEm(t) { const s = escHTML(t); const i = s.lastIndexOf(' '); return i < 0 ? '<em>' + s + '</em>' : s.slice(0, i + 1) + '<em>' + s.slice(i + 1) + '</em>'; }
 
-  function uniGo(course, lesson) {
-    S.uni = { course: course || '', lesson: lesson || '' };
-    store.set('vv_uni_at', JSON.stringify(S.uni));
+  // ---------------------------------------------------------------- moving around
+  function uniGo(course, lesson, dept) {
+    S.uni = Object.assign(S.uni || {}, { course: course || '', lesson: lesson || '', dept: dept || '' });
+    store.set('vv_uni_at', JSON.stringify({ course: S.uni.course, lesson: S.uni.lesson, dept: S.uni.dept }));
     if (S.view !== 'uni') setView('uni');
     else { renderThread(); renderCoach(); }
   }
@@ -3478,8 +3414,9 @@
   }
   function uniMain() {
     thread.innerHTML = '';
-    const l = S.uni.lesson && LESSON_BY[S.uni.lesson], c = S.uni.course && COURSES.find(x => x.id === S.uni.course);
-    thread.appendChild(l ? uniLesson(l) : c ? uniCourse(c) : uniHome());
+    if (!COURSES.length) { const w = el('div', 'home'); uniWait(w); thread.appendChild(w); return; }
+    const l = S.uni.lesson && LESSON_BY[S.uni.lesson], c = S.uni.course && COURSE_BY[S.uni.course], d = S.uni.dept && FACULTY.find(f => f.id === S.uni.dept);
+    thread.appendChild(l ? uniLesson(l) : c ? uniCourse(c) : d ? uniDept(d) : uniHome());
     thread.scrollTop = 0;
   }
   function crumb(label, fn) {
@@ -3487,10 +3424,12 @@
     b.appendChild(el('span', '', label)); b.onclick = fn;
     return b;
   }
+
+  // ---------------------------------------------------------------- the home: faculty, the core, the catalogue
   function profCard(f) {
-    const c = partnerCard({ name: f.name, img: f.img, colors: f.colors, vibe: f.subject }, { onPick: () => openOffice(f.id) });
-    const sp = c.querySelector('.meta span'); if (sp) sp.textContent = f.rank;
-    c.setAttribute('aria-label', f.rank + ' ' + f.name + ', ' + f.subject + ': office hours');
+    const c = partnerCard({ name: f.name, img: f.img, colors: f.colors, vibe: f.subject }, { onPick: () => uniGo('', '', f.id) });
+    const sp = c.querySelector('.meta span'); if (sp) sp.textContent = f.rank + ' · ' + COURSES.filter(x => x.prof === f.id).length + ' courses';
+    c.setAttribute('aria-label', fullName(f) + ', ' + f.subject);
     return c;
   }
   function uniHome() {
@@ -3500,11 +3439,11 @@
     const ht = el('div');
     ht.appendChild(el('div', 'eyebrow', 'Velvet University'));
     const h1 = el('h1', 'display'); h1.innerHTML = 'Learn it from the <em>best.</em>'; ht.appendChild(h1);
-    ht.appendChild(el('p', 'lead', 'Six professors, nine courses, twenty-seven lessons. A short lecture, a practice scene graded line by line, and a degree with your name on it.'));
+    ht.appendChild(el('p', 'lead', FACULTY.length + ' professors, ' + COURSES.length + ' courses, ' + LESSON_LIST.length + ' lessons. A short lecture, a practice scene with the partner you choose, and a grade from your professor, in their own words.'));
     const cta = el('div', 'cta');
     if (nx) {
       const b = el('button', 'btn main big'); b.type = 'button';
-      b.innerHTML = icon('cap') + (T.credits ? 'Next: ' + nx.course.code + ' · ' + nx.title : 'Start with ' + nx.course.code);
+      b.innerHTML = icon('cap') + (T.credits ? 'Next: ' + escHTML(nx.title) : 'Start with ' + nx.course.code);
       b.onclick = () => uniGo(nx.course.id, nx.id); cta.appendChild(b);
     }
     const oh = el('button', 'btn big'); oh.type = 'button'; oh.innerHTML = icon('chat') + 'Office hours'; oh.onclick = () => openOffice();
@@ -3515,22 +3454,60 @@
     w.appendChild(hero);
     w.appendChild(transcriptStrip(T));
     if (T.degree) w.appendChild(diplomaEl(T));
-    w.appendChild(secTitle('Faculty', 'Tap a professor for office hours'));
-    const row = el('div', 'rowscroll');
-    FACULTY.forEach(f => row.appendChild(profCard(f)));
-    w.appendChild(scroller(row));
-    w.appendChild(secTitle('Courses', 'The four core courses earn your Bachelor’s'));
-    const g = el('div', 'courses'); COURSES.forEach(c => g.appendChild(courseCard(c))); w.appendChild(g);
+    w.appendChild(secTitle('Faculty', 'Each professor runs a department'));
+    const row = el('div', 'rowscroll'); FACULTY.forEach(f => row.appendChild(profCard(f))); w.appendChild(scroller(row));
+    const going = COURSES.filter(c => { const s = courseState(c); return s.done && !s.complete; });
+    if (going.length) {
+      w.appendChild(secTitle('Continue', 'Courses you have started'));
+      const g = el('div', 'courses'); going.slice(0, 6).forEach(c => g.appendChild(courseCard(c))); w.appendChild(g);
+    }
+    w.appendChild(secTitle('The core', 'Four courses for your Bachelor’s'));
+    const core = el('div', 'courses'); COURSES.filter(c => c.core).forEach(c => core.appendChild(courseCard(c))); w.appendChild(core);
+    w.appendChild(catalogue());
     w.appendChild(secTitle('How it works'));
     const how = el('div', 'how');
     [['A short lecture', 'Two minutes with your professor: the idea, three rules, and a weak line next to a strong one.'],
-      ['A real assignment', 'A practice scene built for the lesson. The coach grades every line against the lesson’s goal.'],
-      ['An honest grade', 'Reach the goal to pass. Your grade is the average of your lines, and you can retake a lesson for a better one.'],
-      ['A degree', 'Pass the four core courses for a Bachelor of Roleplay Arts, and all nine for a Master’s.']].forEach(x => {
+      ['Your partner, your scene', 'Practise with the suggested partner or anyone in the cast. The coach checks every line against the goal.'],
+      ['Graded by your professor', 'Reach the goal and hand it in. Your professor reads the whole scene and grades it, in their own words.'],
+      ['Degrees', 'The core earns a Bachelor’s. Twelve courses from every department, a Master’s. Thirty, a Doctorate.']].forEach(x => {
       const d = el('div'); d.append(el('b', '', x[0]), document.createTextNode(x[1])); how.appendChild(d);
     });
     w.appendChild(how);
     return w;
+  }
+  function catalogue() {
+    const box = el('div');
+    const F = S.uni.cat || (S.uni.cat = { prof: '', level: 0, q: '', all: false });
+    box.appendChild(secTitle('The catalogue', COURSES.length + ' courses in ' + FACULTY.length + ' departments'));
+    const bar = el('div', 'cat-bar');
+    const find = inputEl('catFind', F.q, 60, 'Find a course: praise, slow burn, openers…'); find.setAttribute('aria-label', 'Find a course');
+    const chips = el('div', 'chips2');
+    [['', 'All']].concat(FACULTY.map(f => [f.id, f.short])).forEach(x => {
+      const c = el('button', 'chip', x[1]); c.type = 'button'; c.setAttribute('aria-pressed', F.prof === x[0] ? 'true' : 'false');
+      c.onclick = () => { F.prof = x[0]; F.all = false; draw(); [].forEach.call(chips.children, k => k.setAttribute('aria-pressed', k === c ? 'true' : 'false')); };
+      chips.appendChild(c);
+    });
+    const lv = seg(['0', '100', '200', '300', '400'], { 0: 'Any level', 100: '100', 200: '200', 300: '300', 400: '400' }, String(F.level), v => { F.level = +v; F.all = false; draw(); }, 'Level');
+    bar.append(find, chips, lv);
+    box.appendChild(bar);
+    const grid = el('div', 'courses'); box.appendChild(grid);
+    const more = el('div', 'cat-more'); box.appendChild(more);
+    const draw = () => {
+      const q = F.q.trim().toLowerCase();
+      const list = COURSES.filter(c => (!F.prof || c.prof === F.prof) && (!F.level || c.level === F.level) &&
+        (!q || (c.code + ' ' + c.name + ' ' + c.blurb + ' ' + c.lessons.map(l => l.title).join(' ')).toLowerCase().indexOf(q) >= 0));
+      grid.innerHTML = ''; more.innerHTML = '';
+      const show = F.all ? list : list.slice(0, 12);
+      show.forEach(c => grid.appendChild(courseCard(c)));
+      if (!list.length) grid.appendChild(el('p', 'muted', 'No course matches that. Try another word.'));
+      if (list.length > show.length) {
+        const b = el('button', 'btn'); b.type = 'button'; b.textContent = 'Show all ' + list.length + ' courses'; b.onclick = () => { F.all = true; draw(); };
+        more.appendChild(b);
+      }
+    };
+    find.oninput = () => { F.q = find.value; F.all = false; draw(); };
+    draw();
+    return box;
   }
   function transcriptStrip(T) {
     const box = el('div', 'xp');
@@ -3538,15 +3515,16 @@
     const cap = el('div', 'av'); cap.innerHTML = icon('cap'); cap.style.setProperty('--a1', '#f6c177'); cap.style.setProperty('--a2', '#9a3412');
     who.appendChild(cap);
     const wt = el('div');
-    wt.append(el('b', '', T.standing), el('span', '', T.degree ? DEGREE[T.degree] : T.credits ? 'Working towards your Bachelor’s' : 'Start a lesson to enrol'));
+    wt.append(el('b', '', T.standing + (T.deans ? ' · Dean’s list' : '')), el('span', '', T.degree ? DEGREE[T.degree] + (T.major ? ', major in ' + T.major.subject.toLowerCase() : '') : T.credits ? 'Working towards your Bachelor’s' : 'Start a lesson to enrol'));
     who.appendChild(wt);
     const barw = el('div', 'xp-bar');
-    const r = el('div', 'row'); r.innerHTML = '<span><b>' + T.credits + '</b> of ' + T.all + ' credits</span><span>' + (T.degree === 'master' ? 'Graduated' : T.coreDone + ' of ' + T.coreAll + ' core courses') + '</span>';
+    const r = el('div', 'row');
+    r.innerHTML = '<span><b>' + T.credits + '</b> ' + (T.credits === 1 ? 'credit' : 'credits') + '</span><span>' + (T.next ? T.next.have + ' of ' + T.next.need + ' ' + escHTML(T.next.label) : 'Every degree earned') + '</span>';
     const bar = el('div', 'bar'); const f = el('i'); bar.appendChild(f); barw.append(r, bar);
     const stats = el('div', 'xp-stats');
-    stats.innerHTML = '<span><b>' + (T.gpa != null ? T.gpa.toFixed(2) : '–') + '</b>GPA</span><span><b>' + T.allDone + '</b>' + (T.allDone === 1 ? 'course' : 'courses') + '</span><span><b>' + T.aces + '</b>' + (T.aces === 1 ? 'A grade' : 'A grades') + '</span>';
+    stats.innerHTML = '<span><b>' + (T.gpa != null ? T.gpa.toFixed(2) : '–') + '</b>GPA</span><span><b>' + T.complete + '</b>' + (T.complete === 1 ? 'course' : 'courses') + '</span><span><b>' + T.aces + '</b>' + (T.aces === 1 ? 'A grade' : 'A grades') + '</span>';
     box.append(who, barw, stats);
-    requestAnimationFrame(() => { f.style.width = Math.round(T.credits / T.all * 100) + '%'; });
+    requestAnimationFrame(() => { f.style.width = (T.next ? Math.round(T.next.have / T.next.need * 100) : 100) + '%'; });
     return box;
   }
   function diplomaEl(T) {
@@ -3559,9 +3537,10 @@
     d.appendChild(el('span', 'deg', DEGREE[T.degree]));
     const honours = T.gpa >= 3.85 ? 'summa cum laude' : T.gpa >= 3.6 ? 'magna cum laude' : T.gpa >= 3.3 ? 'cum laude' : '';
     const last = Math.max.apply(null, Object.keys(UNI.lessons).map(k => UNI.lessons[k].at || 0));
-    d.appendChild(el('div', 'meta', (honours ? honours + ' · ' : '') + 'GPA ' + T.gpa.toFixed(2) + ' · ' + new Date(last).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })));
+    d.appendChild(el('div', 'meta', [honours, T.major ? 'Major in ' + T.major.subject.toLowerCase() : '', 'GPA ' + T.gpa.toFixed(2), new Date(last).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })].filter(Boolean).join(' · ')));
     const sigs = el('div', 'sigs');
-    [['Isadora Vale', 'Dean'], ['Rosalind Hart', 'Faculty of Consent']].forEach(x => { const s = el('span', '', x[0]); s.appendChild(el('em', '', x[1])); sigs.appendChild(s); });
+    const dean = FACULTY.find(f => f.rank === 'Dean') || FACULTY[0];
+    [[dean.name, 'Dean'], [(T.major || FACULTY.find(f => f.id === 'hart') || dean).name, T.major ? 'Head of department' : 'Faculty']].forEach(x => { const s = el('span', '', x[0]); s.appendChild(el('em', '', x[1])); sigs.appendChild(s); });
     d.appendChild(sigs);
     const share = el('button', 'btn tint c-gold'); share.type = 'button'; share.innerHTML = icon('copy') + 'Copy to share';
     share.onclick = () => copy('I just earned my ' + DEGREE[T.degree] + (honours ? ', ' + honours : '') + ' at Velvet University (GPA ' + T.gpa.toFixed(2) + ').', 'Copied. Go and brag.');
@@ -3586,10 +3565,36 @@
     b.onclick = () => uniGo(c.id);
     return b;
   }
+
+  // ---------------------------------------------------------------- a department: the professor and their courses
+  const LEVEL_NAME = { 100: 'Foundations', 200: 'Technique', 300: 'Advanced', 400: 'Mastery' };
+  function uniDept(f) {
+    const w = el('div', 'rv');
+    w.appendChild(crumb('University', () => uniGo()));
+    const mine = COURSES.filter(c => c.prof === f.id), done = mine.filter(c => courseState(c).complete).length;
+    const hero = el('div', 'dept-hero');
+    const pic = el('div', 'dept-pic'); pic.style.backgroundImage = 'url("' + f.img + '")'; hero.appendChild(pic);
+    const t = el('div', 't');
+    t.appendChild(el('div', 'eyebrow', f.subject));
+    const h1 = el('h1', 'display'); h1.innerHTML = lastWordEm(fullName(f)); t.appendChild(h1);
+    t.appendChild(el('p', '', f.bio));
+    t.appendChild(el('div', 'meta', plural(mine.length, 'course') + ' · ' + done + ' completed'));
+    const oh = el('button', 'btn main'); oh.type = 'button'; oh.innerHTML = icon('chat') + 'Office hours with ' + escHTML(f.short); oh.onclick = () => openOffice(f.id);
+    t.appendChild(oh);
+    hero.appendChild(t);
+    w.appendChild(hero);
+    [100, 200, 300, 400].forEach(lv => {
+      const list = mine.filter(c => c.level === lv);
+      if (!list.length) return;
+      w.appendChild(secTitle(lv + ' level', LEVEL_NAME[lv]));
+      const g = el('div', 'courses'); list.forEach(c => g.appendChild(courseCard(c))); w.appendChild(g);
+    });
+    return w;
+  }
   function uniCourse(c) {
     const w = el('div', 'rv'), p = profOf(c.prof), st = courseState(c);
-    w.appendChild(crumb('University', () => uniGo()));
-    w.appendChild(pageTitle(c.code + (c.core ? ' · Core course' : ' · Elective'), lastWordEm(c.name), c.blurb));
+    w.appendChild(crumb(fullName(p) + '’s department', () => uniGo('', '', p.id)));
+    w.appendChild(pageTitle(c.code + (c.core ? ' · Core course' : ' · ' + LEVEL_NAME[c.level]), lastWordEm(c.name), c.blurb));
     const pc = el('div', 'panel prof-row');
     pc.appendChild(avatar(p.name, p.colors, 'lg', p.img));
     const pt = el('div', 't'); pt.append(el('b', '', fullName(p)), el('span', '', p.subject), el('p', 'muted', p.bio));
@@ -3603,7 +3608,7 @@
       const d = passed(l.id), open = openLesson(l.id);
       const r = el('button', 'lrow' + (d ? ' done' : '')); r.type = 'button';
       const n = el('span', 'n'); if (d) n.innerHTML = icon('check'); else n.textContent = String(l.n);
-      const t = el('span', 't'); t.append(el('b', '', l.title), el('small', '', LESSONS[l.id].goal));
+      const t = el('span', 't'); t.append(el('b', '', l.title), el('small', '', LESSONS[l.id] ? LESSONS[l.id].goal : ''));
       r.append(n, t);
       r.appendChild(d ? el('span', 'grade sm', d.grade) : el('span', 'go', open ? 'Continue' : 'Start'));
       r.onclick = () => uniGo(c.id, l.id);
@@ -3612,8 +3617,16 @@
     w.appendChild(list);
     return w;
   }
+
+  // ---------------------------------------------------------------- a lesson: the lecture, the lines, the assignment
+  function lessonPartner(l) {
+    const pick = UNI.picks[l.id];
+    if (pick && pick.cast) { const c = castById(pick.cast); if (c && c.kind === 'persona') return { name: c.name, img: c.pic, colors: c.colors || colorsFor(c.name), cast: c, ref: null }; }
+    const p = PARTNERS.find(x => x.id === (pick && pick.preset)) || PARTNERS.find(x => x.id === l.partner) || PARTNERS[0];
+    return { name: p.name, img: p.img, colors: p.colors, cast: null, ref: p, suggested: p.id === l.partner && !(pick && pick.preset && pick.preset !== l.partner) };
+  }
   function uniLesson(l) {
-    const c = l.course, p = profOf(c.prof), D = LESSONS[l.id], done = passed(l.id), open = openLesson(l.id);
+    const c = l.course, p = profOf(c.prof), D = LESSONS[l.id] || {}, done = passed(l.id), open = openLesson(l.id), mine = UNI.lessons[l.id];
     const w = el('div', 'rv');
     w.appendChild(crumb(c.code + ' · ' + c.name, () => uniGo(c.id)));
     w.appendChild(pageTitle(c.code + ' · Lesson ' + l.n + ' of ' + c.lessons.length, lastWordEm(l.title), null));
@@ -3637,83 +3650,197 @@
     w.appendChild(el('p', 'why muted', l.why));
     const as = el('div', 'panel assign');
     as.appendChild(el('h4', '', 'Your assignment'));
-    as.appendChild(el('p', 'goal', D.goal));
-    const partner = PARTNERS.find(x => x.id === l.partner) || PARTNERS[0], place = SETTINGS.find(x => x.id === l.place);
-    const who = el('div', 'who-row'); who.appendChild(avatar(partner.name, partner.colors, '', partner.img));
-    const wt = el('div'); wt.append(el('b', '', 'With ' + partner.name), el('span', '', (place ? place.label + ' · ' : '') + (D.starts === 'you' ? 'you open the scene' : partner.name + ' opens the scene')));
-    who.appendChild(wt); as.appendChild(who);
-    as.appendChild(el('p', 'muted', 'The coach marks every line against the goal. Reach it to pass; your grade is the average of your lines.'));
+    as.appendChild(el('p', 'goal', D.goal || ''));
+    const P = lessonPartner(l), place = SETTINGS.find(x => x.id === l.place);
+    const who = el('div', 'who-row'); who.appendChild(avatar(P.name, P.colors, '', P.img));
+    const wt = el('div');
+    const role = D.partner_role ? ' · plays ' + ROLE_LABEL[D.partner_role].toLowerCase() : '';
+    wt.append(el('b', '', 'With ' + P.name + (P.suggested ? '' : '')), el('span', '', (place ? place.label : '') + role + ' · ' + (D.starts === 'you' ? 'you open the scene' : P.name + ' opens the scene')));
+    who.appendChild(wt);
+    const ch = el('button', 'btn c-slate'); ch.type = 'button'; ch.innerHTML = icon('users') + 'Choose partner';
+    ch.onclick = () => openPicker({ title: 'Your partner for this assignment', sub: 'Anyone in the cast can play it' + (D.partner_role ? ': for this lesson they play ' + ROLE_LABEL[D.partner_role].toLowerCase() + '.' : '.'),
+      suggested: l.partner, current: UNI.picks[l.id] || { preset: l.partner },
+      onPick: pick => { UNI.picks[l.id] = pick; saveUni(); renderThread(); } });
+    who.appendChild(ch);
+    as.appendChild(who);
+    as.appendChild(el('p', 'muted', 'The coach checks every line against the goal. Reach it, then hand it in: ' + p.short + ' reads the whole scene and grades it.'));
     const row = el('div', 'row');
     const go = el('button', 'btn main'); go.type = 'button';
     go.innerHTML = icon('heart') + (open ? 'Continue the assignment' : done ? 'Retake for a better grade' : 'Start the assignment');
     go.onclick = () => { if (open) openScene(open.id); else startLesson(l.id); };
     row.appendChild(go);
     if (open) { const fresh = el('button', 'btn'); fresh.type = 'button'; fresh.innerHTML = icon('regen') + 'Start over'; fresh.onclick = () => startLesson(l.id); row.appendChild(fresh); }
-    const ask = el('button', 'btn c-slate'); ask.type = 'button'; ask.innerHTML = icon('chat') + 'Ask ' + p.short; ask.onclick = () => openOffice(p.id, c, l);
+    const ask = el('button', 'btn c-slate'); ask.type = 'button'; ask.innerHTML = icon('chat') + 'Ask ' + escHTML(p.short); ask.onclick = () => openOffice(p.id, c, l);
     row.appendChild(ask);
     as.appendChild(row);
-    if (done) {
-      const g = el('div', 'passed');
-      g.append(el('span', 'grade sm', done.grade), el('span', '', 'Passed ' + new Date(done.at).toLocaleDateString() + (done.tries > 1 ? ' · your best of ' + done.tries + ' tries' : '')));
-      as.appendChild(g);
+    if (mine && mine.feedback) {
+      const g = el('div', 'graded-note');
+      g.appendChild(el('span', 'grade sm' + (done ? '' : ' fail'), done ? mine.grade : mine.shown || 'D'));
+      const gt = el('div'); gt.append(el('b', '', done ? 'Your grade from ' + p.short : 'Not passed yet'), el('p', '', '“' + mine.feedback + '”'));
+      if (mine.tries > 1) gt.appendChild(el('small', '', 'Best of ' + mine.tries + ' hand-ins'));
+      g.appendChild(gt); as.appendChild(g);
     }
     w.appendChild(as);
-    const nav = el('div', 'lnav'); const i = LESSON_LIST.indexOf(l);
-    if (i > 0) { const pv = LESSON_LIST[i - 1]; const b = el('button', 'btn'); b.type = 'button'; b.innerHTML = icon('back') + escHTML(pv.title); b.onclick = () => uniGo(pv.course.id, pv.id); nav.appendChild(b); }
+    const nav = el('div', 'lnav'), i = c.lessons.indexOf(l);
+    if (i > 0) { const pv = c.lessons[i - 1]; const b = el('button', 'btn'); b.type = 'button'; b.innerHTML = icon('back') + escHTML(pv.title); b.onclick = () => uniGo(c.id, pv.id); nav.appendChild(b); }
     nav.appendChild(el('span', 'sp'));
-    if (i < LESSON_LIST.length - 1) { const nx = LESSON_LIST[i + 1]; const b = el('button', 'btn'); b.type = 'button'; b.innerHTML = 'Next: ' + escHTML(nx.title) + icon('right'); b.onclick = () => uniGo(nx.course.id, nx.id); nav.appendChild(b); }
+    if (i < c.lessons.length - 1) { const nx = c.lessons[i + 1]; const b = el('button', 'btn'); b.type = 'button'; b.innerHTML = 'Next: ' + escHTML(nx.title) + icon('right'); b.onclick = () => uniGo(c.id, nx.id); nav.appendChild(b); }
     w.appendChild(nav);
     return w;
   }
-  // the assignment: a practice scene with the lesson as its drill
+  // the assignment: a practice scene with the lesson as its drill, and the partner you chose
   function startLesson(id) {
     if (store.get('vv_adult') !== 'yes') { $('ageGate').hidden = false; return; }
     const l = LESSON_BY[id]; if (!l) return;
-    const p = PARTNERS.find(x => x.id === l.partner) || PARTNERS[0];
-    if (!String(S.profile.name || '').trim()) { openNew({ preset: p, lesson: id }); return; }
+    const P = lessonPartner(l);
+    if (!String(S.profile.name || '').trim()) { openNew(P.cast ? { persona: P.cast, lesson: id } : { preset: P.ref, lesson: id }); return; }
     if (!ready()) return;
     const D = LESSONS[id], pr = S.profile, place = SETTINGS.find(x => x.id === l.place);
-    const partner = partnerFrom(p); if (D.partner_role) partner.role = D.partner_role;
+    const partner = partnerFrom(P.cast || P.ref); if (D.partner_role) partner.role = D.partner_role;
     const you = youFromProfile(); if (D.you_role) you.role = D.you_role;
-    createScene({ partner, colors: p.colors, you, settingId: place ? place.id : '', setting: place ? place.text : '',
+    createScene({ partner, colors: P.colors, you, settingId: place ? place.id : '', setting: place ? place.text : '',
       heat: pr.heat || 'steamy', pace: D.pace || pr.pace || 'steady', style: D.style || pr.style || 'paragraphs',
       into: pr.into.slice(), curious: pr.curious.slice(), soft: pr.soft.slice(), hard: pr.hard.slice(),
-      drill: id, lesson: id, coachAuto: true, starts: D.starts || 'partner', presetId: p.id });
+      drill: id, lesson: id, coachAuto: true, starts: D.starts || 'partner', castId: P.cast ? P.cast.id : '', presetId: P.ref ? P.ref.id : '' });
   }
-  function finishLesson(sc) {
-    const l = LESSON_BY[sc.lesson]; if (!l) return;
+
+  // ---------------------------------------------------------------- hand it in: the professor grades the scene
+  function lessonOf(sc) { return sc && sc.lesson ? LESSON_BY[sc.lesson] || null : null; }
+  async function handIn(sc) {
+    sc = sc || S.scene; const l = lessonOf(sc); if (!l || S.busy) return;
+    if (!ready()) return;
+    const p = profOf(l.course.prof);
+    if (sc.msgs.filter(m => m.who === 'you' && !m.ghost && !isOOC(m.text)).length < 2) { toast('Write a few lines of your own first, then hand it in.'); return; }
+    S.busy = true; refreshUI();
+    gradeSheet(null, l, p);
+    try {
+      const msgs = sc.msgs.filter(m => m.who === 'you' || m.who === 'partner').map(m => ({ who: m.who, text: (m.ghost ? '[Velvet wrote this line] ' : '') + msgText(m) })).filter(m => m.text.trim());
+      const out = await toolTask('grade', { scene: apiScene(sc), messages: msgs, lesson: l.id });
+      applyXP(out._xp);
+      recordGrade(sc, l, p, out);
+      gradeSheet(out, l, p);
+    } catch (e) {
+      $('repBody').innerHTML = ''; $('repBody').appendChild(el('p', 'muted', (e && e.message) || 'The professor couldn’t grade it. Try again.'));
+    } finally { S.busy = false; if (S.scene === sc) { renderThread(true); refreshUI(); } }
+  }
+  function recordGrade(sc, l, p, out) {
     const before = transcript().degree;
-    const coached = sc.msgs.filter(m => m.who === 'you' && m.coach);
-    const avg = coached.length ? coached.reduce((s, m) => s + mean(m.coach.scores), 0) / coached.length : 6;
-    const g = gradeFor(avg)[1], prev = UNI.lessons[l.id], tries = (prev ? prev.tries || 1 : 0) + 1;
-    if (!prev || avg > (prev.avg || 0)) UNI.lessons[l.id] = { grade: g, avg: Math.round(avg * 100) / 100, at: Date.now(), tries };
+    const prev = UNI.lessons[l.id], tries = (prev ? prev.tries || 1 : 0) + 1, wasPass = !!passed(l.id);
+    if (out.passed && (!wasPass || gradeRank(out.grade) > gradeRank(prev.grade))) UNI.lessons[l.id] = { grade: out.grade, at: Date.now(), tries, feedback: out.feedback || '', by: p.id };
+    else if (!out.passed && !wasPass) UNI.lessons[l.id] = { grade: 'F', shown: out.grade, at: Date.now(), tries, feedback: out.feedback || '', by: p.id };
     else prev.tries = tries;
     saveUni();
-    sc.msgs.push({ id: newId(), who: 'note', kind: 'lesson', lesson: l.id, grade: g, text: 'Lesson passed: ' + l.course.code + ' · ' + l.title + ' · ' + g });
+    sc.msgs.push({ id: newId(), who: 'note', kind: 'lesson', lesson: l.id, grade: out.grade, passed: !!out.passed, feedback: out.feedback || '',
+      text: (out.passed ? 'Passed: ' : 'Not yet: ') + l.course.code + ' · ' + l.title + ' · ' + out.grade });
+    sc.graded = { grade: out.grade, passed: !!out.passed, at: Date.now() }; saveScene(sc, true);
     const after = transcript().degree;
-    if (after && after !== before) setTimeout(() => toast('You graduated: ' + DEGREE[after] + '! Your diploma is in the University.', 'gold'), 600);
+    if (after && after !== before) setTimeout(() => toast('You graduated: ' + DEGREE[after] + '! Your diploma is in the University.', 'gold'), 700);
   }
-  function profNote(grade, p) {
-    const lines = { A: 'Outstanding. That is exactly how it is done.', B: 'Strong work. A little more polish and it sings.',
-      C: 'You reached the goal. Come back and retake it when you want a better grade.', D: 'Passed, just. Read the lecture again and give it another go.' };
-    return '“' + (lines[grade[0]] || lines.C) + '” — ' + p.short;
+  function gradeSheet(out, l, p) {
+    $('reportSheet').querySelector('.card-head h2').textContent = out ? 'Graded' : 'Handed in';
+    const b = $('repBody'); b.innerHTML = '';
+    const head = el('div', 'graded-head');
+    head.appendChild(avatar(p.name, p.colors, 'lg', p.img));
+    const t = el('div', 't'); t.append(el('b', '', out ? fullName(p) : p.short + ' is reading your assignment'), el('span', '', l.course.code + ' · ' + l.title));
+    head.appendChild(t);
+    if (out) { const g = el('div', 'grade' + (out.passed ? '' : ' fail'), out.grade); head.appendChild(g); }
+    b.appendChild(head);
+    const f = $('repFoot'); f.innerHTML = '';
+    if (!out) {
+      b.appendChild(el('p', 'muted', 'Every line, start to finish.')).insertAdjacentHTML('afterbegin', '<span class="spin"></span> ');
+      $('reportSheet').hidden = false; return;
+    }
+    b.appendChild(el('div', 'verdict ' + (out.passed ? 'pass' : 'fail'), out.passed ? 'Passed' : 'Not yet: keep going and hand it in again'));
+    if (out.feedback) { const q = el('blockquote', 'feedback'); q.textContent = out.feedback; q.appendChild(el('cite', '', '— ' + p.short)); b.appendChild(q); }
+    const list = (title, items, color) => { if (!items || !items.length) return; const h = el('h4', '', title); h.style.cssText = 'margin:16px 0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:' + color; b.appendChild(h); const ul = el('ul', 'rlist'); items.forEach(x => ul.appendChild(el('li', '', x))); b.appendChild(ul); };
+    list('What worked', out.strengths, 'var(--jade)');
+    list('Work on', out.work_on, 'var(--amber)');
+    if (out.best_line) { const h = el('h4', '', 'Your best line'); h.style.cssText = 'margin:16px 0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold)'; b.appendChild(h); const q = el('div', 'quote story'); renderRP(q, out.best_line); b.appendChild(q); }
+    const close = () => { $('reportSheet').hidden = true; };
+    if (out.passed) {
+      const back = el('button', 'btn'); back.type = 'button'; back.innerHTML = icon('cap') + 'Back to ' + l.course.code; back.onclick = () => { close(); leaveScene(); uniGo(l.course.id); };
+      f.appendChild(back);
+      const nx = LESSON_LIST[LESSON_LIST.indexOf(l) + 1];
+      if (nx) { const n = el('button', 'btn main'); n.type = 'button'; n.innerHTML = 'Next lesson' + icon('right'); n.onclick = () => { close(); leaveScene(); uniGo(nx.course.id, nx.id); }; f.appendChild(n); }
+    } else {
+      const k = el('button', 'btn main'); k.type = 'button'; k.innerHTML = icon('edit') + 'Keep writing'; k.onclick = close; f.appendChild(k);
+    }
+    $('reportSheet').hidden = false;
   }
   function leaveScene() { if (S.abort) stopStream(); store.set('vv_open_practice', null); S.scene = null; S.ideas = null; }
   function lessonNoteEl(m) {
     const l = LESSON_BY[m.lesson]; if (!l) return el('div', 'note', m.text);
     const c = l.course, p = profOf(c.prof);
-    const box = el('div', 'lesson-done');
-    box.appendChild(el('span', 'grade', m.grade));
-    const t = el('div', 't'); t.append(el('b', '', 'Lesson passed'), el('span', '', c.code + ' · ' + l.title), el('p', '', profNote(m.grade, p)));
+    if (m.kind === 'ready') {
+      const box = el('div', 'lesson-done ready');
+      box.appendChild(avatar(p.name, p.colors, 'lg', p.img));
+      const t = el('div', 't'); t.append(el('b', '', 'Goal reached'), el('span', '', c.code + ' · ' + l.title), el('p', '', 'Hand it in and ' + p.short + ' reads the whole scene and grades it. Or keep writing and hand it in when you are proud of it.'));
+      box.appendChild(t);
+      const row = el('div', 'row');
+      const h = el('button', 'btn main'); h.type = 'button'; h.innerHTML = icon('grade') + 'Hand it in'; h.disabled = S.busy; h.onclick = () => handIn(S.scene);
+      row.appendChild(h); box.appendChild(row);
+      return box;
+    }
+    const box = el('div', 'lesson-done' + (m.passed === false ? ' fail' : ''));
+    box.appendChild(el('span', 'grade' + (m.passed === false ? ' fail' : ''), m.grade));
+    const t = el('div', 't');
+    t.append(el('b', '', m.passed === false ? 'Not yet' : 'Passed'), el('span', '', c.code + ' · ' + l.title + ' · graded by ' + p.short));
+    if (m.feedback) t.appendChild(el('p', '', '“' + m.feedback + '”'));
     box.appendChild(t);
     const row = el('div', 'row');
-    const back = el('button', 'btn'); back.type = 'button'; back.innerHTML = icon('cap') + 'Back to ' + c.code; back.onclick = () => { leaveScene(); uniGo(c.id); };
-    row.appendChild(back);
-    const nx = LESSON_LIST[LESSON_LIST.indexOf(l) + 1];
-    if (nx) { const n = el('button', 'btn main'); n.type = 'button'; n.innerHTML = 'Next lesson' + icon('right'); n.onclick = () => { leaveScene(); uniGo(nx.course.id, nx.id); }; row.appendChild(n); }
+    if (m.passed === false) {
+      const again = el('button', 'btn main'); again.type = 'button'; again.innerHTML = icon('grade') + 'Hand it in again'; again.disabled = S.busy; again.onclick = () => handIn(S.scene);
+      row.appendChild(again);
+    } else {
+      const back = el('button', 'btn'); back.type = 'button'; back.innerHTML = icon('cap') + 'Back to ' + c.code; back.onclick = () => { leaveScene(); uniGo(c.id); };
+      row.appendChild(back);
+      const nx = LESSON_LIST[LESSON_LIST.indexOf(l) + 1];
+      if (nx) { const n = el('button', 'btn main'); n.type = 'button'; n.innerHTML = 'Next lesson' + icon('right'); n.onclick = () => { leaveScene(); uniGo(nx.course.id, nx.id); }; row.appendChild(n); }
+    }
     box.appendChild(row);
     return box;
   }
+
+  // ---------------------------------------------------------------- choosing a partner: the whole cast, filtered
+  function partnerFilters(F, redraw) {
+    const box = el('div', 'pfilters');
+    const find = el('input'); find.type = 'search'; find.value = F.q || ''; find.placeholder = 'Find someone: a name, a vibe, a place'; find.setAttribute('aria-label', 'Find a partner'); find.className = 'pfind';
+    find.oninput = () => { F.q = find.value; redraw(); };
+    const g = seg(['', 'she', 'he', 'they'], { '': 'Anyone', she: 'Women', he: 'Men', they: 'Non-binary' }, F.g || '', v => { F.g = v; redraw(); }, 'Who');
+    const r = seg(['', 'dominant', 'submissive', 'switch'], { '': 'Any role', dominant: 'Dominant', submissive: 'Submissive', switch: 'Switch' }, F.r || '', v => { F.r = v; redraw(); }, 'Role');
+    box.append(find, g, r);
+    return box;
+  }
+  function filterPartners(list, F) {
+    const q = String(F.q || '').trim().toLowerCase();
+    return list.filter(p => (!F.g || p.pronouns === F.g) && (!F.r || p.role === F.r) &&
+      (!q || [p.name, p.vibe, p.look, p.personality, (SETTINGS.find(s => s.id === p.setting) || {}).label].join(' ').toLowerCase().indexOf(q) >= 0));
+  }
+  let PICK = null;
+  function openPicker(o) { PICK = Object.assign({ q: '', g: '', r: '' }, o); renderPicker(); $('pickSheet').hidden = false; closeDrawers(); }
+  function renderPicker() {
+    const b = $('pickBody'); b.innerHTML = '';
+    $('pickTitle').textContent = PICK.title || 'Choose your partner';
+    if (PICK.sub) { const s = el('p', 'muted', PICK.sub); s.style.margin = '0 0 12px'; b.appendChild(s); }
+    const grid = el('div', 'portraits');
+    b.append(partnerFilters(PICK, () => draw()), grid);
+    const cur = PICK.current || {};
+    const draw = () => {
+      grid.innerHTML = '';
+      const people = personasAndPresets().map(x => Object.assign({}, x.ref || {}, { name: x.name, age: x.age, role: x.role, vibe: x.vibe, img: x.img, colors: x.colors, castId: x.castId, presetId: x.presetId, pronouns: (x.ref && x.ref.pronouns) || (castById(x.castId) || {}).pronouns || 'she', setting: (x.ref && x.ref.setting) || (castById(x.castId) || {}).setting || '' }));
+      const list = filterPartners(people, PICK).sort((a, z) => (z.presetId === PICK.suggested) - (a.presetId === PICK.suggested));
+      list.forEach(x => {
+        const on = x.castId ? cur.cast === x.castId : cur.preset === x.presetId;
+        const card = partnerCard(x, { pressed: on, onPick: () => { $('pickSheet').hidden = true; PICK.onPick(x.castId ? { cast: x.castId } : { preset: x.presetId }); } });
+        if (x.presetId === PICK.suggested) card.appendChild(el('span', 'suggest-flag', 'Suggested'));
+        grid.appendChild(card);
+      });
+      if (!list.length) grid.appendChild(el('p', 'muted', 'Nobody matches. Try another word.'));
+    };
+    draw();
+  }
+
+  // ---------------------------------------------------------------- the side panel: your transcript and office hours
   function gpaRing(gpa) {
     const ring = el('div', 'ring'), C = 2 * Math.PI * 33;
     ring.innerHTML = '<svg viewBox="0 0 78 78"><circle class="bg" cx="39" cy="39" r="33"/><circle class="fg" cx="39" cy="39" r="33" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + C.toFixed(1) + '"/></svg>';
@@ -3725,20 +3852,22 @@
   function uniPanel() {
     const c = $('coach'); c.innerHTML = '';
     const body = panelHead(c, 'Transcript', 'cap', 'c-gold', null);
+    if (!COURSES.length) { const p = el('div', 'panel'); p.appendChild(el('p', 'muted', 'Your transcript opens with the university.')); body.appendChild(p); return; }
     const T = transcript();
     const p = el('div', 'panel');
-    p.appendChild(el('h4', '', T.standing + ' · ' + T.credits + ' of ' + T.all + ' credits'));
+    p.appendChild(el('h4', '', T.standing + ' · ' + T.credits + ' ' + (T.credits === 1 ? 'credit' : 'credits')));
     const rr = el('div', 'ring-row'); rr.appendChild(gpaRing(T.gpa));
     const facts = el('div', 'dims');
-    [['Core', T.coreDone + ' of ' + T.coreAll], ['Courses', T.allDone + ' of ' + COURSES.length], ['Degree', T.degree === 'master' ? 'Master' : T.degree === 'bachelor' ? 'Bachelor' : 'Not yet']].forEach(x => {
+    [['Courses', String(T.complete)], ['Degree', T.degree ? DEGREE[T.degree].split(' of ')[0] : 'Not yet'], ['Next', T.next ? T.next.have + '/' + T.next.need : 'All done']].forEach(x => {
       const row = el('div', 'dim'); row.style.gridTemplateColumns = '70px 1fr'; row.append(el('span', '', x[0]), el('b', '', x[1])); row.lastChild.style.textAlign = 'left'; facts.appendChild(row);
     });
     rr.appendChild(facts); p.appendChild(rr);
     const list = el('div', 'tx-list'); list.style.marginTop = '12px';
-    COURSES.forEach(cs => {
-      const st = courseState(cs); const row = el('button', 'tx'); row.type = 'button';
-      row.append(el('span', 'code', cs.code), el('span', 'nm', cs.name), el('b', '', st.complete ? letterOf(st.gpa) : st.done ? st.done + '/' + st.all : '–'));
-      row.onclick = () => uniGo(cs.id); list.appendChild(row);
+    FACULTY.forEach(f => {
+      const mine = COURSES.filter(x => x.prof === f.id), done = mine.filter(x => courseState(x).complete).length;
+      const row = el('button', 'tx'); row.type = 'button';
+      row.append(el('span', 'code', f.short.split(' ').pop()), el('span', 'nm', f.subject), el('b', '', done + '/' + mine.length));
+      row.onclick = () => uniGo('', '', f.id); list.appendChild(row);
     });
     p.appendChild(list);
     body.appendChild(p);
@@ -3757,6 +3886,7 @@
   const OFFICE_LOG = store.json('vv_office', {});
   function openOffice(profId, course, lesson) {
     if (store.get('vv_adult') !== 'yes') { $('ageGate').hidden = false; return; }
+    if (!FACULTY.length) { ensureUni().then(() => openOffice(profId, course, lesson)).catch(e => toast(e.message, 'err')); return; }
     OFFICE = { prof: profId || '', topic: lesson ? lesson.course.code + ' · ' + lesson.title : course ? course.code + ' · ' + course.name : '', busy: false };
     renderOffice(); $('officeSheet').hidden = false; closeDrawers();
     if (OFFICE.prof) setTimeout(() => $('officeIn').focus(), 60);
@@ -5027,9 +5157,11 @@
     g2.appendChild(people.length ? addCard('New person', 'Their profile, their Kink List, your notes and grades', '', false, () => openCast({ kind: 'person' }))
       : addCard('Add someone you roleplay with', 'Their profile and Kink List, your notes and their grades. The live wingman reads their card when you chat with them.', 'c-teal', true, () => openCast({ kind: 'person' })));
     w.appendChild(g2);
-    h2('Ready-made partners');
+    h2('Ready-made partners', [el('span', 'count', PARTNERS.length + ' to play with')]);
+    const CF = S.castF || (S.castF = { q: '', g: '', r: '' });
     const g3 = el('div', 'cgrid');
-    PARTNERS.forEach(p => {
+    w.appendChild(partnerFilters(CF, () => drawCast()));
+    const drawCast = () => { g3.innerHTML = ''; filterPartners(PARTNERS, CF).forEach(p => {
       const c = el('div', 'ccard');
       const rr = el('div', 'r1'); const tt = el('div', 't'); tt.append(el('b', '', p.name), el('span', '', p.age + ' · ' + ROLE_LABEL[p.role]));
       rr.append(avatar(p.name, p.colors, '', p.img), tt); c.appendChild(rr);
@@ -5038,7 +5170,8 @@
       const play = el('button', 'btn tint c-rose'); play.type = 'button'; play.innerHTML = icon('heart') + 'Play'; play.onclick = () => { setView('practice'); openNew({ preset: p }); };
       const cp = el('button', 'btn c-slate'); cp.type = 'button'; cp.innerHTML = icon('copy') + 'Copy and edit'; cp.onclick = () => openCast({ kind: 'persona', from: p });
       row.append(play, cp); c.appendChild(row); g3.appendChild(c);
-    });
+    }); };
+    drawCast();
     w.appendChild(g3);
     thread.appendChild(w);
     thread.scrollTop = 0;
@@ -5437,7 +5570,7 @@
     S.account.stats = Object.assign({}, S.account.stats || {}, { xp: x.xp, lines: x.lines, coached: x.coached, avg: x.avg, drills: x.drills, reports: x.reports, best_grade: x.best_grade, streak: x.streak, best_streak: x.best_streak });
     const after = level(x.xp || 0);
     if (after.idx > before) toast('Level up: ' + after.name + '!', 'gold');
-    else if (x.gained > 0) toast('+' + x.gained + ' XP · ' + (({ line: 'coached line', drill: S.scene && S.scene.lesson ? 'lesson passed' : 'drill complete', report: 'report card', review: 'review' })[x.reason] || 'XP'), 'gold');
+    else if (x.gained > 0) toast('+' + x.gained + ' XP · ' + (({ line: 'coached line', drill: S.scene && S.scene.lesson ? 'goal reached' : 'drill complete', grade: 'graded assignment', report: 'report card', review: 'review' })[x.reason] || 'XP'), 'gold');
     if (x.capped) toast('That’s today’s XP for the leaderboard (' + (S.account.xp_per_day || 1500) + '). Keep playing: it fills up again tomorrow.');
     renderXP();
     if (x.gained > 0) refreshAccountSoon();
@@ -5635,12 +5768,12 @@
   $('settingsBtn').onclick = () => openSettings(false);
   $('themeBtn').innerHTML = icon('moon');
   $('themeBtn').onclick = toggleTheme;
-  ['newClose', 'setClose', 'repClose', 'castClose', 'liveClose', 'shotClose', 'enhClose', 'advClose', 'acctClose', 'officeClose', 'savedClose'].forEach(id => { $(id).innerHTML = icon('x'); });
+  ['newClose', 'setClose', 'repClose', 'castClose', 'liveClose', 'shotClose', 'enhClose', 'advClose', 'acctClose', 'officeClose', 'savedClose', 'pickClose'].forEach(id => { $(id).innerHTML = icon('x'); });
   document.querySelectorAll('[data-close]').forEach(b => { b.addEventListener('click', () => { const s = b.closest('.sheet'); if (s) s.hidden = true; }); });
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
     if (!$('askSheet').hidden) { $('askNo').click(); return; }
-    ['newSheet', 'settingsSheet', 'reportSheet', 'castSheet', 'liveSheet', 'shotSheet', 'enhanceSheet', 'adviceSheet', 'acctSheet', 'officeSheet', 'savedSheet'].forEach(id => { $(id).hidden = true; });
+    ['newSheet', 'settingsSheet', 'reportSheet', 'castSheet', 'liveSheet', 'shotSheet', 'enhanceSheet', 'adviceSheet', 'acctSheet', 'officeSheet', 'savedSheet', 'pickSheet'].forEach(id => { $(id).hidden = true; });
     hideEnhFloat();
     closeDrawers(); closeMenu();
   });
@@ -5657,8 +5790,9 @@
   }
   render();
   detectMode();
+  if (S.view === 'uni' || (S.scene && S.scene.lesson)) ensureUni().then(() => render()).catch(() => { /* the page shows a retry */ });
   window.__vv = { S, cleanScene, cleanMessages, partnerPrompt, chatMessages, jsonMessages, veniceBody, isMinorText, compat, parseTranscript,
-    UNI, LESSON_BY, transcript, leanWords, saved: () => SAVED };
+    UNI, uni: () => ({ LESSON_BY, COURSES, FACULTY }), transcript, leanWords, saved: () => SAVED, ensureUni, handIn };
 })();
 </script>
 </body>
