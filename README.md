@@ -1,17 +1,17 @@
 # Velvet
 
-Practise erotic roleplay with a partner who plays along, and a coach who scores every line and shows you how to make it better.
+Practise erotic roleplay, get reply ideas while you roleplay with real people, and grade your chats.
 
 **Use it:** https://deaeath.github.io/velvet/
 
-- Pick a partner (ten ready-made characters, or make your own), a place, and the feel: how hot, how fast, and short 3DXChat-style chat lines or longer prose.
-- Your partner only ever writes their own side. You decide everything your character says, does and feels.
-- The coach scores each of your lines for detail, voice, initiative, pacing and chemistry, with a stronger version to learn from. End a scene for a report card.
-- Ten drills to practise one skill at a time: First move, Five senses, Slow burn, Talk first, Take the lead, Let go, Say it out loud, Read the room, Aftercare and a 3DX speed round.
-- Yellow slows things down and checks in. Red stops the scene straight away. Write (( like this )) to talk out of character.
-- Paste your SBS Kink List link and your partner knows what you love, what you're curious about, and your limits.
-- Ideas and Polish help with your own line. Replies can be read aloud.
+**Practice.** Pick a partner (ten ready-made characters, or your own personas), a place and the feel: how hot, how fast, and short 3DXChat-style chat lines or longer prose. Your partner only ever writes their own side. The coach scores each of your lines for detail, voice, initiative, pacing and chemistry, with a stronger version to learn from, and ten drills practise one skill at a time. Yellow slows things down and checks in; Red stops the scene. Write (( like this )) to talk out of character.
 
-It's free and needs no key or account: turns run through the SBS server, and nothing is kept there. Your scenes, scores and progress stay in your own browser. If the server can't be reached, you can use your own [Venice AI](https://venice.ai/settings/api) key instead, which goes only to api.venice.ai. SBS members also find Velvet on the SBS desktop.
+**Live.** Roleplaying with someone in the game right now? Paste their line, or a screenshot of the chat, and get three replies in your voice: tease, heat or tender. Steer them (flirtier, bolder, softer, funnier), see what they seem to want, get a translation if they write in another language, and keep it going as one chat. Ask what to try with them, or grade the chat.
+
+**Review.** Paste a roleplay you had, or add screenshots, and everyone in it gets a grade: you and them, with strengths, what to work on, best lines and the lines that could have been stronger. Select any words in a line to enhance just that part.
+
+**Cast.** Your personas (upload a picture or make a portrait, let the picture describe their look, or invent one from an idea), the people you roleplay with (their profile, their SBS Kink List and where it meets yours, your notes and their grades), and you.
+
+It's free and needs no key or account: everything runs through the SBS server, and nothing is kept there. Your scenes, people, reviews and progress stay in your own browser. If the server can't be reached, practice scenes still work with your own [Venice AI](https://venice.ai/settings/api) key, which goes only to api.venice.ai. SBS members also find Velvet on the SBS desktop.
 
 For adults only. Every character in Velvet is an adult, and it won't write anyone under 18.
