@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'self' https://sbsbot.my.pebble.host https://api.venice.ai; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob: 'self' https://sbsbot.my.pebble.host http://127.0.0.1:*; connect-src 'self' https://sbsbot.my.pebble.host https://api.venice.ai http://127.0.0.1:*; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="color-scheme" content="dark light">
 <title>Velvet</title>
@@ -341,9 +341,10 @@
   @media (hover: none) { input, select, textarea { font-size: 16px !important; } }
 
   /* ---- sections: practice, live, review, cast */
-  .tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin: 0 14px 12px; padding: 4px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); }
+  .tabs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; margin: 0 14px 12px; padding: 4px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); }
   .tab { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 2px; border: 0; border-radius: 9px; background: none; color: var(--muted); font-size: 11.5px; font-weight: 600; }
   .tab svg.i { width: 17px; height: 17px; }
+  .tab span { font-size: 10.5px; }
   .tab:hover { color: var(--c); }
   .tab[aria-current="true"] { background: var(--cs); color: var(--c); }
   .side .group { margin: 8px 8px 2px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
@@ -423,6 +424,28 @@
   .shot-line { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 6px 0; border-top: 1px solid var(--line); font-size: 13.5px; }
   .shot-line .who-seg { margin: 0; }
   .shot-line span b { color: var(--accent); }
+  /* leaderboard */
+  .podium { display: grid; grid-template-columns: 1fr 1.15fr 1fr; gap: 10px; align-items: end; margin-top: 10px; }
+  .pod { border: 1px solid var(--line); border-radius: 16px; background: var(--panel); padding: 16px 10px 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; position: relative; min-width: 0; }
+  .pod.p1 { padding-top: 24px; border-color: #f6c177; box-shadow: 0 10px 30px rgba(246,193,119,0.18); }
+  .pod.p2 { border-color: #cbd5e1; }
+  .pod.p3 { border-color: #d6a77a; }
+  .pod.me { outline: 2px solid var(--accent); }
+  .pod b { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pod .val { font-weight: 750; font-size: 16px; }
+  .pod small { color: var(--muted); font-size: 12px; }
+  .medal { position: absolute; top: -12px; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 13px; color: #1a0509; background: #f6c177; }
+  .pod.p2 .medal { background: #cbd5e1; }
+  .pod.p3 .medal { background: #d6a77a; }
+  .rrow { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 10px; }
+  .rrow + .rrow { border-top: 1px solid var(--line); }
+  .rrow.me { background: var(--accent-soft); }
+  .rrow .rk { width: 34px; flex: none; font-weight: 700; color: var(--muted); font-size: 13px; }
+  .rrow .t { flex: 1; min-width: 0; }
+  .rrow .t b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rrow .t span { display: block; font-size: 12px; color: var(--muted); }
+  .rrow .v { font-weight: 700; white-space: nowrap; }
+  @media (max-width: 560px) { .podium { gap: 6px; } .pod { padding: 14px 6px 10px; } }
 </style>
 </head>
 <body>
@@ -494,6 +517,14 @@
     <div class="card-head"><h2>Report card</h2><button class="ib" type="button" data-close aria-label="Close" id="repClose"></button></div>
     <div class="card-body" id="repBody"></div>
     <div class="card-foot" id="repFoot"></div>
+  </div>
+</div>
+
+<div class="sheet" id="acctSheet" hidden>
+  <div class="card">
+    <div class="card-head"><h2 id="acctTitle">Your leaderboard card</h2><button class="ib" type="button" data-close aria-label="Close" id="acctClose"></button></div>
+    <div class="card-body" id="acctBody"></div>
+    <div class="card-foot" id="acctFoot"></div>
   </div>
 </div>
 
@@ -570,7 +601,11 @@
 (function () {
   'use strict';
   const $ = id => document.getElementById(id);
-  const PUBLIC_API = 'https://sbsbot.my.pebble.host';
+  // ?api= points a page served from this computer at a local server, for testing. Anywhere else it is ignored, so a
+  // link can never send someone's sign-in somewhere else.
+  const LOCAL = /^(127\.0\.0\.1|localhost)$/.test(location.hostname);
+  const PUBLIC_API = (LOCAL && /^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(new URLSearchParams(location.search).get('api') || '')
+    && new URLSearchParams(location.search).get('api')) || 'https://sbsbot.my.pebble.host';
 
   // ==== prompts start (the server keeps the same in handlers/velvet.py; tests/test_velvet.py compares them)
   const MAX_MESSAGES = 400, MAX_MESSAGE = 4000, HISTORY_BUDGET = 48000;
@@ -1044,7 +1079,8 @@
     progress: Object.assign({ xp: 0, lines: 0, streak: 0, lastDay: '', drills: {}, reports: 0, best: 0 }, store.json('vv_progress', {})),
     settings: Object.assign({ model: '', voice: false, voiceName: '', rate: 1, coachAuto: true, key: '' }, store.json('vv_settings', {})),
     ideas: null, polishUndo: null,
-    view: ['practice', 'live', 'review', 'cast'].indexOf(store.get('vv_view')) >= 0 ? store.get('vv_view') : 'practice',
+    view: ['practice', 'live', 'review', 'cast', 'ranks'].indexOf(store.get('vv_view')) >= 0 ? store.get('vv_view') : 'practice',
+    account: null, loginNote: '', board: { board: 'xp', period: 'week', data: null, loading: false, err: '' },
     cast: store.json('vv_cast', []),            // personas (AI partners) and people (real people you roleplay with)
     reviews: store.json('vv_rindex', []),       // graded roleplays
     review: null, liveWho: 'them', reviewDraft: null,
@@ -1057,6 +1093,19 @@
   if (!Array.isArray(S.index)) S.index = [];
   const savedKey = store.get('vv_key');
   if (savedKey) S.settings.key = savedKey;
+  // a Discord sign-in on GitHub Pages comes back as #vv_token=...: keep it in this browser, take it out of the address
+  let TOKEN = store.get('vv_token') || '';
+  function takeToken() {
+    const h = location.hash || '';
+    const t = /[#&]vv_token=([A-Za-z0-9_\-.]{20,400})/.exec(h), f = /[#&]vv_login=(\w+)/.exec(h);
+    if (t) { TOKEN = t[1]; store.set('vv_token', TOKEN); }
+    if (t || f) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* an old browser keeps it */ } }
+    if (f) S.loginNote = f[1];
+    return !!t;
+  }
+  takeToken();
+  // signed in while the page was open (the address changed after the #): take the token and load the account
+  window.addEventListener('hashchange', () => { if (takeToken()) loadAccount(); });
 
   function saveProfile() { store.set('vv_profile', JSON.stringify(S.profile)); }
   function saveProgress() { store.set('vv_progress', JSON.stringify(S.progress)); }
@@ -1200,13 +1249,16 @@
     const today = todayKey(), y = new Date(); y.setDate(y.getDate() - 1);
     if (S.progress.lastDay !== today) { S.progress.streak = S.progress.lastDay === todayKey(y) ? S.progress.streak + 1 : 1; S.progress.lastDay = today; }
     S.progress.lines++;
-    S.progress.xp += 5; saveProgress(); renderXP();
+    if (!signedIn()) S.progress.xp += 5;
+    saveProgress(); renderXP();
   }
 
   // ---------------------------------------------------------------- backends
   function viaServer() { return S.mode === 'server' || S.mode === 'public'; }
   function api(path) { return S.mode === 'public' ? PUBLIC_API + '/api/sbs/velvet/public/' + path : '/api/sbs/velvet/' + path; }
   function creds() { return S.mode === 'public' ? 'omit' : 'same-origin'; }
+  function authHeaders() { return S.mode === 'public' && TOKEN ? { Authorization: 'Bearer ' + TOKEN } : {}; }
+  function jsonHeaders() { return Object.assign({ 'Content-Type': 'application/json' }, authHeaders()); }
   function model() { const m = S.settings.model; return MODELS.some(x => x[0] === m) ? m : ((S.status && S.status.model) || MODELS[0][0]); }
   function noteLeft(r) {
     const left = r.headers.get('X-Velvet-Left');
@@ -1231,7 +1283,7 @@
     let r;
     if (viaServer()) {
       try {
-        r = await fetch(api('ai'), { method: 'POST', credentials: creds(), signal, headers: { 'Content-Type': 'application/json' },
+        r = await fetch(api('ai'), { method: 'POST', credentials: creds(), signal, headers: jsonHeaders(),
           body: JSON.stringify({ task, scene: sc, messages: msgs, model: model() }) });
       } catch (e) { if (e.name === 'AbortError') throw e; throw new Error("Couldn't reach Velvet. Check your connection and try again."); }
       if (!r.ok) throw await errorOf(r);
@@ -1285,12 +1337,12 @@
     try { return JSON.parse(t); } catch (e) { const a = t.indexOf('{'), b = t.lastIndexOf('}'); try { return a >= 0 && b > a ? JSON.parse(t.slice(a, b + 1)) : {}; } catch (e2) { return {}; } }
   }
   function shapeScores(v) { const o = {}; DIMS.forEach(d => { const n = Math.round(parseFloat((v || {})[d[0]])); o[d[0]] = isFinite(n) ? Math.max(1, Math.min(10, n)) : 5; }); return o; }
-  async function jsonTask(task, sc, msgs, draft) {
+  async function jsonTask(task, sc, msgs, draft, extra) {
     let r;
     if (viaServer()) {
       try {
-        r = await fetch(api('ai'), { method: 'POST', credentials: creds(), headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ task, scene: sc, messages: msgs, draft: draft || '' }) });
+        r = await fetch(api('ai'), { method: 'POST', credentials: creds(), headers: jsonHeaders(),
+          body: JSON.stringify(Object.assign({ task, scene: sc, messages: msgs, draft: draft || '' }, extra || {})) });
       } catch (e) { throw new Error("Couldn't reach Velvet. Check your connection and try again."); }
       if (!r.ok) throw await errorOf(r);
       noteLeft(r);
@@ -1329,7 +1381,7 @@
 
   async function tryPublic() {
     try {
-      const r = await fetch(PUBLIC_API + '/api/sbs/velvet/public/status', { credentials: 'omit' });
+      const r = await fetch(PUBLIC_API + '/api/sbs/velvet/public/status', { credentials: 'omit', headers: TOKEN ? { Authorization: 'Bearer ' + TOKEN } : {} });
       if (!r.ok) throw new Error(String(r.status));
       const st = await r.json();
       if (!st.public || !st.configured) throw new Error('off');
@@ -1352,9 +1404,11 @@
     }
     if (store.get('vv_adult') !== 'yes') $('ageGate').hidden = false;
     renderLeft(); render();
+    loadAccount();
+    if (S.loginNote) toast(S.loginNote === 'expired' ? 'That sign-in took too long. Try again.' : 'Discord sign-in didn\u2019t work. Try again.', 'err');
   }
   function byok() { S.mode = 'byok'; $('memberLink').hidden = false; }
-  $('ageYes').onclick = () => { store.set('vv_adult', 'yes'); $('ageGate').hidden = true; };
+  $('ageYes').onclick = () => { store.set('vv_adult', 'yes'); $('ageGate').hidden = true; if (signedIn() && !S.account.chosen) setTimeout(openJoin, 300); };
   function ready() {
     if (!S.mode) { toast('Still connecting. Try again in a second.'); return false; }
     if (S.mode === 'server' && S.status && !S.status.signed_in) { $('gate').hidden = false; return false; }
@@ -1366,6 +1420,7 @@
 
   // ---------------------------------------------------------------- rendering: sidebar
   function renderXP() {
+    if (signedIn()) { accountXPCard(); return; }
     const L = level(S.progress.xp), p = S.progress;
     const pct = L.to ? Math.round((S.progress.xp - L.from) / (L.to - L.from) * 100) : 100;
     $('xp').innerHTML = '';
@@ -1376,6 +1431,11 @@
     $('xp').append(r1, bar, st);
     $('xp').title = L.next ? (L.to - p.xp) + ' XP to ' + L.next : 'Top level';
     requestAnimationFrame(() => { fillEl.style.width = pct + '%'; });
+    if (S.mode === 'public') {
+      const d = discordButton('Sign in for the leaderboard');
+      d.classList.add('block'); d.style.marginTop = '10px'; d.style.minHeight = '32px'; d.style.fontSize = '12.5px';
+      $('xp').appendChild(d);
+    }
   }
   function renderScenes() {
     const box = $('scenes'); box.innerHTML = '';
@@ -1386,6 +1446,16 @@
       S.reviews.forEach(x => {
         const g = el('div', 'av sm', x.grade || '★'); g.style.setProperty('--a1', '#f6c177'); g.style.setProperty('--a2', '#a16207'); g.style.fontSize = '12px';
         box.appendChild(sideItem(g, x.title, (x.people || []).join(', ') + ' · ' + ago(x.created), S.review && S.review.id === x.id, () => openReview(x.id)));
+      });
+      return;
+    }
+    if (S.view === 'ranks') {
+      head.textContent = 'Boards';
+      [['xp', 'week', 'trophy', ['#f6c177', '#a16207']], ['xp', 'all', 'crown', ['#fb7185', '#881337']], ['writers', 'all', 'feather', ['#a78bfa', '#4c1d95']], ['streak', 'all', 'flame', ['#f59e0b', '#9a3412']]].forEach(x => {
+        const av = el('div', 'av sm'); av.style.setProperty('--a1', x[3][0]); av.style.setProperty('--a2', x[3][1]); av.innerHTML = icon(x[2]);
+        const sub = x[0] === 'writers' ? 'The coach\u2019s best average' : x[0] === 'streak' ? 'Days in a row' : x[1] === 'week' ? 'XP since Monday' : 'XP since the start';
+        box.appendChild(sideItem(av, BOARD_LABEL[x[0]] + (x[0] === 'xp' ? ' \u00b7 ' + PERIOD_LABEL[x[1]] : ''), sub, S.board.board === x[0] && (x[0] !== 'xp' || S.board.period === x[1]),
+          () => { S.board.board = x[0]; if (x[0] === 'xp') S.board.period = x[1]; S.board.data = null; render(); }));
       });
       return;
     }
@@ -2020,11 +2090,11 @@
     m.coaching = true; sc.coachErr = '';
     if (S.scene === sc) { renderCoach(); renderThread(true); }
     try {
-      const out = await jsonTask('coach', apiScene(sc), apiMsgs(sc.msgs.slice(0, idx + 1)));
+      const out = await jsonTask('coach', apiScene(sc), apiMsgs(sc.msgs.slice(0, idx + 1)), '', { scene_id: sc.id });
       m.coach = { scores: out.scores, praise: out.praise || '', tip: out.tip || '', better: out.better || '' };
       sc.coachSel = m.id;
       const v = mean(out.scores);
-      if (v >= 9) addXP(15, 'superb line (' + v.toFixed(1) + ')'); else if (v >= 8) addXP(8, 'great line (' + v.toFixed(1) + ')'); else addXP(Math.round(v / 3));
+      if (!applyXP(out._xp)) { if (v >= 9) addXP(15, 'superb line (' + v.toFixed(1) + ')'); else if (v >= 8) addXP(8, 'great line (' + v.toFixed(1) + ')'); else addXP(Math.round(v / 3)); }
       if (out.drill && sc.drill) {
         sc.drillProgress = Math.max(sc.drillProgress || 0, out.drill.progress || 0);
         sc.drillNote = out.drill.note || sc.drillNote;
@@ -2032,7 +2102,7 @@
           sc.drillDone = true;
           S.progress.drills[sc.drill] = (S.progress.drills[sc.drill] || 0) + 1; saveProgress();
           sc.msgs.push({ id: newId(), who: 'note', text: 'Drill complete: ' + DRILLS[sc.drill].name + '. Keep playing, or end the scene for your report.' });
-          addXP(100, 'drill complete');
+          if (!signedIn()) addXP(100, 'drill complete');
         }
       }
     } catch (e) {
@@ -2142,7 +2212,8 @@
       const out = await jsonTask('report', apiScene(sc), apiMsgs(sc.msgs));
       const first = !sc.report;
       sc.report = out; saveScene(sc);
-      if (first) { S.progress.reports++; saveProgress(); addXP(25 + (GRADE_XP[out.grade] || 15), 'report card'); }
+      if (first) { S.progress.reports++; saveProgress(); if (!applyXP(out._xp)) addXP(25 + (GRADE_XP[out.grade] || 15), 'report card'); }
+      else applyXP(out._xp);
       showReport(out);
       renderThread(true);
     } catch (e) {
@@ -2565,6 +2636,7 @@
     { id: 'live', label: 'Live', icon: 'pulse', cls: 'c-teal' },
     { id: 'review', label: 'Review', icon: 'grade', cls: 'c-gold' },
     { id: 'cast', label: 'Cast', icon: 'users', cls: 'c-violet' },
+    { id: 'ranks', label: 'Ranks', icon: 'trophy', cls: 'c-amber' },
   ];
   function prepScene(sc) {
     sc.msgs = (sc.msgs || []).filter(m => !(m.who === 'partner' && !msgText(m)));
@@ -2606,6 +2678,10 @@
     if (S.view === 'practice') { b('c-rose', 'plus', 'New scene', 'Set up a new scene', () => openNew()); b('c-gold', 'dice', 'Surprise me', 'Jump straight into a scene with a random partner', quickStart); }
     else if (S.view === 'live') { b('c-teal', 'plus', 'New chat', 'Get reply ideas while you roleplay with someone in the game', () => openLiveNew()); b('c-violet', 'scan', 'Screenshot', 'Start from a screenshot of your chat', () => openLiveNew({ shot: true })); }
     else if (S.view === 'review') { b('c-gold', 'plus', 'New review', 'Grade a roleplay you had', () => { S.review = null; render(); }); b('c-violet', 'scan', 'Screenshots', 'Grade a roleplay from screenshots of the chat', () => { S.review = null; render(); pickShots('review'); }); }
+    else if (S.view === 'ranks') {
+      if (signedIn()) { b('c-amber', 'user', 'My card', 'Your name and picture on the leaderboard', () => openAccount(false)); b('c-gold', 'regen', 'Refresh', 'Load the leaderboard again', loadBoard); }
+      else if (S.mode === 'public') { const d = discordButton('Sign in'); d.style.gridColumn = '1 / -1'; a.appendChild(d); }
+    }
     else { b('c-violet', 'plus', 'Persona', 'Make a character to practise with', () => openCast({ kind: 'persona' })); b('c-teal', 'user', 'Person', 'Keep notes on someone you roleplay with', () => openCast({ kind: 'person' })); }
   }
   function sideItem(av, title, sub, current, fn) {
@@ -2621,7 +2697,7 @@
     if (!viaServer()) throw new Error('This needs the free SBS server, which can’t be reached right now. Try again later.');
     let r;
     try {
-      r = await fetch(api('ai'), { method: 'POST', credentials: creds(), headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ task }, body)) });
+      r = await fetch(api('ai'), { method: 'POST', credentials: creds(), headers: jsonHeaders(), body: JSON.stringify(Object.assign({ task }, body)) });
     } catch (e) { throw new Error("Couldn't reach Velvet. Check your connection and try again."); }
     if (!r.ok) throw await errorOf(r);
     noteLeft(r);
@@ -3298,7 +3374,7 @@
       r.result = out; r.loading = false;
       out.people.forEach(p => { if (p.is_you) return; const c = castById(r.castIds[p.name]) || personByName(p.name); if (c && c.kind === 'person') addGrade(c, p, r); });
       saveReview(r);
-      addXP(20, 'review');
+      if (!applyXP(out._xp)) addXP(20, 'review');
     } catch (e) { r.loading = false; r.err = (e && e.data && e.data.flagged) ? flaggedNote(e.data) : e.message; }
     if (S.review === r) render();
   }
@@ -3866,10 +3942,276 @@
   document.addEventListener('selectionchange', () => { clearTimeout(selTimer); selTimer = setTimeout(checkSelection, 180); });
   thread.addEventListener('scroll', hideEnhFloat);
 
+  // ================================================================ accounts (Discord) and the leaderboard
+  // On the SBS site the site's login counts. On GitHub Pages, signing in brings back a token (#vv_token=...), kept in
+  // this browser and sent as "Authorization: Bearer". XP for the board is counted by the server; signed out, the XP
+  // card shows this browser's own XP.
+  const BOARD_LABEL = { xp: 'XP', writers: 'Best writers', streak: 'Streaks' };
+  const PERIOD_LABEL = { week: 'This week', all: 'All time' };
+  const DISCORD_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;fill:currentColor;stroke:none;flex:none"><path d="M20.317 4.37a19.79 19.79 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.74 19.74 0 003.677 4.37a.07.07 0 00-.032.028C.533 9.046-.32 13.58.099 18.058a.082.082 0 00.031.056 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.1 13.1 0 01-1.872-.892.077.077 0 01-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 01.078-.01c3.927 1.793 8.18 1.793 12.061 0a.074.074 0 01.079.009c.12.099.246.198.373.292a.077.077 0 01-.007.128 12.3 12.3 0 01-1.873.891.077.077 0 00-.041.107c.36.698.772 1.363 1.225 1.993a.076.076 0 00.084.029 19.84 19.84 0 006.002-3.03.077.077 0 00.032-.055c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.331c-1.183 0-2.157-1.086-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.332-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.086-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.332-.946 2.418-2.157 2.418z"/></svg>';
+  function absUrl(p) { return p && p.charAt(0) === '/' && S.mode === 'public' ? PUBLIC_API + p : p; }
+  function signedIn() { return !!(S.account && S.account.signed_in); }
+  async function loadAccount() {
+    if (!viaServer()) return;
+    try {
+      const r = await fetch(api('me'), { credentials: creds(), headers: authHeaders() });
+      const d = await r.json();
+      if (d && d.signed_in) S.account = d;
+      else { S.account = null; if (S.mode === 'public' && TOKEN) { TOKEN = ''; store.set('vv_token', null); } }
+    } catch (e) { return; }
+    renderXP(); renderSideActs();
+    if (S.view === 'ranks') render();
+    if (signedIn() && !S.account.chosen && store.get('vv_adult') === 'yes') setTimeout(openJoin, 400);
+  }
+  function signIn() {
+    if (S.mode === 'server') { $('gate').hidden = false; return; }
+    if (S.mode !== 'public') { toast('Signing in needs the free SBS server, which can’t be reached right now.', 'err'); return; }
+    const url = PUBLIC_API + '/api/sbs/velvet/login?back=pages';
+    if (inFrame()) { window.open(url, '_blank', 'noopener'); toast('Finish signing in in the new tab, then come back.'); return; }
+    location.href = url;
+  }
+  function discordButton(label) {
+    const b = el('button', 'btn'); b.type = 'button';
+    b.style.cssText = 'background:#5865F2;border-color:#5865F2;color:#fff;font-weight:650';
+    b.innerHTML = DISCORD_SVG + (label || 'Sign in with Discord');
+    b.onclick = signIn;
+    return b;
+  }
+  async function saveAccount(body) {
+    const r = await fetch(api('me'), { method: 'POST', credentials: creds(), headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()), body: JSON.stringify(body) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || 'Couldn’t save that. Try again.');
+    S.account = d; renderXP(); renderSideActs();
+    if (S.view === 'ranks') { S.board.data = null; render(); }
+    return d;
+  }
+  function openJoin() { openAccount(true); }
+  function openAccount(first) {
+    if (!signedIn()) { signIn(); return; }
+    const A = S.account;
+    $('acctTitle').textContent = first ? 'Join the leaderboard?' : 'Your leaderboard card';
+    const b = $('acctBody'); b.innerHTML = '';
+    b.appendChild(el('p', '', first ? 'You’re signed in. Want to show up on Velvet’s leaderboard? It’s public, so pick any name: it doesn’t have to be your Discord name. You can leave any time.' : 'The leaderboard is public. Your name and picture are the only things on it.'));
+    const name = inputEl('acctName', A.name || S.profile.name || '', 24, 'The name people see'); name.style.cssText = 'width:100%';
+    const fn = field('Name on the leaderboard', name); fn.style.marginTop = '8px';
+    b.appendChild(fn);
+    const sh = el('label', 'check'); const shi = el('input'); shi.type = 'checkbox'; shi.checked = first ? true : !!A.show;
+    sh.append(shi, document.createTextNode('Show me on the leaderboard'));
+    b.appendChild(sh);
+    const av = el('label', 'check'); const avi = el('input'); avi.type = 'checkbox'; avi.checked = !!A.use_avatar; avi.disabled = !A.has_discord_avatar;
+    av.append(avi, document.createTextNode(A.has_discord_avatar ? 'Use my Discord picture' : 'Use my Discord picture (you don’t have one)'));
+    b.appendChild(av);
+    if (A.hidden) b.appendChild(el('p', 'muted', 'The owners have taken you off the board for now.'));
+    const st = A.stats || {};
+    const p = el('p', 'muted'); p.style.cssText = 'margin-top:12px;font-size:12.5px';
+    p.textContent = (st.xp || 0) + ' XP · ' + (st.lines || 0) + ' coached lines' + (st.avg ? ' · ' + st.avg.toFixed(1) + ' average' : '') + ' · ' + (st.drills || 0) + ' drills · ' + (st.reports || 0) + ' report cards' + (st.best_grade ? ' · best ' + st.best_grade : '');
+    b.appendChild(p);
+    const f = $('acctFoot'); f.innerHTML = '';
+    if (!first) {
+      if (S.mode === 'public') {
+        const so = el('button', 'btn c-slate'); so.type = 'button'; so.textContent = 'Sign out'; so.style.marginRight = 'auto';
+        so.onclick = () => { TOKEN = ''; store.set('vv_token', null); S.account = null; $('acctSheet').hidden = true; render(); toast('Signed out on this device.'); };
+        const all = el('button', 'btn c-red'); all.type = 'button'; all.textContent = 'Sign out everywhere';
+        all.onclick = async () => { try { await fetch(api('logout'), { method: 'POST', credentials: creds(), headers: authHeaders() }); } catch (e) { /* signed out here anyway */ } TOKEN = ''; store.set('vv_token', null); S.account = null; $('acctSheet').hidden = true; render(); toast('Signed out on every device.'); };
+        f.append(so, all);
+      } else {
+        f.appendChild(el('span', 'note2', 'Signed in with your SBS login.'));
+      }
+    }
+    const later = el('button', 'btn'); later.type = 'button'; later.textContent = first ? 'Not now' : 'Cancel';
+    later.onclick = async () => { $('acctSheet').hidden = true; if (first) { try { await saveAccount({ show: false }); } catch (e) { /* asks again next time */ } } };
+    const save = el('button', 'btn main'); save.type = 'button'; save.textContent = first ? 'Join' : 'Save';
+    save.onclick = async () => {
+      const nm = name.value.trim();
+      if (shi.checked && nm.length < 2) { toast('Pick a name of 2 to 24 letters or numbers.', 'err'); name.focus(); return; }
+      if (isMinorText(nm)) { toast(ADULTS_ONLY, 'err'); return; }
+      spinBtn(save, true);
+      try { await saveAccount({ name: nm, show: shi.checked, use_avatar: avi.checked }); $('acctSheet').hidden = true; toast(shi.checked ? 'You’re on the leaderboard as ' + S.account.name + '.' : 'Saved. You’re not on the leaderboard.'); }
+      catch (e) { toast(e.message, 'err'); spinBtn(save, false); }
+    };
+    f.append(later, save);
+    $('acctSheet').hidden = false;
+  }
+  // the server's XP after a coached line, a report card or a review
+  function applyXP(x) {
+    if (!x || !signedIn()) return false;
+    const before = level((S.account.stats || {}).xp || 0).idx;
+    S.account.stats = Object.assign({}, S.account.stats || {}, { xp: x.xp, lines: x.lines, coached: x.coached, avg: x.avg, drills: x.drills, reports: x.reports, best_grade: x.best_grade, streak: x.streak, best_streak: x.best_streak });
+    const after = level(x.xp || 0);
+    if (after.idx > before) toast('Level up: ' + after.name + '!', 'gold');
+    else if (x.gained > 0) toast('+' + x.gained + ' XP · ' + (({ line: 'coached line', drill: 'drill complete', report: 'report card', review: 'review' })[x.reason] || 'XP'), 'gold');
+    if (x.capped) toast('That’s today’s XP for the leaderboard (' + (S.account.xp_per_day || 1500) + '). Keep playing: it fills up again tomorrow.');
+    renderXP();
+    if (x.gained > 0) refreshAccountSoon();
+    return true;
+  }
+  // ranks move as XP comes in: one quiet look at the account a little later, not one per line
+  let acctTimer = null;
+  function refreshAccountSoon() {
+    clearTimeout(acctTimer);
+    acctTimer = setTimeout(async () => {
+      try {
+        const r = await fetch(api('me'), { credentials: creds(), headers: authHeaders() });
+        const d = await r.json();
+        if (d && d.signed_in) { S.account = d; renderXP(); if (S.view === 'ranks') ranksPanel(); }
+      } catch (e) { /* next time */ }
+    }, 2500);
+  }
+  function accountXPCard() {
+    const A = S.account, st = A.stats || {}, L = level(st.xp || 0);
+    const box = $('xp'); box.innerHTML = '';
+    const top = el('div', 'row'); top.style.cssText = 'align-items:center;justify-content:flex-start;gap:8px;cursor:pointer';
+    top.appendChild(avatar(A.name || A.discord_name || '?', colorsFor(A.name || A.discord_name || '?'), 'sm', absUrl(A.avatar)));
+    const nm = el('div'); nm.style.cssText = 'min-width:0;flex:1';
+    nm.append(el('b', '', A.name || A.discord_name || 'You'), el('div', 'pts', A.show && !A.hidden ? (A.rank_week ? '#' + A.rank_week + ' this week' : 'On the leaderboard') : 'Not on the leaderboard'));
+    nm.firstChild.style.cssText = 'display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+    top.appendChild(nm);
+    top.title = 'Your leaderboard card'; top.onclick = () => openAccount(false);
+    const r1 = el('div', 'row'); r1.style.marginTop = '8px'; r1.append(el('span', 'lvl', L.name), el('span', 'pts', (st.xp || 0) + ' XP'));
+    const bar = el('div', 'bar'); const fillEl = el('i'); bar.appendChild(fillEl);
+    const pct = L.to ? Math.round(((st.xp || 0) - L.from) / (L.to - L.from) * 100) : 100;
+    const stats = el('div', 'stats');
+    stats.innerHTML = '<span>🔥 <b>' + (st.streak || 0) + '</b> day' + (st.streak === 1 ? '' : 's') + '</span><span><b>' + (st.lines || 0) + '</b> lines</span><span><b>' + (st.drills || 0) + '</b> drills</span>';
+    box.append(top, r1, bar, stats);
+    box.title = L.next ? (L.to - (st.xp || 0)) + ' XP to ' + L.next : 'Top level';
+    requestAnimationFrame(() => { fillEl.style.width = pct + '%'; });
+  }
+
+  // ---------------------------------------------------------------- the leaderboard view
+  async function loadBoard() {
+    const B = S.board;
+    B.loading = true; B.err = '';
+    if (S.view === 'ranks') rankMain();
+    try {
+      const r = await fetch(api('leaderboard') + '?board=' + B.board + '&period=' + B.period, { credentials: creds(), headers: authHeaders() });
+      if (!r.ok) throw new Error('The leaderboard couldn’t load. Try again in a moment.');
+      B.data = await r.json();
+      if (signedIn() && B.board === 'xp' && B.data.me) { S.account[B.period === 'week' ? 'rank_week' : 'rank_all'] = B.data.me.rank || null; renderXP(); }
+    } catch (e) { B.err = (e && e.message) || 'The leaderboard couldn’t load.'; }
+    B.loading = false;
+    if (S.view === 'ranks') { rankMain(); ranksPanel(); }
+  }
+  function boardValue(row, board) {
+    if (board === 'writers') return (row.value || 0).toFixed(1) + ' avg';
+    if (board === 'streak') return row.value + ' day' + (row.value === 1 ? '' : 's');
+    return row.value + ' XP';
+  }
+  function ranksHead() {
+    const h = $('head'); h.innerHTML = '';
+    const menuBtn = el('button', 'ib only-mid'); menuBtn.type = 'button'; menuBtn.innerHTML = icon('menu'); menuBtn.setAttribute('aria-label', 'Sections'); menuBtn.onclick = () => openDrawer('side');
+    h.appendChild(menuBtn);
+    const w = el('div', 'who'); w.append(el('b', '', 'Leaderboard'), el('span', '', 'Who’s writing the best roleplay on Velvet'));
+    h.appendChild(w);
+    const rf = el('button', 'ib c-amber'); rf.type = 'button'; rf.innerHTML = icon('regen'); rf.title = 'Refresh'; rf.setAttribute('aria-label', 'Refresh the leaderboard'); rf.onclick = loadBoard;
+    h.appendChild(rf);
+  }
+  function rankMain() {
+    thread.innerHTML = '';
+    const B = S.board, w = el('div', 'rv');
+    const controls = el('div', 'formrow'); controls.style.alignItems = 'center';
+    controls.appendChild(seg(['week', 'all'], PERIOD_LABEL, B.period, v => { B.period = v; B.data = null; loadBoard(); }, 'Period'));
+    controls.appendChild(seg(['xp', 'writers', 'streak'], BOARD_LABEL, B.board, v => { B.board = v; B.data = null; loadBoard(); }, 'Board'));
+    w.appendChild(controls);
+    if (!viaServer()) { w.appendChild(el('div', 'panel')).appendChild(el('p', 'muted', 'The leaderboard lives on the SBS server, which can’t be reached right now.')); thread.appendChild(w); return; }
+    if (!signedIn()) {
+      const cta = el('div', 'rv-top');
+      const t = el('div'); t.append(el('h2', '', 'Join the leaderboard'), el('p', '', 'Sign in with Discord and the XP you earn from coached lines, drills, report cards and reviews counts here. You pick the name people see.'));
+      cta.appendChild(t);
+      const btn = S.mode === 'server' ? null : discordButton(); if (btn) { btn.style.marginLeft = 'auto'; cta.appendChild(btn); }
+      w.appendChild(cta);
+    } else if (!S.account.show || S.account.hidden) {
+      const cta = el('div', 'rv-top');
+      const t = el('div'); t.append(el('h2', '', S.account.hidden ? 'You’re off the board' : 'You’re not on the board'), el('p', '', S.account.hidden ? 'The owners took you off the leaderboard for now.' : 'Your XP still counts. Show up whenever you like.'));
+      cta.appendChild(t);
+      if (!S.account.hidden) { const b2 = el('button', 'btn main'); b2.type = 'button'; b2.textContent = 'Join'; b2.style.marginLeft = 'auto'; b2.onclick = () => openAccount(true); cta.appendChild(b2); }
+      w.appendChild(cta);
+    }
+    if (B.loading && !B.data) { w.appendChild(el('div', 'panel')).innerHTML = '<p class="muted" style="padding:20px 0;text-align:center"><span class="spin"></span> Loading the leaderboard…</p>'; thread.appendChild(w); return; }
+    if (B.err) { const p = el('div', 'panel'); p.appendChild(el('p', 'muted', B.err)); w.appendChild(p); thread.appendChild(w); return; }
+    const d = B.data; if (!d) { thread.appendChild(w); loadBoard(); return; }
+    const rows = d.rows || [];
+    if (!rows.length) {
+      const p = el('div', 'panel'); p.appendChild(el('p', 'muted', B.board === 'writers' ? 'Nobody has ' + d.min_lines + ' coached lines yet. Best writers need that many to count.' : B.period === 'week' ? 'Nobody’s on the board this week yet. Get coaching and take first place.' : 'Nobody’s on the board yet.'));
+      w.appendChild(p);
+    } else {
+      const pod = el('div', 'podium');
+      [1, 0, 2].forEach(k => {
+        const r = rows[k]; if (!r) { pod.appendChild(el('div')); return; }      // keeps first place in the middle
+        const c = el('div', 'pod p' + (k + 1) + (r.me ? ' me' : ''));
+        c.appendChild(el('div', 'medal', String(k + 1)));
+        c.appendChild(avatar(r.name, colorsFor(r.name), k === 0 ? 'lg' : '', absUrl(r.avatar)));
+        c.appendChild(el('b', '', r.name));
+        c.appendChild(el('div', 'val', boardValue(r, B.board)));
+        c.appendChild(el('small', '', level(r.xp || 0).name));
+        pod.appendChild(c);
+      });
+      w.appendChild(pod);
+      const list = el('div', 'panel'); list.style.padding = '6px';
+      rows.slice(3).forEach(r => list.appendChild(rankRow(r, B.board)));
+      if (rows.length > 3) w.appendChild(list);
+    }
+    if (d.me && d.me.rank && d.me.rank > 3 && !rows.slice(3).some(r => r.me)) {
+      const mine = el('div', 'panel'); mine.style.padding = '6px'; mine.appendChild(rankRow(d.me, B.board)); w.appendChild(mine);
+    }
+    const note = el('p', 'muted', 'XP comes from coached lines, finished drills, report cards and reviews, counted by the server: each only once, ' + ((S.account && S.account.xp_per_day) || 1500) + ' a day at most. ' + (B.period === 'week' ? 'The week started Monday (UTC).' : ''));
+    note.style.cssText = 'font-size:12px;margin:0';
+    w.appendChild(note);
+    thread.appendChild(w);
+  }
+  function rankRow(r, board) {
+    const row = el('div', 'rrow' + (r.me ? ' me' : ''));
+    row.appendChild(el('span', 'rk', '#' + r.rank));
+    row.appendChild(avatar(r.name || 'You', colorsFor(r.name || 'You'), 'sm', absUrl(r.avatar)));
+    const t = el('div', 't'); t.append(el('b', '', (r.name || 'You') + (r.me ? ' (you)' : '')), el('span', '', level(r.xp || 0).name + ' · ' + (r.lines || 0) + ' lines' + (r.best_grade ? ' · best ' + r.best_grade : '')));
+    row.appendChild(t);
+    row.appendChild(el('span', 'v', boardValue(r, board)));
+    if (r.ref && S.mode === 'server') {
+      const hide = el('button', 'btn c-red'); hide.type = 'button'; hide.textContent = 'Hide'; hide.title = 'Take them off the leaderboard';
+      hide.style.cssText = 'min-height:28px;padding:0 9px;font-size:12px';
+      hide.onclick = async () => {
+        if (!(await ask('Hide ' + r.name + '?', 'They come off the leaderboard. Their XP stays.', 'Hide'))) return;
+        try { const res = await fetch('/api/sbs/velvet/hide', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ref: r.ref }) }); if (!res.ok) throw new Error(); S.board.data = null; loadBoard(); }
+        catch (e) { toast('Couldn’t hide them. Try again.', 'err'); }
+      };
+      row.appendChild(hide);
+    }
+    return row;
+  }
+  function ranksPanel() {
+    const c = $('coach'); c.innerHTML = '';
+    const body = panelHead(c, 'You', 'trophy', 'c-amber', null);
+    const p = el('div', 'panel');
+    if (signedIn()) {
+      const st = S.account.stats || {};
+      p.appendChild(el('h4', '', S.account.name || S.account.discord_name || 'Your card'));
+      const ring = el('div', 'ring-row');
+      ring.appendChild(ringEl(st.avg != null ? st.avg : null, 'average'));
+      const facts = el('div', 'dims');
+      [['XP', st.xp || 0], ['This week', S.account.rank_week ? '#' + S.account.rank_week : '–'], ['All time', S.account.rank_all ? '#' + S.account.rank_all : '–'], ['Streak', (st.streak || 0) + ' day' + (st.streak === 1 ? '' : 's')], ['Best grade', st.best_grade || '–']].forEach(x => {
+        const row = el('div', 'dim'); row.style.gridTemplateColumns = '74px 1fr'; row.append(el('span', '', x[0]), el('b', '', String(x[1]))); row.lastChild.style.textAlign = 'left'; facts.appendChild(row);
+      });
+      ring.appendChild(facts); p.appendChild(ring);
+      const b = el('button', 'btn tint c-amber block'); b.type = 'button'; b.innerHTML = icon('user') + 'Your leaderboard card'; b.style.marginTop = '10px'; b.onclick = () => openAccount(false);
+      p.appendChild(b);
+    } else {
+      p.appendChild(el('h4', '', 'Not signed in'));
+      p.appendChild(el('p', 'muted', S.mode === 'server' ? 'Log in with your SBS login to join the leaderboard.' : 'Sign in with Discord to put your XP on the leaderboard. Velvet only sees your Discord name and picture, and shows neither unless you say so.'));
+      if (S.mode !== 'server') { const d = discordButton(); d.classList.add('block'); d.style.marginTop = '10px'; p.appendChild(d); }
+    }
+    body.appendChild(p);
+    const how = el('div', 'panel'); how.appendChild(el('h4', '', 'How XP works'));
+    const ul = el('ul', 'rlist'); ul.style.fontSize = '13px';
+    ['Every coached line: 5 XP, more for a strong one (8 for 8+, 15 for 9+)', 'A finished drill: 100 XP', 'A report card: 25 XP plus up to 60 for the grade', 'A review: 20 XP', 'Each counts once. Up to ' + ((S.account && S.account.xp_per_day) || 1500) + ' XP a day.'].forEach(x => ul.appendChild(el('li', '', x)));
+    how.appendChild(ul); body.appendChild(how);
+    const bw = el('div', 'panel'); bw.appendChild(el('h4', '', 'Best writers'));
+    bw.appendChild(el('p', 'muted', 'Ranked by the coach’s average score, once you have ' + ((S.board.data && S.board.data.min_lines) || 20) + ' coached lines.'));
+    body.appendChild(bw);
+  }
+
   // ---------------------------------------------------------------- the section dispatchers
-  function renderHead() { if (S.view === 'live') liveHead(); else if (S.view === 'review') reviewHead(); else if (S.view === 'cast') castHead(); else practiceHead(); }
-  function renderThread(keep) { if (S.view === 'live') liveThread(keep); else if (S.view === 'review') reviewMain(); else if (S.view === 'cast') castMain(); else practiceThread(keep); }
-  function renderCoach() { if (S.view === 'live') liveCoach(); else if (S.view === 'practice') practiceCoach(); else sideTips(); }
+  function renderHead() { if (S.view === 'live') liveHead(); else if (S.view === 'review') reviewHead(); else if (S.view === 'cast') castHead(); else if (S.view === 'ranks') ranksHead(); else practiceHead(); }
+  function renderThread(keep) { if (S.view === 'live') liveThread(keep); else if (S.view === 'review') reviewMain(); else if (S.view === 'cast') castMain(); else if (S.view === 'ranks') rankMain(); else practiceThread(keep); }
+  function renderCoach() { if (S.view === 'live') liveCoach(); else if (S.view === 'practice') practiceCoach(); else if (S.view === 'ranks') ranksPanel(); else sideTips(); }
   function renderComposer() {
     if (S.view === 'live') return liveComposer();
     $('whoWrap').hidden = true; $('shotBtn').hidden = true; $('suggestBtn').hidden = true; $('suggestWrap').hidden = true;
@@ -3909,12 +4251,12 @@
   $('settingsBtn').onclick = () => openSettings(false);
   $('themeBtn').innerHTML = icon('moon');
   $('themeBtn').onclick = toggleTheme;
-  ['newClose', 'setClose', 'repClose', 'castClose', 'liveClose', 'shotClose', 'enhClose', 'advClose'].forEach(id => { $(id).innerHTML = icon('x'); });
+  ['newClose', 'setClose', 'repClose', 'castClose', 'liveClose', 'shotClose', 'enhClose', 'advClose', 'acctClose'].forEach(id => { $(id).innerHTML = icon('x'); });
   document.querySelectorAll('[data-close]').forEach(b => { b.addEventListener('click', () => { const s = b.closest('.sheet'); if (s) s.hidden = true; }); });
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
     if (!$('askSheet').hidden) { $('askNo').click(); return; }
-    ['newSheet', 'settingsSheet', 'reportSheet', 'castSheet', 'liveSheet', 'shotSheet', 'enhanceSheet', 'adviceSheet'].forEach(id => { $(id).hidden = true; });
+    ['newSheet', 'settingsSheet', 'reportSheet', 'castSheet', 'liveSheet', 'shotSheet', 'enhanceSheet', 'adviceSheet', 'acctSheet'].forEach(id => { $(id).hidden = true; });
     hideEnhFloat();
     closeDrawers(); closeMenu();
   });

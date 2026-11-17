@@ -12,6 +12,8 @@ Practise erotic roleplay, get reply ideas while you roleplay with real people, a
 
 **Cast.** Your personas (upload a picture or make a portrait, let the picture describe their look, or invent one from an idea), the people you roleplay with (their profile, their SBS Kink List and where it meets yours, your notes and their grades), and you.
 
-It's free and needs no key or account: everything runs through the SBS server, and nothing is kept there. Your scenes, people, reviews and progress stay in your own browser. If the server can't be reached, practice scenes still work with your own [Venice AI](https://venice.ai/settings/api) key, which goes only to api.venice.ai. SBS members also find Velvet on the SBS desktop.
+**Leaderboard.** Sign in with Discord to put your XP on the leaderboard: this week, all time, best writers and streaks. XP comes from coached lines, finished drills, report cards and reviews, counted by the server. Nobody shows up until they pick a name for it, and your Discord picture only if you choose.
+
+It's free and needs no key or account to play: everything runs through the SBS server, and nothing is kept there. Your scenes, people, reviews and progress stay in your own browser. If the server can't be reached, practice scenes still work with your own [Venice AI](https://venice.ai/settings/api) key, which goes only to api.venice.ai. SBS members also find Velvet on the SBS desktop.
 
 For adults only. Every character in Velvet is an adult, and it won't write anyone under 18.
