@@ -1,0 +1,2316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'self' https://sbsbot.my.pebble.host https://api.venice.ai; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="dark light">
+<title>Velvet</title>
+<meta name="description" content="Practise erotic roleplay with a partner who plays along and a coach who helps you get better. Adults only. Venice AI.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23fb7185'/%3E%3Cstop offset='1' stop-color='%23881337'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Cpath d='M32 47s-15-8.6-15-19a8 8 0 0115-4 8 8 0 0115 4c0 10.4-15 19-15 19z' fill='%23fff'/%3E%3C/svg%3E">
+<!--
+  Velvet. One page, two homes:
+    * on the SBS site (/velvet) it talks to /api/sbs/velvet with the member's login and the server's key
+    * on GitHub Pages it is free through the SBS server's public route (the key never leaves the server)
+    * if that can't be reached, it asks for the visitor's own Venice key and calls Venice directly
+  Scenes, progress and settings live only in this browser. The server builds its own prompts from the scene's
+  fields; this page keeps a copy (between the "prompts" markers) for the bring-your-own-key mode.
+-->
+<style>
+  :root {
+    --bg: #faf6f7; --panel: #ffffff; --panel2: #fbf7f8; --ink: #1f1418; --muted: #6f5a62; --faint: #9c8890; --line: #ead9df;
+    --accent: #be123c; --accent-ink: #ffffff; --accent-soft: #fde7ee; --gold: #a16207; --gold-soft: #fef3c7;
+    --me: #be123c; --me-ink: #fff7f8; --bot: #f6eef1; --ooc: #7c6a72;
+    --yellow: #b45309; --yellow-soft: #fef3c7; --red: #b91c1c; --red-soft: #fee2e2; --ok: #15803d;
+    --violet: #7c3aed; --violet-soft: #ede9fe; --teal: #0f766e; --teal-soft: #ccfbf1; --amber: #b45309; --amber-soft: #fef3c7;
+    --err-bg: #fdecec; --err: #9f1d1d; --shadow: 0 18px 50px rgba(60,10,25,0.14); --scrim: rgba(20,6,12,0.45);
+    --glow: radial-gradient(900px 520px at 85% -15%, rgba(190,18,60,0.09), transparent 60%);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0c0608; --panel: #160c10; --panel2: #120a0d; --ink: #f7ecef; --muted: #b9a1a9; --faint: #7d6870; --line: #2e1c23;
+      --accent: #fb7185; --accent-ink: #1a0509; --accent-soft: rgba(251,113,133,0.12); --gold: #f6c177; --gold-soft: rgba(246,193,119,0.12);
+      --me: #8f1236; --me-ink: #fff1f4; --bot: #1d1116; --ooc: #a8949b;
+      --yellow: #fbbf24; --yellow-soft: rgba(251,191,36,0.14); --red: #f87171; --red-soft: rgba(248,113,113,0.15); --ok: #4ade80;
+      --violet: #a78bfa; --violet-soft: rgba(167,139,250,0.14); --teal: #2dd4bf; --teal-soft: rgba(45,212,191,0.13); --amber: #fbbf24; --amber-soft: rgba(251,191,36,0.13);
+      --err-bg: rgba(220,38,38,0.16); --err: #fecaca; --shadow: 0 18px 50px rgba(0,0,0,0.55); --scrim: rgba(0,0,0,0.6);
+      --glow: radial-gradient(900px 520px at 85% -15%, rgba(190,18,60,0.22), transparent 60%);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0c0608; --panel: #160c10; --panel2: #120a0d; --ink: #f7ecef; --muted: #b9a1a9; --faint: #7d6870; --line: #2e1c23;
+    --accent: #fb7185; --accent-ink: #1a0509; --accent-soft: rgba(251,113,133,0.12); --gold: #f6c177; --gold-soft: rgba(246,193,119,0.12);
+    --me: #8f1236; --me-ink: #fff1f4; --bot: #1d1116; --ooc: #a8949b;
+    --yellow: #fbbf24; --yellow-soft: rgba(251,191,36,0.14); --red: #f87171; --red-soft: rgba(248,113,113,0.15); --ok: #4ade80;
+    --violet: #a78bfa; --violet-soft: rgba(167,139,250,0.14); --teal: #2dd4bf; --teal-soft: rgba(45,212,191,0.13); --amber: #fbbf24; --amber-soft: rgba(251,191,36,0.13);
+    --err-bg: rgba(220,38,38,0.16); --err: #fecaca; --shadow: 0 18px 50px rgba(0,0,0,0.55); --scrim: rgba(0,0,0,0.6);
+    --glow: radial-gradient(900px 520px at 85% -15%, rgba(190,18,60,0.22), transparent 60%);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--glow), var(--bg); background-color: var(--bg); color: var(--ink); font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
+  [hidden] { display: none !important; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  a { color: var(--accent); }
+  svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .story { font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif; }
+
+  /* ---- layout */
+  .app { display: grid; grid-template-columns: 272px minmax(0, 1fr) 336px; height: 100vh; height: 100dvh; }
+  .side, .coach { background: var(--panel2); display: flex; flex-direction: column; min-height: 0; }
+  .side { border-right: 1px solid var(--line); }
+  .coach { border-left: 1px solid var(--line); }
+  .mid { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 40; }
+  .only-narrow, .only-mid { display: none !important; }
+  @media (max-width: 1179px) {
+    .app { grid-template-columns: minmax(0, 1fr) 320px; }
+    .side { position: fixed; z-index: 50; left: 0; top: 0; bottom: 0; width: min(300px, 86vw); transform: translateX(-104%); transition: transform .22s ease; box-shadow: var(--shadow); }
+    .side.open { transform: none; }
+    .only-mid { display: inline-flex !important; }
+  }
+  @media (max-width: 859px) {
+    .app { grid-template-columns: minmax(0, 1fr); }
+    .coach { position: fixed; z-index: 50; right: 0; top: 0; bottom: 0; width: min(360px, 92vw); transform: translateX(104%); transition: transform .22s ease; box-shadow: var(--shadow); }
+    .coach.open { transform: none; }
+    .only-narrow { display: inline-flex !important; }
+  }
+  @media (prefers-reduced-motion: reduce) { .side, .coach { transition: none; } }
+
+  /* ---- buttons */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 36px; padding: 0 13px; border-radius: 11px; border: 1px solid var(--line); background: var(--panel); white-space: nowrap; text-decoration: none; color: var(--ink); }
+  .btn:hover { border-color: var(--c, var(--accent)); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn.main { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 650; }
+  .btn.tint { background: var(--cs, var(--accent-soft)); border-color: transparent; color: var(--c, var(--accent)); font-weight: 600; }
+  .btn.tint:hover { border-color: var(--c, var(--accent)); }
+  .btn.block { width: 100%; }
+  .ib { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 36px; height: 36px; padding: 0 9px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); color: var(--c, var(--ink)); white-space: nowrap; }
+  .ib:hover { border-color: var(--c, var(--accent)); }
+  .ib:disabled { opacity: 0.4; cursor: not-allowed; }
+  .ib .lbl { font-size: 13px; font-weight: 600; }
+  .ib.on { background: var(--cs, var(--accent-soft)); border-color: var(--c, var(--accent)); }
+  .c-rose { --c: var(--accent); --cs: var(--accent-soft); }
+  .c-gold { --c: var(--gold); --cs: var(--gold-soft); }
+  .c-violet { --c: var(--violet); --cs: var(--violet-soft); }
+  .c-teal { --c: var(--teal); --cs: var(--teal-soft); }
+  .c-amber { --c: var(--amber); --cs: var(--amber-soft); }
+  .c-yellow { --c: var(--yellow); --cs: var(--yellow-soft); }
+  .c-red { --c: var(--red); --cs: var(--red-soft); }
+  .c-slate { --c: var(--muted); --cs: rgba(127,127,127,0.12); }
+
+  /* ---- sidebar */
+  .brand { display: flex; align-items: center; gap: 10px; padding: 16px 16px 10px; }
+  .logo { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, #fb7185, #881337); display: grid; place-items: center; box-shadow: 0 6px 18px rgba(190,18,60,0.35); }
+  .logo svg { width: 20px; height: 20px; fill: #fff; stroke: none; }
+  .brand b { font-size: 19px; letter-spacing: 0.01em; font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; }
+  .brand small { display: block; color: var(--muted); font-size: 11.5px; margin-top: -2px; }
+  .xp { margin: 4px 14px 12px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
+  .xp .row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .xp .lvl { font-weight: 700; }
+  .xp .pts { color: var(--muted); font-size: 12px; }
+  .bar { height: 7px; border-radius: 99px; background: var(--line); overflow: hidden; margin-top: 8px; }
+  .bar > i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent), var(--gold)); width: 0; transition: width .4s ease; }
+  .xp .stats { display: flex; gap: 12px; margin-top: 9px; color: var(--muted); font-size: 12px; }
+  .xp .stats b { color: var(--ink); }
+  .side .acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 14px 12px; }
+  .side .acts .btn { padding: 0 8px; min-width: 0; font-size: 13px; gap: 6px; }
+  .side h3 { margin: 6px 16px 6px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
+  .scenes { flex: 1; min-height: 0; overflow-y: auto; padding: 0 8px 8px; }
+  .scene-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px; border: 1px solid transparent; border-radius: 12px; background: none; text-align: left; }
+  .scene-item:hover { background: var(--panel); border-color: var(--line); }
+  .scene-item[aria-current="true"] { background: var(--panel); border-color: var(--accent); }
+  .scene-item .t { min-width: 0; flex: 1; }
+  .scene-item .t b { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .scene-item .t span { display: block; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .empty-note { color: var(--muted); font-size: 12.5px; padding: 6px 10px; }
+  .side-foot { display: flex; align-items: center; gap: 6px; padding: 10px 12px; border-top: 1px solid var(--line); }
+  .side-foot .left { flex: 1; color: var(--muted); font-size: 12px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .av { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 15px; background: linear-gradient(135deg, var(--a1, #fb7185), var(--a2, #881337)); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15); font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; }
+  .av.sm { width: 30px; height: 30px; font-size: 13px; }
+  .av.lg { width: 64px; height: 64px; font-size: 26px; }
+
+  /* ---- scene header */
+  .head { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-bottom: 1px solid var(--line); background: var(--panel); min-height: 58px; }
+  .head .who { min-width: 0; flex: 1; }
+  .head .who b { display: block; font-size: 15.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .head .who span { display: block; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .safe { display: inline-flex; gap: 6px; }
+  .safe .ib { font-weight: 700; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); flex: none; }
+  @media (max-width: 560px) { .safe .lbl, .head .hide-sm { display: none; } }
+  .menu { position: absolute; z-index: 60; min-width: 230px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 6px; }
+  .menu button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px; border: 0; border-radius: 8px; background: none; text-align: left; color: var(--c, var(--ink)); }
+  .menu button:hover { background: var(--bot); }
+
+  /* ---- thread */
+  .thread { flex: 1; min-height: 0; overflow-y: auto; scroll-behavior: auto; padding: 18px 16px 10px; }
+  .inner { max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+  .scene-card { display: flex; gap: 14px; align-items: center; padding: 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); }
+  .scene-card .t { min-width: 0; }
+  .scene-card b { font-size: 17px; }
+  .scene-card p { margin: 3px 0 7px; color: var(--muted); font-size: 13px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; padding: 2px 9px; border-radius: 99px; background: var(--cs, var(--bot)); color: var(--c, var(--muted)); font-weight: 600; }
+  .msg { display: flex; gap: 10px; align-items: flex-end; }
+  .msg.you { justify-content: flex-end; }
+  .msg .col { display: flex; flex-direction: column; gap: 4px; max-width: min(620px, 86%); min-width: 0; }
+  .msg.you .col { align-items: flex-end; }
+  .bubble { padding: 10px 14px; border-radius: 18px; background: var(--bot); white-space: pre-wrap; word-break: break-word; font-size: 15.5px; line-height: 1.55; }
+  .msg.partner .bubble { border-bottom-left-radius: 6px; }
+  .msg.you .bubble { background: var(--me); color: var(--me-ink); border-bottom-right-radius: 6px; }
+  .act { font-style: italic; color: var(--accent); }
+  .msg.you .bubble .act { color: inherit; opacity: 0.86; }
+  .say { font-weight: 500; }
+  .ooc { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 13px; color: var(--ooc); }
+  .msg.you .bubble .ooc { color: inherit; opacity: 0.75; }
+  .bubble.ooc-only { background: transparent; border: 1px dashed var(--line); }
+  .msg.you .bubble.ooc-only { background: transparent; color: var(--muted); border-color: var(--line); }
+  .bubble.safe-red { background: var(--red-soft) !important; color: var(--red) !important; font-weight: 700; font-family: system-ui, sans-serif; }
+  .bubble.safe-yellow { background: var(--yellow-soft) !important; color: var(--yellow) !important; font-weight: 700; font-family: system-ui, sans-serif; }
+  .bubble.err { background: var(--err-bg); color: var(--err); font-family: system-ui, sans-serif; font-size: 14px; }
+  .bubble textarea { width: min(560px, 70vw); min-height: 90px; resize: vertical; border: 1px solid var(--line); border-radius: 10px; padding: 8px; background: var(--panel); color: var(--ink); font-size: 15px; font-family: inherit; }
+  .caret::after { content: ""; display: inline-block; width: 7px; height: 1.05em; margin-left: 2px; vertical-align: -2px; background: var(--accent); border-radius: 1px; animation: blink 1s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .typing { display: inline-flex; gap: 4px; padding: 4px 2px; }
+  .typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); animation: bob 1.2s infinite ease-in-out; }
+  .typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
+  @keyframes bob { 0%, 60%, 100% { transform: translateY(0); opacity: .5; } 30% { transform: translateY(-4px); opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .typing i, .caret::after { animation: none; } }
+  .macts { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; opacity: 0; transition: opacity .15s; }
+  .msg:hover .macts, .msg:focus-within .macts, .msg.last .macts { opacity: 1; }
+  @media (hover: none) { .macts { opacity: 1; } }
+  .macts button { display: inline-flex; align-items: center; gap: 4px; border: 0; background: none; color: var(--faint); padding: 4px 6px; border-radius: 7px; font-size: 12px; }
+  .macts button:hover { color: var(--ink); background: var(--bot); }
+  .macts svg.i { width: 15px; height: 15px; }
+  .macts .alt { color: var(--muted); font-size: 12px; padding: 0 2px; }
+  .score-chip { display: inline-flex; align-items: center; gap: 4px; border: 0; padding: 2px 9px !important; border-radius: 99px !important; font-weight: 700; font-size: 12px !important; color: var(--c) !important; background: var(--cs) !important; }
+  .note { align-self: center; text-align: center; color: var(--muted); font-size: 12.5px; padding: 4px 12px; border-radius: 99px; background: var(--bot); max-width: 90%; }
+  .note.gold { color: var(--gold); background: var(--gold-soft); font-weight: 600; cursor: pointer; border: 0; }
+
+  /* ---- welcome */
+  .welcome { max-width: 760px; margin: 0 auto; padding: 18px 4px 30px; }
+  .hero { text-align: center; padding: 18px 10px 8px; }
+  .hero .logo { width: 64px; height: 64px; border-radius: 20px; margin: 0 auto 12px; }
+  .hero .logo svg { width: 36px; height: 36px; }
+  .hero h1 { margin: 0; font-size: 34px; letter-spacing: 0.01em; font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; }
+  .hero p { margin: 8px auto 16px; max-width: 520px; color: var(--muted); font-size: 15px; }
+  .hero .cta { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .welcome h2 { margin: 26px 0 10px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+  .drill-card { text-align: left; padding: 12px 13px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); display: flex; flex-direction: column; gap: 4px; }
+  .drill-card:hover { border-color: var(--c); }
+  .drill-card .top { display: flex; align-items: center; gap: 8px; font-weight: 650; color: var(--ink); }
+  .drill-card .top span { width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; background: var(--cs); color: var(--c); flex: none; }
+  .drill-card small { color: var(--muted); font-size: 12.5px; line-height: 1.4; }
+  .how { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+  .how div { padding: 12px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+  .how b { display: block; color: var(--ink); margin-bottom: 2px; }
+
+  /* ---- ideas + composer */
+  .ideas { max-width: 812px; width: 100%; margin: 0 auto; padding: 0 16px 6px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 700px) { .ideas { grid-template-columns: minmax(0, 1fr); } }
+  .idea { text-align: left; border: 1px solid var(--line); border-left: 3px solid var(--c); background: var(--panel); border-radius: 12px; padding: 8px 10px; font-size: 13.5px; line-height: 1.45; max-height: 150px; overflow: auto; }
+  .idea:hover { border-color: var(--c); }
+  .idea b { display: block; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--c); margin-bottom: 3px; }
+  .ideas-head { max-width: 812px; width: 100%; margin: 0 auto; padding: 4px 16px 6px; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+  .ideas-head button { margin-left: auto; border: 0; background: none; color: var(--muted); text-decoration: underline; padding: 0; }
+  .nudges { max-width: 812px; width: 100%; margin: 0 auto; padding: 2px 16px 6px; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+  .nudges::-webkit-scrollbar { display: none; }
+  .chip { flex: none; border: 1px solid var(--line); background: var(--panel); border-radius: 99px; padding: 5px 12px; font-size: 12.5px; white-space: nowrap; color: var(--ink); }
+  .chip:hover { border-color: var(--c, var(--accent)); }
+  .chip:disabled { opacity: 0.45; cursor: not-allowed; }
+  .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .composer { max-width: 812px; width: 100%; margin: 0 auto; padding: 4px 16px calc(12px + env(safe-area-inset-bottom)); }
+  .box { border: 1px solid var(--line); border-radius: 16px; background: var(--panel); padding: 6px; transition: border-color .15s; }
+  .box:focus-within { border-color: var(--accent); }
+  .box.ooc { border-style: dashed; }
+  .box textarea { display: block; width: 100%; resize: none; border: 0; outline: 0; background: transparent; padding: 8px 9px 4px; min-height: 44px; max-height: 180px; font-size: 15.5px; line-height: 1.5; color: var(--ink); }
+  .box .bar2 { display: flex; align-items: center; gap: 6px; padding: 2px; }
+  .box .bar2 .ib { height: 32px; min-width: 32px; border-color: transparent; background: transparent; }
+  .box .bar2 .ib:hover { background: var(--cs, var(--bot)); }
+  .box .bar2 .ib.on { background: var(--cs); }
+  .box .grow { flex: 1; }
+  .send { height: 38px; min-width: 38px; padding: 0 14px; border-radius: 12px; border: 0; background: var(--accent); color: var(--accent-ink); display: inline-flex; align-items: center; gap: 6px; font-weight: 650; }
+  .send:disabled { opacity: 0.4; cursor: not-allowed; }
+  .send.stop { background: var(--ink); color: var(--bg); }
+  .hintline { color: var(--faint); font-size: 11.5px; padding: 5px 4px 0; display: flex; gap: 10px; flex-wrap: wrap; }
+  @media (max-width: 560px) { .box .bar2 .lbl { display: none; } .hintline { display: none; } }
+
+  /* ---- coach */
+  .coach-head { display: flex; align-items: center; gap: 8px; padding: 14px 14px 10px; }
+  .coach-head b { font-size: 15px; flex: 1; }
+  .switch { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--muted); cursor: pointer; user-select: none; }
+  .switch input { appearance: none; -webkit-appearance: none; width: 34px; height: 20px; border-radius: 99px; background: var(--line); position: relative; cursor: pointer; margin: 0; transition: background .15s; }
+  .switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .15s; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+  .switch input:checked { background: var(--teal); }
+  .switch input:checked::after { transform: translateX(14px); }
+  .coach-body { flex: 1; min-height: 0; overflow-y: auto; padding: 0 14px 14px; display: flex; flex-direction: column; gap: 12px; }
+  .panel { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); padding: 12px; }
+  .panel h4 { margin: 0 0 8px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); display: flex; align-items: center; gap: 6px; }
+  .ring-row { display: flex; align-items: center; gap: 14px; }
+  .ring { position: relative; width: 78px; height: 78px; flex: none; }
+  .ring svg { width: 78px; height: 78px; transform: rotate(-90deg); }
+  .ring circle { fill: none; stroke-width: 7; }
+  .ring .bg { stroke: var(--line); }
+  .ring .fg { stroke: url(#ringGrad); stroke-linecap: round; transition: stroke-dashoffset .5s ease; }
+  .ring .num { position: absolute; inset: 0; display: grid; place-items: center; font-size: 22px; font-weight: 750; }
+  .ring .num small { display: block; font-size: 10px; color: var(--muted); font-weight: 600; text-align: center; margin-top: -4px; }
+  .dims { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .dim { display: grid; grid-template-columns: 74px 1fr 22px; gap: 7px; align-items: center; font-size: 12px; color: var(--muted); }
+  .dim .track { height: 6px; border-radius: 99px; background: var(--line); overflow: hidden; }
+  .dim .track i { display: block; height: 100%; border-radius: 99px; background: var(--c); width: 0; transition: width .5s ease; }
+  .dim b { color: var(--ink); text-align: right; font-size: 12px; }
+  .fb p { margin: 0 0 8px; font-size: 13.5px; line-height: 1.5; }
+  .fb p b { color: var(--c); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 1px; }
+  .fb .better { border-left: 3px solid var(--gold); padding: 6px 10px; background: var(--gold-soft); border-radius: 0 10px 10px 0; font-size: 14px; white-space: pre-wrap; }
+  .fb .row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .fb .row .btn { min-height: 30px; padding: 0 10px; font-size: 12.5px; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .spin { width: 16px; height: 16px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--teal); animation: spin .9s linear infinite; display: inline-block; vertical-align: -3px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .drillp .bar > i { background: linear-gradient(90deg, var(--teal), var(--gold)); }
+  .kv { display: grid; grid-template-columns: 68px 1fr; gap: 6px 8px; align-items: center; font-size: 12.5px; }
+  .kv label { color: var(--muted); }
+  .kv select, .panel textarea { width: 100%; border: 1px solid var(--line); border-radius: 9px; background: var(--bg); color: var(--ink); padding: 5px 8px; font-size: 13px; }
+  .panel textarea { resize: vertical; min-height: 60px; margin-top: 4px; }
+
+  /* ---- sheets */
+  .sheet { position: fixed; inset: 0; z-index: 80; background: var(--scrim); display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .card { width: min(480px, 100%); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); overflow: hidden; }
+  .card.wide { width: min(860px, 100%); }
+  .card-head { display: flex; align-items: center; gap: 10px; padding: 16px 18px 8px; }
+  .card-head h2 { margin: 0; font-size: 18px; flex: 1; }
+  .card-body { padding: 4px 18px 16px; overflow-y: auto; min-height: 0; }
+  .card-body > p { color: var(--muted); margin: 0 0 12px; }
+  .card-foot { display: flex; gap: 8px; justify-content: flex-end; align-items: center; padding: 12px 18px; border-top: 1px solid var(--line); background: var(--panel2); }
+  .card-foot .note2 { margin-right: auto; color: var(--muted); font-size: 12px; }
+  .sec { padding: 12px 0; border-top: 1px solid var(--line); }
+  .sec:first-child { border-top: 0; padding-top: 4px; }
+  .sec h3 { margin: 0 0 9px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+  .sec h3 small { color: var(--muted); font-weight: 400; font-size: 12px; }
+  .partners { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .pcard { position: relative; text-align: left; padding: 10px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--panel2); display: flex; flex-direction: column; gap: 6px; min-height: 108px; }
+  .pcard:hover { border-color: var(--faint); }
+  .pcard[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+  .pcard .r1 { display: flex; align-items: center; gap: 8px; }
+  .pcard .r1 b { display: block; font-size: 14px; }
+  .pcard .r1 span { display: block; font-size: 11.5px; color: var(--muted); }
+  .pcard small { color: var(--muted); font-size: 12px; line-height: 1.35; }
+  .pcard.add { align-items: center; justify-content: center; color: var(--muted); border-style: dashed; }
+  .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; margin-top: 10px; }
+  .fields .full { grid-column: 1 / -1; }
+  @media (max-width: 560px) { .fields { grid-template-columns: minmax(0, 1fr); } }
+  .f label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .f input, .f select, .f textarea { width: 100%; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); padding: 8px 10px; }
+  .f textarea { resize: vertical; min-height: 64px; }
+  details.tweak summary { cursor: pointer; color: var(--accent); font-size: 13px; margin-top: 10px; }
+  .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 11px; overflow: hidden; }
+  .seg button { border: 0; background: transparent; padding: 7px 12px; font-size: 13px; color: var(--ink); }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); font-weight: 650; }
+  .feel { display: grid; grid-template-columns: 70px 1fr; gap: 9px 10px; align-items: center; }
+  .feel > span { font-size: 12.5px; color: var(--muted); }
+  .feel .desc { grid-column: 2; color: var(--faint); font-size: 12px; margin-top: -4px; }
+  .chips2 { display: flex; flex-wrap: wrap; gap: 6px; }
+  .kl { display: flex; gap: 8px; }
+  .kl input { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); padding: 8px 10px; }
+  .tg { margin-top: 10px; }
+  .tg .lab { font-size: 12px; font-weight: 650; color: var(--c); margin-bottom: 5px; display: flex; gap: 6px; align-items: center; }
+  .tg .lab small { color: var(--faint); font-weight: 400; }
+  .tg .list { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+  .tg .t { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; padding: 3px 4px 3px 9px; border-radius: 99px; background: var(--cs); color: var(--ink); }
+  .tg .t button { border: 0; background: none; color: var(--muted); padding: 0 4px; font-size: 14px; line-height: 1; }
+  .tg input { border: 1px dashed var(--line); background: transparent; border-radius: 99px; padding: 3px 10px; font-size: 12px; width: 150px; color: var(--ink); }
+  .tg .more { border: 0; background: none; color: var(--accent); font-size: 12px; padding: 2px 4px; }
+  .check { display: flex; gap: 8px; align-items: center; font-size: 13px; margin-top: 8px; }
+  .report-top { display: flex; gap: 16px; align-items: center; }
+  .grade { width: 84px; height: 84px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 30px; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--accent), #881337); box-shadow: 0 10px 30px rgba(190,18,60,0.35); font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; }
+  .report-top h3 { margin: 0 0 4px; font-size: 18px; }
+  .rlist { margin: 6px 0 0; padding-left: 18px; }
+  .rlist li { margin: 3px 0; }
+  .quote { margin: 8px 0 0; padding: 10px 12px; border-left: 3px solid var(--gold); background: var(--gold-soft); border-radius: 0 12px 12px 0; white-space: pre-wrap; }
+  .toasts { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 90; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; width: min(560px, calc(100vw - 32px)); }
+  .toast { pointer-events: auto; background: var(--ink); color: var(--bg); padding: 9px 14px; border-radius: 12px; font-size: 13.5px; box-shadow: var(--shadow); text-align: center; }
+  .toast.err { background: var(--err-bg); color: var(--err); border: 1px solid var(--err); }
+  .toast.gold { background: linear-gradient(135deg, #f6c177, #e07a5f); color: #1a0509; font-weight: 650; }
+  @media (hover: none) { input, select, textarea { font-size: 16px !important; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fb7185"/><stop offset="1" stop-color="#f6c177"/></linearGradient></defs></svg>
+<div class="app" id="app">
+  <aside class="side" id="side" aria-label="Scenes">
+    <div class="brand"><div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.3-7.5-9.8A4.2 4.2 0 0112 8.1a4.2 4.2 0 017.5 2.6c0 5.5-7.5 9.8-7.5 9.8z"/></svg></div><div><b>Velvet</b><small>Roleplay practice</small></div></div>
+    <div class="xp" id="xp"></div>
+    <div class="acts">
+      <button class="btn tint c-rose" id="newBtn" type="button" title="Set up a new scene"></button>
+      <button class="btn tint c-gold" id="quickBtn" type="button" title="Jump straight into a scene with a random partner"></button>
+    </div>
+    <h3>Your scenes</h3>
+    <div class="scenes" id="scenes"></div>
+    <div class="side-foot">
+      <span class="left" id="left"></span>
+      <a class="ib c-rose" id="memberLink" href="https://sbsbot.my.pebble.host/desktop" target="_top" rel="noopener" title="SBS members use Velvet free on the SBS desktop" hidden><span class="lbl">SBS</span></a>
+      <button class="ib" id="settingsBtn" type="button" title="Settings" aria-label="Settings"></button>
+      <button class="ib" id="themeBtn" type="button" title="Light or dark" aria-label="Switch light or dark"></button>
+    </div>
+  </aside>
+
+  <main class="mid">
+    <header class="head" id="head"></header>
+    <div class="thread" id="thread" aria-live="polite"></div>
+    <div id="ideasWrap" hidden><div class="ideas-head"><span id="ideasNote">Tap one to use it. Make it yours before you send.</span><button type="button" id="ideasClose">Close</button></div><div class="ideas" id="ideas"></div></div>
+    <div class="nudges" id="nudges" role="group" aria-label="Steer the scene"></div>
+    <form class="composer" id="composer" autocomplete="off">
+      <div class="box" id="box">
+        <textarea id="input" rows="1" maxlength="4000" placeholder="Write your line. *Actions in asterisks*" aria-label="Your line"></textarea>
+        <div class="bar2">
+          <button class="ib c-rose" type="button" id="actBtn" title="Wrap in *asterisks* as an action"></button>
+          <button class="ib c-slate" type="button" id="oocBtn" title="Talk out of character (( like this ))" aria-pressed="false"></button>
+          <button class="ib c-amber" type="button" id="ideasBtn" title="Three ideas for your next line"></button>
+          <button class="ib c-violet" type="button" id="polishBtn" title="Make your draft more vivid"></button>
+          <span class="grow"></span>
+          <button class="send" id="sendBtn" type="submit" aria-label="Send" disabled></button>
+        </div>
+      </div>
+      <div class="hintline"><span>Enter sends · Shift+Enter new line</span><span>(( )) talks out of character</span><span>Yellow slows down · Red stops everything</span></div>
+    </form>
+  </main>
+
+  <aside class="coach" id="coach" aria-label="Coach"></aside>
+</div>
+<div class="scrim" id="scrim" hidden></div>
+<div class="toasts" id="toasts" aria-live="assertive"></div>
+
+<div class="sheet" id="newSheet" hidden>
+  <form class="card wide" id="newForm" autocomplete="off" novalidate>
+    <div class="card-head"><h2>New scene</h2><button class="ib" type="button" data-close aria-label="Close" id="newClose"></button></div>
+    <div class="card-body" id="newBody"></div>
+    <div class="card-foot"><span class="note2" id="newNote">Everyone in Velvet is an adult. Your scenes stay on this device.</span><button class="btn" type="button" data-close>Cancel</button><button class="btn main" type="submit" id="startBtn">Start scene</button></div>
+  </form>
+</div>
+
+<div class="sheet" id="settingsSheet" hidden>
+  <form class="card" id="settingsForm" autocomplete="off">
+    <div class="card-head"><h2>Settings</h2><button class="ib" type="button" data-close aria-label="Close" id="setClose"></button></div>
+    <div class="card-body" id="setBody"></div>
+    <div class="card-foot"><button class="btn main" type="submit">Done</button></div>
+  </form>
+</div>
+
+<div class="sheet" id="reportSheet" hidden>
+  <div class="card">
+    <div class="card-head"><h2>Report card</h2><button class="ib" type="button" data-close aria-label="Close" id="repClose"></button></div>
+    <div class="card-body" id="repBody"></div>
+    <div class="card-foot" id="repFoot"></div>
+  </div>
+</div>
+
+<div class="sheet" id="askSheet" hidden>
+  <div class="card">
+    <div class="card-head"><h2 id="askTitle"></h2></div>
+    <div class="card-body"><p id="askText"></p></div>
+    <div class="card-foot"><button class="btn" type="button" id="askNo">Cancel</button><button class="btn main" type="button" id="askYes">OK</button></div>
+  </div>
+</div>
+
+<div class="sheet" id="gate" hidden>
+  <div class="card">
+    <div class="card-head"><h2>Log in to use Velvet</h2></div>
+    <div class="card-body"><p>Velvet on the SBS site is for members. Log in with Discord and come back.</p></div>
+    <div class="card-foot"><a class="btn main" id="loginLink" href="/login?return_to=/velvet" target="_top">Log in with Discord</a></div>
+  </div>
+</div>
+
+<div class="sheet" id="ageGate" hidden>
+  <div class="card">
+    <div class="card-head"><h2>Adults only</h2></div>
+    <div class="card-body"><p>Velvet is for practising erotic roleplay, with sexual content. Confirm you are 18 or older to use it. Every character in Velvet is an adult too: it won't write anyone under 18.</p></div>
+    <div class="card-foot"><button class="btn main" id="ageYes" type="button">I am 18 or older</button></div>
+  </div>
+</div>
+
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+
+<script>
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const PUBLIC_API = 'https://sbsbot.my.pebble.host';
+
+  // ==== prompts start (the server keeps the same in handlers/velvet.py; tests/test_velvet.py compares them)
+  const MAX_MESSAGES = 400, MAX_MESSAGE = 4000, HISTORY_BUDGET = 48000;
+  const MODELS = [
+    ['glm-5-3-flash-uncensored', 'Rich: vivid, detailed scenes', 0.165, 0.55],
+    ['deepseek-v4-1-flash-1017-uncensored', 'Sharp: quick and clever', 0.33, 1.32],
+    ['venice-uncensored-role-play', 'Roleplay tuned', 0.5, 2.0],
+    ['venice-uncensored-1-2', 'Wild: the most uncensored', 0.2, 0.9],
+  ];
+  const COACH_MODEL = 'deepseek-v4-1-flash-1017-uncensored';
+  const VENICE_PARAMS = { include_venice_system_prompt: false, disable_thinking: true, strip_thinking_response: true };
+  const MINOR = new RegExp(
+    String.raw`\b(?:` +
+    String.raw`lol(?:i|is|icon|ita|itas)|shota(?:con)?s?|under-?aged?|jail-?bait|minors` +
+    String.raw`|under\s+(?:the\s+)?age\s+of\s+(?:1[0-8]|[1-9]|eighteen|consent)` +
+    String.raw`|(?:a|is|was|still|being|as|plays?|playing)\s+(?:a\s+)?minor(?!\s+(?:details?|things?|issues?|changes?|problems?|keys?` +
+    String.raw`|chords?|injur(?:y|ies)|adjustments?|roles?|inconvenience|tweaks?|points?|scratch|bruises?|setbacks?|league|part))` +
+    String.raw`|pre-?teens?|pre-?pubescent|pubescent|tweens?|tweenagers?` +
+    String.raw`|child|children|childlike|kids?|kiddies|kiddo|toddlers?|infants?|newborns?` +
+    String.raw`|teen|teens|teenage|teenaged|teenager|teenagers` +
+    String.raw`|school-?(?:girl|boy)s?|(?:little|young)[\s-]+(?:girl|boy)s?` +
+    String.raw`|(?:elementary|primary|middle|grade|junior[\s-]*high)[\s-]*school(?:ers?)?` +
+    String.raw`|high[\s-]*school(?:ers?|\s+(?:girl|boy|student|kid|freshman|sophomore)s?)` +
+    String.raw`|(?:1[0-2]|[1-9])(?:st|nd|rd|th)[\s-]*grade(?:rs?)?` +
+    String.raw`|(?:first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth)[\s-]*grade(?:rs?)?` +
+    String.raw`|(?:1[0-7]|[1-9])[\s-]*(?:years?|yrs?)[\s-]*old|(?:1[0-7]|[1-9])[\s-]*(?:yo|y/o)` +
+    String.raw`|(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen)` +
+    String.raw`[\s-]*(?:years?|yrs?)[\s-]*old` +
+    String.raw`|aged?\s+(?:1[0-7]|[1-9]|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen)(?!\d|\.\d)` +
+    String.raw`|(?:i'?m|i\s+am|she'?s|she\s+is|he'?s|he\s+is|they'?re|they\s+are|you'?re|you\s+are|turned|turning)\s+` +
+    String.raw`(?:only\s+|just\s+|barely\s+|almost\s+|nearly\s+)?` +
+    String.raw`(?:1[0-7]|[1-9]|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen)` +
+    String.raw`(?![\d'/%]|[.,:-]\d|\s*(?:percent|out\s+of|of\b|for\b|minutes?|mins?|hours?|hrs?|days?|weeks?|months?|` +
+    String.raw`years?\s+(?:ago|later|in|into|of|since|now|older|younger|together)|times?|inch(?:es)?|cm|feet|foot|ft\b|` +
+    String.raw`o'?clock|am\b|pm\b|a\.m|p\.m|dollars?|bucks|drinks?|shots?|glasses|beers?|steps?|rounds?|seconds?|secs?|` +
+    String.raw`miles?|km\b|met(?:er|re)s?|pounds?|lbs?|kg\b|points?|stars?|inches))` +
+    String.raw`|age[\s-]*play|ageplay|ddlg|mdlg|abdl|little[\s-]*space|littlespace|diapers?` +
+    String.raw`)\b`, 'i');
+  const ADULTS_ONLY = 'Velvet only writes scenes between adults. Take out anything that suggests someone under 18 (ages, school grades, kid or teen words, age play) and try again.';
+  function isMinorText(t) { return !!t && MINOR.test(t); }
+
+  const ROLES = ['dominant', 'submissive', 'switch'];
+  const HEATS = ['flirty', 'steamy', 'explicit'];
+  const PACES = ['slow', 'steady', 'fast'];
+  const STYLES = ['chat', 'paragraphs', 'novel'];
+  const PRONOUNS = { she: 'she/her', he: 'he/him', they: 'they/them' };
+  const ROLE_TEXT = {
+    dominant: "You lead. You set the pace, give clear direction, tease and take control, and you watch {you}'s reactions closely, rewarding what pleases you.",
+    submissive: "You follow {you}'s lead. You answer every touch and order vividly, ask permission, obey eagerly or resist playfully, and let them take control.",
+    switch: 'You read the moment: you take charge when {you} hesitates and yield when they take the lead.',
+  };
+  const YOU_ROLE = { dominant: 'likes to lead (dominant)', submissive: 'likes to follow (submissive)', switch: 'switches between leading and following' };
+  const HEAT_TEXT = {
+    flirty: 'Heat: flirty. Tension, banter, lingering looks and touches, innuendo. Kissing is as far as it goes on the page; if things go further, fade to black with a time skip.',
+    steamy: 'Heat: steamy. Sensual and sexual. When the scene turns to sex, write it with feeling and real detail, suggestive rather than graphic.',
+    explicit: "Heat: explicit. When the scene turns to sex, write it fully and graphically, with frank, direct language. Match {you}'s words and energy.",
+  };
+  const PACE_TEXT = {
+    slow: 'Pace: slow burn. Build anticipation. Escalate one small step at a time, and never faster than {you} does.',
+    steady: "Pace: steady. Let the scene build naturally, following {you}'s lead on how far and how fast.",
+    fast: 'Pace: fast. Move the scene forward boldly every turn and get to the heat quickly.',
+  };
+  const STYLE_TEXT = {
+    chat: "Format: like 3DXChat's in-game chat. 1 to 3 short lines, 300 characters at most in total. Actions in *asterisks* without your name (*leans in close*), speech as plain text. Casual and punchy.",
+    paragraphs: 'Format: 1 or 2 short paragraphs, under 120 words. Actions in *asterisks* in the third person, present tense; speech in "quotes".',
+    novel: 'Format: 2 to 4 rich paragraphs, up to 300 words, of vivid prose: the senses, body language, tension, a hint of your inner thoughts. Third person, present tense; speech in "quotes".',
+  };
+  const STYLE_SHORT = { chat: 'short in-game chat lines with *actions*', paragraphs: 'one or two short paragraphs', novel: 'rich novel-style prose' };
+  const MAX_TOKENS = { chat: 160, paragraphs: 350, novel: 750 };
+  const RULES = 'Rules that always apply:\n' +
+    '1. Everyone in this story is an adult, 18 or older, and so is everyone you mention. Never describe anyone as a child, as childlike or as under 18, and never use school-age settings. If {you} suggests anything like that, step out of the story with a short ((OOC)) note and refuse.\n' +
+    "2. Write only {name}. Never write {you}'s actions, words, thoughts or feelings, and never decide what they do or how they react. Leave every decision to them. End your turn with something {you} can react to.\n" +
+    '3. Safewords: if {you} writes "red", stop the scene at once. Step out of character in (( )), check in warmly, and don\'t carry on until they say so. If they write "yellow", slow right down, soften, and check in gently without leaving the story.\n' +
+    '4. Lines in (( )) are {you} talking out of character. Answer briefly in (( )), take their direction, then carry on in character if they want.\n' +
+    '5. Everything is consensual fiction between adults. Respect the boundaries completely: never bring in a hard limit, and only touch a soft limit after checking in.\n' +
+    '6. Stay in character. No disclaimers, no lectures, no summaries, no talk of being an AI. Keep the story moving and never repeat a line you have already used.';
+  const DRILLS = {
+    first_move: {
+      name: 'First move',
+      goal: 'Open the scene yourself: where you are, what you look like, the mood, and a hook your partner can answer.',
+      partner: 'Let them open. Answer with interest and leave them room to lead.',
+      coach: 'Did they set the place, their look and the mood, and give a clear hook? Progress is 25 for each.',
+      starts: 'you',
+    },
+    five_senses: {
+      name: 'Five senses',
+      goal: 'Use sight, sound, touch, smell and taste across your lines.',
+      partner: 'Give them rich moments for every sense to answer: scents, textures, sounds, tastes.',
+      coach: 'Count which of the five senses their lines have used so far. Progress is 20 for each sense used.',
+    },
+    slow_burn: {
+      name: 'Slow burn',
+      goal: 'Build tension over eight lines. Tease, hold back, and escalate one small step at a time.',
+      partner: 'Tempt them, but never escalate faster than they do.',
+      coach: 'Reward restraint, anticipation and small steps; mark down rushing. Progress grows with each patient line and reaches 100 after eight good ones.',
+      pace: 'slow',
+    },
+    talk_first: {
+      name: 'Talk first',
+      goal: 'Before the scene starts, agree on likes, limits and a safeword with your partner, out of character (( like this )).',
+      partner: 'Begin out of character in (( )). Ask about their likes, limits and a safeword, share yours, and only start the scene once you have agreed.',
+      coach: "Did they cover likes, limits and a safeword, and ask about the partner's? Progress is a third for each.",
+      opening: 'Start out of character in (( )): say hi, and ask {you} about likes, limits and a safeword before the scene begins. Share a little about yours.',
+      starts: 'partner',
+    },
+    lead: {
+      name: 'Take the lead',
+      goal: 'Lead the scene: confident, clear direction, and praise when your partner pleases you.',
+      partner: 'Follow their lead eagerly and react to every instruction, so they can practise leading.',
+      coach: "Confidence, clear direction, praise, and reading the partner's reactions.",
+      you_role: 'dominant', partner_role: 'submissive',
+    },
+    surrender: {
+      name: 'Let go',
+      goal: "Follow your partner's lead and show what every touch and order does to you.",
+      partner: 'Take charge clearly so they can practise following and reacting.',
+      coach: 'Vivid reactions that show rather than tell, playful resistance or eager obedience, staying responsive.',
+      you_role: 'submissive', partner_role: 'dominant',
+    },
+    say_it: {
+      name: 'Say it out loud',
+      goal: "Tell your partner exactly what you want, in your character's own words.",
+      partner: 'Invite them to say what they want, and react strongly when they do.',
+      coach: 'Directness, confidence, specific wants, and staying in character.',
+    },
+    read_room: {
+      name: 'Read the room',
+      goal: 'Your partner drops small hints about what they want. Notice them and answer them.',
+      partner: "Drop subtle cues about what you want or don't (a glance, a pause, a shiver, a half-said wish) without saying it outright. Warm up when they notice; cool slightly when they miss one.",
+      coach: "Did they notice and answer the partner's cues? Progress grows with each cue they pick up.",
+    },
+    aftercare: {
+      name: 'Aftercare',
+      goal: 'The scene has just ended. Bring your partner down gently, with warmth, care and check-ins.',
+      partner: 'You are tender and a little raw after an intense scene. Let their care land, and say what you need.',
+      coach: 'Warmth, check-ins, attentiveness, comfort, and listening.',
+      opening: "Open just after an intense scene has ended: you're both catching your breath. Show how you feel in a few tender details and let {you} take care of you.",
+      starts: 'partner',
+    },
+    speed_round: {
+      name: '3DX speed round',
+      goal: 'Short chat lines like in game, under 120 characters each, and still vivid.',
+      partner: 'Keep your own lines short and quick so the rhythm stays fast.',
+      coach: 'Impact in few words: vivid within 120 characters. Mark down long lines.',
+      style: 'chat',
+    },
+  };
+  const OPENING = "Open the scene. Set it in a few vivid details and give {you} something to react to. Don't act for {you}.";
+  const CONTINUE = "Continue your last reply from exactly where it stopped. Don't repeat anything.";
+  const COACH_SHAPE = '{"scores":{"detail":0,"voice":0,"initiative":0,"pacing":0,"chemistry":0},' +
+    '"praise":"what worked, under 25 words","tip":"one concrete improvement, under 25 words",' +
+    '"better":"their line rewritten stronger","drill":{"progress":0,"note":"under 20 words"}}';
+  const REPORT_SHAPE = '{"grade":"B+","headline":"under 12 words","scores":{"detail":0,"voice":0,"initiative":0,"pacing":0,' +
+    '"chemistry":0},"strengths":["...","..."],"work_on":["...","..."],"best_line":"...",' +
+    '"next_drill":"one drill id","why":"under 20 words"}';
+  const SCORE_GUIDE = 'Score from 1 to 10 on each of these:\n' +
+    '- detail: specific, sensory, vivid\n' +
+    '- voice: in character, sounds like a real person, fits their role\n' +
+    '- initiative: gives {name} something to answer and moves the scene on\n' +
+    "- pacing: fits the scene's pace and heat, neither rushing nor stalling\n" +
+    "- chemistry: answers {name}'s cues, builds tension, reads the room and consent\n" +
+    'Use the whole range: 5 is fine, 8 is strong, 10 is rare.';
+
+  const CONTROL = /[\x00-\x08\x0b-\x1f\x7f]+/g;
+  function fill(t, vals) { return t.replace(/\{(you|name)\}/g, (m, k) => vals[k]); }
+  function has(allowed, v) { return Array.isArray(allowed) ? allowed.indexOf(v) >= 0 : Object.prototype.hasOwnProperty.call(allowed, v); }
+  function cleanLine(v, n) { return String(v || '').replace(CONTROL, ' ').replace(/\n/g, ' ').replace(/[ \t]+/g, ' ').trim().slice(0, n); }
+  function cleanText(v, n) { return String(v || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(CONTROL, ' ').replace(/\n{3,}/g, '\n\n').trim().slice(0, n); }
+  function pick(v, allowed, def) { const s = String(v || '').trim().toLowerCase(); return s && has(allowed, s) ? s : def; }
+  function cleanList(v, items, size) {
+    items = items || 60; size = size || 80;
+    const out = [];
+    for (const x of (Array.isArray(v) ? v : []).slice(0, items * 2)) {
+      const t = cleanLine(x, size);
+      if (t && out.indexOf(t) < 0) out.push(t);
+      if (out.length >= items) break;
+    }
+    return out;
+  }
+  function flagged(extra) { const e = new Error(ADULTS_ONLY); e.data = Object.assign({ error: ADULTS_ONLY }, extra); return e; }
+  function cleanScene(raw) {
+    raw = raw && typeof raw === 'object' ? raw : {};
+    const p = raw.partner && typeof raw.partner === 'object' ? raw.partner : {};
+    const y = raw.you && typeof raw.you === 'object' ? raw.you : {};
+    let age = parseFloat(p.age || 25);
+    age = isFinite(age) ? Math.trunc(age) : 25;
+    if (age < 18) throw flagged({ flagged: 'scene', field: 'partner.age' });
+    const sc = {
+      partner: {
+        name: cleanLine(p.name, 40) || 'Your partner', age: Math.min(age, 99),
+        pronouns: pick(p.pronouns, PRONOUNS, 'she'), role: pick(p.role, ROLES, 'switch'),
+        look: cleanLine(p.look, 400), personality: cleanLine(p.personality, 400), voice: cleanLine(p.voice, 300),
+      },
+      you: { name: cleanLine(y.name, 40) || 'You', pronouns: pick(y.pronouns, PRONOUNS, 'they'), role: pick(y.role, ROLES, 'switch'), look: cleanLine(y.look, 400) },
+      setting: cleanText(raw.setting, 600), notes: cleanText(raw.notes, 1000),
+      heat: pick(raw.heat, HEATS, 'steamy'), pace: pick(raw.pace, PACES, 'steady'), style: pick(raw.style, STYLES, 'paragraphs'),
+      into: cleanList(raw.into), curious: cleanList(raw.curious), soft: cleanList(raw.soft), hard: cleanList(raw.hard),
+      drill: pick(raw.drill, DRILLS, ''),
+    };
+    const checks = [['partner.name', sc.partner.name], ['partner.look', sc.partner.look], ['partner.personality', sc.partner.personality],
+      ['partner.voice', sc.partner.voice], ['you.name', sc.you.name], ['you.look', sc.you.look], ['setting', sc.setting], ['notes', sc.notes]];
+    ['into', 'curious', 'soft'].forEach(k => checks.push([k, sc[k].join(' | ')]));
+    for (const c of checks) if (isMinorText(c[1])) throw flagged({ flagged: 'scene', field: c[0] });
+    return sc;
+  }
+  function cleanMessages(raw) {
+    const msgs = [];
+    (Array.isArray(raw) ? raw.slice(-MAX_MESSAGES) : []).forEach((m, i) => {
+      if (!m || typeof m !== 'object') return;
+      const who = m.who === 'partner' ? 'partner' : 'you';
+      const text = cleanText(m.text, MAX_MESSAGE);
+      if (!text) return;
+      if (isMinorText(text)) throw flagged({ flagged: 'message', index: i });
+      msgs.push({ who, text });
+    });
+    const kept = []; let total = 0;
+    for (let i = msgs.length - 1; i >= 0; i--) {
+      total += msgs[i].text.length;
+      if (kept.length && total > HISTORY_BUDGET) break;
+      kept.push(msgs[i]);
+    }
+    return kept.reverse();
+  }
+  function boundaries(sc) {
+    const you = sc.you.name, lines = [];
+    if (sc.into.length) lines.push('Into: ' + sc.into.join('; '));
+    if (sc.curious.length) lines.push('Curious about (go gently): ' + sc.curious.join('; '));
+    if (sc.soft.length) lines.push('Soft limits (only after checking in): ' + sc.soft.join('; '));
+    if (sc.hard.length) lines.push('Hard limits (never, not even mentioned): ' + sc.hard.join('; '));
+    if (!lines.length) return [];
+    return ['## Boundaries', you + "'s own list. After a · is the side " + you + ' plays; ♥ means they love it.'].concat(lines);
+  }
+  function partnerPrompt(sc) {
+    const p = sc.partner, y = sc.you, name = p.name, you = y.name, drill = DRILLS[sc.drill];
+    const sections = [
+      ['You are ' + name + ', in a private, adults-only erotic roleplay with ' + you + '. You write ' + name + "'s side of the scene, and only that."],
+      ['## ' + name,
+        name + ' is ' + p.age + ' (' + PRONOUNS[p.pronouns] + '). ' + fill(ROLE_TEXT[p.role], { you }),
+        p.look ? 'Looks: ' + p.look : '', p.personality ? 'Personality: ' + p.personality : '', p.voice ? 'How ' + name + ' talks: ' + p.voice : ''],
+      ['## ' + you, you + ' (' + PRONOUNS[y.pronouns] + ') is an adult who ' + YOU_ROLE[y.role] + '.' + (y.look ? ' Looks: ' + y.look : '')],
+      ['## The scene',
+        sc.setting ? 'Setting: ' + sc.setting : 'Setting: wherever the story takes you.',
+        sc.notes ? 'Remember: ' + sc.notes : '',
+        fill(HEAT_TEXT[sc.heat], { you }), fill(PACE_TEXT[sc.pace], { you }), STYLE_TEXT[sc.style]],
+      boundaries(sc),
+      drill ? ['## Practice', you + ' is practising "' + drill.name + '": ' + drill.goal + ' ' + drill.partner] : [],
+      [fill(RULES, { you, name })],
+    ];
+    return sections.filter(s => s.some(Boolean)).map(s => s.filter(Boolean).join('\n')).join('\n\n');
+  }
+  function transcript(sc, msgs, limit) {
+    const names = { you: sc.you.name, partner: sc.partner.name }, lines = [];
+    let total = 0;
+    for (let i = msgs.length - 1; i >= 0; i--) {
+      const l = names[msgs[i].who] + ': ' + msgs[i].text;
+      total += l.length + 2;
+      if (lines.length && total > limit) break;
+      lines.push(l);
+    }
+    return lines.reverse().join('\n\n');
+  }
+  function sceneBrief(sc) {
+    const p = sc.partner, y = sc.you;
+    return y.name + ' (' + PRONOUNS[y.pronouns] + ') ' + YOU_ROLE[y.role] + ', playing opposite ' + p.name + ' (' + p.role + '). Heat: ' + sc.heat +
+      '. Pace: ' + sc.pace + '. Format: ' + STYLE_SHORT[sc.style] + '.' + (sc.setting ? ' Setting: ' + sc.setting : '');
+  }
+  function chatMessages(task, sc, msgs) {
+    const you = sc.you.name;
+    const out = [{ role: 'system', content: partnerPrompt(sc) }];
+    const turns = task === 'opening' ? [] : msgs;
+    if (task === 'opening' || !turns.length) {
+      const drill = DRILLS[sc.drill] || {};
+      out.push({ role: 'user', content: '((' + fill(drill.opening || OPENING, { you }) + '))' });
+    } else if (turns[0].who === 'partner') {
+      out.push({ role: 'user', content: '((' + fill(OPENING, { you }) + '))' });
+    }
+    for (const m of turns) {
+      const role = m.who === 'partner' ? 'assistant' : 'user';
+      if (out[out.length - 1].role === role) out[out.length - 1].content += '\n\n' + m.text;
+      else out.push({ role, content: m.text });
+    }
+    if (out[out.length - 1].role === 'assistant') out.push({ role: 'user', content: '((' + CONTINUE + '))' });
+    return out;
+  }
+  function jsonMessages(task, sc, msgs, draft) {
+    draft = draft || '';
+    const name = sc.partner.name, you = sc.you.name, brief = sceneBrief(sc), drill = DRILLS[sc.drill];
+    const bounds = boundaries(sc).slice(2).join('\n');
+    let system, user;
+    if (task === 'coach') {
+      let last = '';
+      for (let i = msgs.length - 1; i >= 0; i--) if (msgs[i].who === 'you') { last = msgs[i].text; break; }
+      system = 'You are the coach in Velvet, an app for practising adult erotic roleplay: warm, sharp and honest. ' +
+        'You coach ' + you + "'s writing only, never " + name + "'s.\nThe scene: " + brief + '\n' +
+        (drill ? '\n' + you + ' is practising "' + drill.name + '": ' + drill.goal + ' How to judge it: ' + drill.coach + ' "drill.progress" is 0 to 100 for the whole scene so far.\n' : '') +
+        '\nCoach ' + you + "'s latest line. " + fill(SCORE_GUIDE, { name }) +
+        '\nBe specific about their actual words. "better" keeps their intent, stays in the scene\'s format ' +
+        '(' + STYLE_SHORT[sc.style] + ') and writes only ' + you + "'s actions and words, never " + name +
+        "'s. Everyone in the scene is an adult.\nReply with JSON only, in this shape" + (drill ? '' : ' (leave out "drill")') + ':\n' + COACH_SHAPE;
+      user = 'The scene so far, latest last:\n\n' + transcript(sc, msgs.slice(0, -1), 6000) + '\n\nCoach ' + you + "'s latest line:\n" + last;
+    } else if (task === 'ideas') {
+      system = 'You help ' + you + ' write their next line in an adult erotic roleplay with ' + name +
+        '.\nThe scene: ' + brief + '\n' + (bounds ? bounds + '\n' : '') +
+        'Write three different next lines for ' + you + ", in their voice and in the scene's format (" +
+        STYLE_SHORT[sc.style] + '): one that teases, one that turns up the heat (within the heat level ' +
+        'and the boundaries), and one that is tender or playful. Each writes only ' + you + "'s actions and " +
+        'words and leaves ' + name + ' something to answer. Everyone is an adult.\nReply with JSON only: ' +
+        '{"ideas":[{"tone":"Tease","text":"..."},{"tone":"Heat","text":"..."},{"tone":"Tender","text":"..."}]}';
+      user = 'The scene so far, latest last:\n\n' + (transcript(sc, msgs, 6000) || '(nothing yet: this is the opening line)') +
+        (draft ? '\n\n' + you + ' has started writing this, build on it:\n' + draft : '') +
+        '\n\nWrite ' + you + "'s three options for the next line.";
+    } else if (task === 'polish') {
+      system = 'You edit lines for ' + you + ' in an adult erotic roleplay with ' + name + '.\nThe scene: ' + brief +
+        '\nRewrite ' + you + "'s draft so it is more vivid, sensual and in character, keeping exactly what " +
+        "they mean to do and say, in the scene's format (" + STYLE_SHORT[sc.style] + '). Keep it about ' +
+        'the same length, or a little longer if it is very short. Never add actions or words for ' + name +
+        '. Everyone is an adult.\nReply with JSON only: {"text":"..."}';
+      user = 'The scene so far, latest last:\n\n' + (transcript(sc, msgs, 4000) || '(nothing yet)') + '\n\n' + you + "'s draft:\n" + draft;
+    } else {
+      system = 'You are the coach in Velvet, an app for practising adult erotic roleplay. The scene below is over. ' +
+        'Write ' + you + "'s report card: warm, honest and specific, about " + you + "'s writing only.\n" +
+        'The scene: ' + brief + '\n' +
+        (drill ? 'The drill was "' + drill.name + '": ' + drill.goal + '\n' : '') +
+        fill(SCORE_GUIDE, { name }) + '\nThe scores are for the whole scene. "best_line" quotes one of ' +
+        you + "'s own lines exactly. \"next_drill\" is the drill that would help most, one of: " +
+        Object.keys(DRILLS).join(', ') + '.\nReply with JSON only, in this shape:\n' + REPORT_SHAPE;
+      user = 'The scene:\n\n' + transcript(sc, msgs, 30000);
+    }
+    return [{ role: 'system', content: system }, { role: 'user', content: user }];
+  }
+  function veniceBody(task, sc, msgs, model, draft) {
+    if (task === 'opening' || task === 'reply' || task === 'continue') {
+      const you = sc.you.name;
+      const stops = ['\n' + you + ':', '\n**' + you + '**'].filter(s => s.length > 3).slice(0, 4);
+      return { model, messages: chatMessages(task, sc, msgs), stream: true, max_tokens: MAX_TOKENS[sc.style], temperature: 0.9, top_p: 0.95,
+        frequency_penalty: 0.3, presence_penalty: 0.2, stop: stops, venice_parameters: VENICE_PARAMS };
+    }
+    const temps = { coach: 0.4, report: 0.4, ideas: 0.95, polish: 0.8 };
+    return { model: COACH_MODEL, messages: jsonMessages(task, sc, msgs, draft), max_tokens: task === 'report' ? 1200 : 700,
+      temperature: temps[task], response_format: { type: 'json_object' }, venice_parameters: VENICE_PARAMS };
+  }
+  // ==== prompts end
+
+  // ---------------------------------------------------------------- presets
+  const PARTNERS = [
+    { id: 'mara', name: 'Mara', age: 29, pronouns: 'she', role: 'switch', colors: ['#f59e0b', '#be123c'], setting: 'beach',
+      vibe: 'Beach-club bartender who flirts like it is a sport',
+      look: 'sun-kissed skin, dark curls piled up, gold hoops, a black tank top and denim shorts',
+      personality: 'confident, teasing, quick-witted, secretly a romantic', voice: 'playful banter, pet names, a low laugh' },
+    { id: 'damon', name: 'Damon', age: 34, pronouns: 'he', role: 'dominant', colors: ['#7c3aed', '#1e1b4b'], setting: 'vip',
+      vibe: 'Owns the club. Speaks softly and gets obeyed',
+      look: 'tall Black man with dark brown skin, a close-cropped beard, a tailored charcoal suit with the collar open',
+      personality: 'calm, commanding, observant, generous with praise when it is earned', voice: 'slow and low, few words, every one deliberate' },
+    { id: 'celeste', name: 'Celeste', age: 31, pronouns: 'she', role: 'dominant', colors: ['#10b981', '#064e3b'], setting: 'penthouse',
+      vibe: 'Gallery owner with expensive taste and a velvet voice',
+      look: 'Black woman with deep brown skin, a sleek bob, red lips, a fitted emerald dress and heels',
+      personality: 'elegant, cool, amused, loves making people wait', voice: 'polished and teasing, a raised eyebrow in every line' },
+    { id: 'riley', name: 'Riley', age: 26, pronouns: 'they', role: 'submissive', colors: ['#22d3ee', '#7c3aed'], setting: 'house_party',
+      vibe: 'Bratty tattoo artist who loves being put in their place',
+      look: 'lean, inked sleeves, a silver septum ring, messy bleached hair, an oversized band tee',
+      personality: 'cheeky, mouthy, secretly melts at praise', voice: 'sarcastic quips and grins, pretends not to care' },
+    { id: 'marcus', name: 'Marcus', age: 38, pronouns: 'he', role: 'dominant', colors: ['#f97316', '#7c2d12'], setting: 'gym',
+      vibe: 'Ex-pro athlete turned trainer: protective, patient, strong',
+      look: 'broad-shouldered Black man with dark brown skin, a shaved head, warm eyes, a fitted grey tee',
+      personality: 'steady, protective, patient, gently teasing', voice: 'warm and reassuring, firm when it counts' },
+    { id: 'sienna', name: 'Sienna', age: 23, pronouns: 'she', role: 'submissive', colors: ['#f472b6', '#9d174d'], setting: 'house_party',
+      vibe: 'Sorority president: all confidence until someone takes charge',
+      look: 'long honey-blonde hair, freckles, a cropped sorority sweater and jeans',
+      personality: 'bubbly, bold, competitive, flustered when someone takes control', voice: 'fast and flirty, giggles when caught off guard' },
+    { id: 'kai', name: 'Kai', age: 30, pronouns: 'he', role: 'submissive', colors: ['#60a5fa', '#1e3a8a'], setting: 'apartment',
+      vibe: 'Shy barista who blushes when you hold eye contact',
+      look: 'soft curls, glasses, a white tee under a coffee-stained apron, a tattoo on his forearm',
+      personality: 'sweet, shy, eager to please, braver than he looks', voice: 'soft and a little flustered, very earnest' },
+    { id: 'valentina', name: 'Valentina', age: 36, pronouns: 'she', role: 'dominant', colors: ['#e11d48', '#4c0519'], setting: 'playroom',
+      vibe: 'Runs a members-only club with strict rules',
+      look: 'tall, a black latex corset, long dark hair, sharp eyeliner, a riding crop at her hip',
+      personality: 'strict, precise, rewards obedience, punishes cheek', voice: 'crisp commands; "good" said like a reward' },
+    { id: 'nyx', name: 'Nyx', age: 30, pronouns: 'she', role: 'switch', colors: ['#a855f7', '#3b0764'], setting: 'tavern',
+      vibe: 'A succubus who feeds on desire, and finds you delicious',
+      look: 'violet skin, small curved horns, glowing amber eyes, a slow-swinging tail, black silk',
+      personality: 'mischievous, hungry, endlessly curious about mortals', voice: 'a purr, old-fashioned words, amused' },
+    { id: 'jordan', name: 'Jordan', age: 32, pronouns: 'he', role: 'switch', colors: ['#fbbf24', '#92400e'], setting: 'apartment',
+      vibe: 'The charming neighbour who keeps borrowing sugar',
+      look: 'Black man with dark brown skin, an easy smile, locs tied back, grey sweatpants, a white tee',
+      personality: 'charming, funny, attentive, a slow-burn flirt', voice: 'easy jokes, warm, a little bold' },
+  ];
+  const SETTINGS = [
+    { id: 'beach', label: 'Beach club', text: 'A beach club after hours: lanterns swaying, warm sand, the bar half closed and the music low.' },
+    { id: 'vip', label: 'VIP booth', text: 'A VIP booth at a nightclub: bass through the floor, a velvet rope, low red light, a bottle on ice.' },
+    { id: 'penthouse', label: 'Penthouse', text: 'A penthouse at midnight: floor-to-ceiling windows, the city lit up below, a glass of red wine.' },
+    { id: 'mansion', label: 'Mansion pool', text: 'A beach mansion by the pool at night: blue pool light, warm wind, the sea hushing beyond the deck.' },
+    { id: 'hot_tub', label: 'Hot tub', text: 'A hot tub under the stars: steam, bubbles, a bottle of champagne within reach.' },
+    { id: 'yacht', label: 'Yacht', text: 'A yacht deck at sunset: warm teak underfoot, open sea, nobody else for miles.' },
+    { id: 'hotel', label: 'Hotel suite', text: 'A hotel suite after a wedding: a loosened tie, kicked-off heels, rose petals someone else left.' },
+    { id: 'house_party', label: 'House party', text: 'A sorority house after the party: everyone else asleep, the kitchen lit only by the fridge.' },
+    { id: 'playroom', label: 'Playroom', text: 'A private playroom: soft amber lights, a padded bench, a wall of toys and restraints.' },
+    { id: 'office', label: 'Office', text: 'An office after hours: blinds down, one desk lamp on, the deadline long forgotten.' },
+    { id: 'gym', label: 'Private gym', text: 'A private gym after closing: mirrors, low music, the smell of rubber mats and sweat.' },
+    { id: 'apartment', label: 'Rainy night', text: 'An apartment on a rainy night: candles lit, rain streaming down the windows, a record playing.' },
+    { id: 'tavern', label: 'Fantasy tavern', text: 'A fantasy tavern: a roaring fire, mead in heavy mugs, and a room upstairs with a creaking bed.' },
+  ];
+  const DRILL_UI = {
+    first_move: ['spark', 'c-rose'], five_senses: ['eye', 'c-violet'], slow_burn: ['flame', 'c-amber'], talk_first: ['chat', 'c-teal'],
+    lead: ['crown', 'c-gold'], surrender: ['feather', 'c-violet'], say_it: ['mic', 'c-rose'], read_room: ['radar', 'c-teal'],
+    aftercare: ['heart', 'c-rose'], speed_round: ['bolt', 'c-amber'],
+  };
+  const NUDGES = [
+    { label: 'Slow down', text: '((Slow down a little. Let it build.))' },
+    { label: 'Turn it up', text: '((Turn up the heat.))' },
+    { label: 'Surprise me', text: '((Surprise me: take the scene somewhere unexpected.))' },
+    { label: 'More talking', text: '((More dialogue, please.))' },
+    { label: 'More detail', text: '((More sensory detail, please.))' },
+    { label: 'Time skip', text: '((Skip ahead a little.))' },
+    { label: 'Change place', text: '((Move the scene somewhere new.))' },
+  ];
+  const DIMS = [['detail', 'Detail', '#f472b6'], ['voice', 'Voice', '#a78bfa'], ['initiative', 'Initiative', '#f59e0b'], ['pacing', 'Pacing', '#38bdf8'], ['chemistry', 'Chemistry', '#fb7185']];
+  const LEVELS = [[0, 'Shy newcomer'], [150, 'Flirt'], [400, 'Tease'], [800, 'Charmer'], [1500, 'Smooth talker'], [2500, 'Heartbreaker'], [4000, 'Velvet tongue'], [6000, 'Legend']];
+  const GRADE_XP = { 'A+': 60, A: 50, 'A-': 45, 'B+': 40, B: 35, 'B-': 30, 'C+': 25, C: 20 };
+  const HEAT_LABEL = { flirty: 'Flirty', steamy: 'Steamy', explicit: 'Explicit' };
+  const PACE_LABEL = { slow: 'Slow burn', steady: 'Steady', fast: 'Fast' };
+  const STYLE_LABEL = { chat: '3DX chat', paragraphs: 'Paragraphs', novel: 'Novel' };
+  const ROLE_LABEL = { dominant: 'Dominant', submissive: 'Submissive', switch: 'Switch' };
+  const PALETTE = [['#fb7185', '#881337'], ['#a855f7', '#3b0764'], ['#22d3ee', '#1e3a8a'], ['#f59e0b', '#9a3412'], ['#10b981', '#064e3b'], ['#f472b6', '#831843']];
+
+  // ---------------------------------------------------------------- icons
+  const ICONS = {
+    plus: 'M12 5v14M5 12h14', bolt: 'M13 2L4 14h7l-1 8 9-12h-7z', bulb: 'M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z',
+    sparkle: 'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9zM19 16l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z',
+    ooc: 'M8 6c-2.5 2.5-2.5 9.5 0 12M16 6c2.5 2.5 2.5 9.5 0 12M5 6c-3 3.5-3 8.5 0 12M19 6c3 3.5 3 8.5 0 12', star: 'M12 4v16M5.1 8l13.8 8M18.9 8L5.1 16',
+    send: 'M5 12h14M13 6l6 6-6 6', stop: 'M7 7h10v10H7z', regen: 'M20 11a8 8 0 00-14.3-4.9L4 8M4 4v4h4M4 13a8 8 0 0014.3 4.9L20 16M20 20v-4h-4',
+    more: 'M5 12h.01M12 12h.01M19 12h.01', edit: 'M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4', speak: 'M4 10v4h4l5 4V6L8 10zM16 9.5a3.5 3.5 0 010 5M18.5 7a7 7 0 010 10',
+    copy: 'M9 9h11v11H9zM5 15H4V4h11v1', rewind: 'M11 18l-6-6 6-6M19 18l-6-6 6-6', trash: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',
+    menu: 'M4 6h16M4 12h16M4 18h16', target: 'M12 21a9 9 0 100-18 9 9 0 000 18zM12 16a4 4 0 100-8 4 4 0 000 8zM12 12h.01',
+    trophy: 'M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0zM17 6h3v1a3 3 0 01-3 3M7 6H4v1a3 3 0 003 3', gear: 'M12 15a3 3 0 100-6 3 3 0 000 6zM19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z',
+    moon: 'M21 13A9 9 0 1111 3a7 7 0 0010 10z', x: 'M6 6l12 12M18 6L6 18', left: 'M15 18l-6-6 6-6', right: 'M9 18l6-6-6-6',
+    download: 'M12 4v11M7 10l5 5 5-5M5 20h14', upload: 'M12 20V9M7 14l5-5 5 5M5 4h14', link: 'M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1',
+    key: 'M8 15a4 4 0 100-8 4 4 0 000 8zM11 11h10M17 11v3M20 11v2', heart: 'M12 20.5s-7.5-4.3-7.5-9.8A4.2 4.2 0 0112 8.1a4.2 4.2 0 017.5 2.6c0 5.5-7.5 9.8-7.5 9.8z',
+    spark: 'M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8', eye: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 100-6 3 3 0 000 6z',
+    flame: 'M12 22c4 0 7-3 7-7 0-4.5-4-7-4-11-3 2-4.5 4.5-4.5 7-1-.8-1.5-2-1.5-3-2 1.5-4 4-4 7 0 4 3 7 7 7z', chat: 'M4 5h16v11H9l-5 4z',
+    crown: 'M3 8l4 4 5-7 5 7 4-4-2 11H5z', feather: 'M20 4C12 4 6 10 6 18l-2 2M6 18c6 0 12-4 14-14M10 14h5', mic: 'M12 3a3 3 0 00-3 3v6a3 3 0 006 0V6a3 3 0 00-3-3zM5 11a7 7 0 0014 0M12 18v3',
+    radar: 'M12 12l6-6M19.1 4.9A10 10 0 1021 12M15.5 8.5A5 5 0 1017 12', dice: 'M4 4h16v16H4zM8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01',
+    flag: 'M5 21V4M5 4h11l-2 4 2 4H5', back: 'M15 18l-6-6 6-6',
+  };
+  function icon(name, cls) { return '<svg class="i' + (cls ? ' ' + cls : '') + '" viewBox="0 0 24 24" aria-hidden="true"><path d="' + ICONS[name] + '"/></svg>'; }
+  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function btnHTML(ic, label) { return icon(ic) + (label ? '<span class="lbl">' + label + '</span>' : ''); }
+
+  // ---------------------------------------------------------------- storage
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); return true; } catch (e) { return false; } },
+    json(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  };
+  function newId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+  function todayKey(d) { d = d || new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+
+  // ---------------------------------------------------------------- state
+  const S = {
+    mode: null, status: null,
+    index: store.json('vv_index', []),
+    scene: null,
+    busy: false, abort: null, streamMsg: null,
+    ooc: false,
+    profile: Object.assign({ name: '', pronouns: 'they', role: 'switch', look: '', heat: 'steamy', pace: 'steady', style: 'paragraphs', into: [], curious: [], soft: [], hard: [], kinkName: '' }, store.json('vv_profile', {})),
+    progress: Object.assign({ xp: 0, lines: 0, streak: 0, lastDay: '', drills: {}, reports: 0, best: 0 }, store.json('vv_progress', {})),
+    settings: Object.assign({ model: '', voice: false, voiceName: '', rate: 1, coachAuto: true, key: '' }, store.json('vv_settings', {})),
+    ideas: null, polishUndo: null,
+  };
+  if (!Array.isArray(S.index)) S.index = [];
+  const savedKey = store.get('vv_key');
+  if (savedKey) S.settings.key = savedKey;
+
+  function saveProfile() { store.set('vv_profile', JSON.stringify(S.profile)); }
+  function saveProgress() { store.set('vv_progress', JSON.stringify(S.progress)); }
+  function saveSettings() { const s = Object.assign({}, S.settings); delete s.key; store.set('vv_settings', JSON.stringify(s)); }
+  function saveIndex() { if (!store.set('vv_index', JSON.stringify(S.index))) toast("This browser won't save more. Download your scenes in Settings, then delete some old ones.", 'err'); }
+  function loadScene(id) { return store.json('vv_s_' + id, null); }
+  const pendingSaves = {};          // scene id -> timer: each scene saves on its own
+  function writeScene(sc) {
+    delete pendingSaves[sc.id];
+    if (!store.set('vv_s_' + sc.id, JSON.stringify(sc))) { toast("This browser won't save more. Download your scenes in Settings, then delete some old ones.", 'err'); return; }
+    const entry = { id: sc.id, title: sceneTitle(sc), partner: sc.partner.name, colors: sc.colors, updated: sc.updated, lines: sc.msgs.filter(m => m.who === 'you').length, drill: sc.drill || '' };
+    const i = S.index.findIndex(x => x.id === sc.id);
+    if (i >= 0) S.index.splice(i, 1);
+    S.index.unshift(entry);
+    saveIndex();
+    renderScenes();
+  }
+  function saveScene(sc, now) {
+    sc = sc || S.scene; if (!sc) return;
+    sc.updated = Date.now();
+    if (pendingSaves[sc.id]) clearTimeout(pendingSaves[sc.id].timer);
+    if (now) writeScene(sc);
+    else pendingSaves[sc.id] = { sc, timer: setTimeout(() => writeScene(sc), 250) };
+  }
+  function flushSaves() { Object.keys(pendingSaves).forEach(id => { const p = pendingSaves[id]; clearTimeout(p.timer); writeScene(p.sc); }); }
+  function deleteScene(id) {
+    store.set('vv_s_' + id, null);
+    S.index = S.index.filter(x => x.id !== id);
+    saveIndex();
+    if (S.scene && S.scene.id === id) { S.scene = null; store.set('vv_open', null); }
+    render();
+  }
+  function sceneTitle(sc) {
+    const st = SETTINGS.find(s => s.id === sc.settingId);
+    return sc.partner.name + ' · ' + (st ? st.label : (sc.setting ? sc.setting.split(/[.:,]/)[0].slice(0, 28) : 'Free scene'));
+  }
+
+  // ---------------------------------------------------------------- theme
+  const qsTheme = new URLSearchParams(location.search).get('theme');
+  function applyTheme(t) { t ? document.documentElement.setAttribute('data-theme', t) : document.documentElement.removeAttribute('data-theme'); }
+  applyTheme(store.get('vv_theme') || (qsTheme === 'dark' || qsTheme === 'light' ? qsTheme : null));
+  function toggleTheme() {
+    const t = document.documentElement.getAttribute('data-theme');
+    const dark = t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches);
+    applyTheme(dark ? 'light' : 'dark'); store.set('vv_theme', dark ? 'light' : 'dark');
+  }
+
+  // ---------------------------------------------------------------- small helpers
+  function toast(text, kind) {
+    const t = el('div', 'toast' + (kind ? ' ' + kind : ''), text);
+    $('toasts').appendChild(t);
+    setTimeout(() => { t.style.transition = 'opacity .3s'; t.style.opacity = '0'; setTimeout(() => t.remove(), 320); }, kind === 'err' ? 6000 : 3600);
+  }
+  let askResolve = null;
+  function ask(title, text, yes) {
+    $('askTitle').textContent = title; $('askText').textContent = text; $('askYes').textContent = yes || 'OK';
+    $('askSheet').hidden = false; $('askYes').focus();
+    return new Promise(res => { askResolve = res; });
+  }
+  $('askYes').onclick = () => { $('askSheet').hidden = true; if (askResolve) askResolve(true); askResolve = null; };
+  $('askNo').onclick = () => { $('askSheet').hidden = true; if (askResolve) askResolve(false); askResolve = null; };
+  function ago(t) {
+    const s = Math.max(0, (Date.now() - t) / 1000);
+    if (s < 60) return 'just now';
+    if (s < 3600) return Math.round(s / 60) + 'm ago';
+    if (s < 86400) return Math.round(s / 3600) + 'h ago';
+    if (s < 604800) return Math.round(s / 86400) + 'd ago';
+    return new Date(t).toLocaleDateString();
+  }
+  function colorsFor(name) { let h = 0; for (const c of String(name)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return PALETTE[h % PALETTE.length]; }
+  function avatar(name, colors, size) {
+    const a = el('div', 'av' + (size ? ' ' + size : ''), (String(name || '?').trim()[0] || '?').toUpperCase());
+    const c = colors || colorsFor(name);
+    a.style.setProperty('--a1', c[0]); a.style.setProperty('--a2', c[1]);
+    a.setAttribute('aria-hidden', 'true');
+    return a;
+  }
+  function msgText(m) { return m.who === 'partner' ? (m.alts ? m.alts[m.alt || 0] || '' : m.text || '') : m.text || ''; }
+  function isOOC(t) { return /^\s*\(\([\s\S]*\)\)\s*$/.test(t); }
+  function safeWord(t) { const m = /^\s*\(*\s*(red|yellow)\s*[.!]*\s*\)*\s*$/i.exec(t); return m ? m[1].toLowerCase() : ''; }
+  function inFrame() { try { return window.top !== window.self; } catch (e) { return true; } }
+  const RP = /(\(\([\s\S]*?\)\))|(\*[^*\n]+\*)|("[^"\n]+"|“[^”\n]+”)/g;
+  function renderRP(target, text) {
+    target.textContent = '';
+    let last = 0, m;
+    RP.lastIndex = 0;
+    while ((m = RP.exec(text))) {
+      if (m.index > last) target.appendChild(document.createTextNode(text.slice(last, m.index)));
+      const s = el('span', m[1] ? 'ooc' : m[2] ? 'act' : 'say', m[2] ? m[0].slice(1, -1) : m[0]);
+      target.appendChild(s);
+      last = m.index + m[0].length;
+    }
+    if (last < text.length) target.appendChild(document.createTextNode(text.slice(last)));
+  }
+  function plainForSpeech(t) { return t.replace(/\(\([\s\S]*?\)\)/g, ' ').replace(/[*_~]/g, '').replace(/\s+/g, ' ').trim(); }
+
+  // ---------------------------------------------------------------- progress
+  function level(xp) {
+    let i = 0; while (i + 1 < LEVELS.length && xp >= LEVELS[i + 1][0]) i++;
+    const cur = LEVELS[i], next = LEVELS[i + 1];
+    return { name: cur[1], idx: i, from: cur[0], to: next ? next[0] : null, next: next ? next[1] : null };
+  }
+  function addXP(n, why) {
+    if (!n) return;
+    const before = level(S.progress.xp).idx;
+    S.progress.xp += n; saveProgress();
+    const after = level(S.progress.xp);
+    if (after.idx > before) toast('Level up: ' + after.name + '!', 'gold');
+    else if (why) toast('+' + n + ' XP · ' + why, 'gold');
+    renderXP();
+  }
+  function countLine() {
+    const today = todayKey(), y = new Date(); y.setDate(y.getDate() - 1);
+    if (S.progress.lastDay !== today) { S.progress.streak = S.progress.lastDay === todayKey(y) ? S.progress.streak + 1 : 1; S.progress.lastDay = today; }
+    S.progress.lines++;
+    S.progress.xp += 5; saveProgress(); renderXP();
+  }
+
+  // ---------------------------------------------------------------- backends
+  function viaServer() { return S.mode === 'server' || S.mode === 'public'; }
+  function api(path) { return S.mode === 'public' ? PUBLIC_API + '/api/sbs/velvet/public/' + path : '/api/sbs/velvet/' + path; }
+  function creds() { return S.mode === 'public' ? 'omit' : 'same-origin'; }
+  function model() { const m = S.settings.model; return MODELS.some(x => x[0] === m) ? m : ((S.status && S.status.model) || MODELS[0][0]); }
+  function noteLeft(r) {
+    const left = r.headers.get('X-Velvet-Left');
+    if (S.status && left) { S.status.left = left === 'unlimited' ? null : parseInt(left, 10); renderLeft(); }
+  }
+  async function errorOf(r) {
+    let d = {};
+    try { d = await r.json(); } catch (e) { /* not JSON */ }
+    if (typeof d.left === 'number' && S.status) { S.status.left = d.left; renderLeft(); }
+    if (r.status === 401 && S.mode === 'server') $('gate').hidden = false;
+    const e = new Error(d.error || (S.mode === 'byok' ? veniceFail(r.status) : 'Something went wrong. Try again.'));
+    e.data = d; e.status = r.status;
+    return e;
+  }
+  function veniceFail(code) {
+    return ({ 401: "Venice didn't accept that key. Check it in Settings.", 402: 'Your Venice account is out of credit, or the key hit its spend limit.', 403: "Venice refused that key from here. Check the key's settings.",
+      429: 'Venice is busy or your key hit its rate limit. Try again in a minute.', 503: 'Venice is busy right now. Try again in a minute.' })[code] ||
+      ('Venice had a problem with that one (' + code + '). Try again.');
+  }
+  function heldError() { const e = new Error('held'); e.held = true; return e; }
+  async function streamTask(task, sc, msgs, onText, signal) {
+    let r;
+    if (viaServer()) {
+      try {
+        r = await fetch(api('ai'), { method: 'POST', credentials: creds(), signal, headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task, scene: sc, messages: msgs, model: model() }) });
+      } catch (e) { if (e.name === 'AbortError') throw e; throw new Error("Couldn't reach Velvet. Check your connection and try again."); }
+      if (!r.ok) throw await errorOf(r);
+      noteLeft(r);
+      let full = '';
+      const finish = tail => { if (tail.indexOf('\x00HOLD') === 0) throw heldError(); if (tail.indexOf('\x00ERR:') === 0) { const e = new Error(tail.slice(5)); e.partial = full; throw e; } };
+      if (!r.body || !r.body.getReader) {
+        full = await r.text();
+        const z = full.indexOf('\x00'); if (z >= 0) { const tail = full.slice(z); full = full.slice(0, z); onText(full); finish(tail); }
+        onText(full); return full;
+      }
+      const reader = r.body.getReader(), dec = new TextDecoder();
+      for (;;) {
+        const step = await reader.read();
+        if (step.done) break;
+        full += dec.decode(step.value, { stream: true });
+        const z = full.indexOf('\x00');
+        if (z >= 0) { const tail = full.slice(z); full = full.slice(0, z); onText(full); finish(tail); break; }
+        onText(full);
+      }
+      return full;
+    }
+    // bring your own key: straight to Venice
+    let clean, cm;
+    clean = cleanScene(sc); cm = cleanMessages(msgs);
+    try {
+      r = await fetch('https://api.venice.ai/api/v1/chat/completions', { method: 'POST', signal, referrerPolicy: 'no-referrer',
+        headers: { 'Authorization': 'Bearer ' + S.settings.key, 'Content-Type': 'application/json' }, body: JSON.stringify(veniceBody(task, clean, cm, model())) });
+    } catch (e) { if (e.name === 'AbortError') throw e; throw new Error("Couldn't reach Venice. Check your connection and try again."); }
+    if (!r.ok) throw await errorOf(r);
+    const reader = r.body.getReader(), dec = new TextDecoder();
+    let buf = '', full = '';
+    for (;;) {
+      const step = await reader.read();
+      if (step.done) break;
+      buf += dec.decode(step.value, { stream: true });
+      let nl;
+      while ((nl = buf.indexOf('\n')) >= 0) {
+        const line = buf.slice(0, nl).trim(); buf = buf.slice(nl + 1);
+        if (line.indexOf('data:') !== 0) continue;
+        const data = line.slice(5).trim();
+        if (data === '[DONE]') { buf = ''; break; }
+        try { const j = JSON.parse(data); const c = j.choices && j.choices[0] && j.choices[0].delta && j.choices[0].delta.content; if (c) { full += c; onText(full); } } catch (e) { /* keep-alive */ }
+      }
+    }
+    if (isMinorText(full)) throw heldError();
+    return full;
+  }
+  function parseJSON(t) {
+    t = String(t || '').trim();
+    try { return JSON.parse(t); } catch (e) { const a = t.indexOf('{'), b = t.lastIndexOf('}'); try { return a >= 0 && b > a ? JSON.parse(t.slice(a, b + 1)) : {}; } catch (e2) { return {}; } }
+  }
+  function shapeScores(v) { const o = {}; DIMS.forEach(d => { const n = Math.round(parseFloat((v || {})[d[0]])); o[d[0]] = isFinite(n) ? Math.max(1, Math.min(10, n)) : 5; }); return o; }
+  async function jsonTask(task, sc, msgs, draft) {
+    let r;
+    if (viaServer()) {
+      try {
+        r = await fetch(api('ai'), { method: 'POST', credentials: creds(), headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task, scene: sc, messages: msgs, draft: draft || '' }) });
+      } catch (e) { throw new Error("Couldn't reach Velvet. Check your connection and try again."); }
+      if (!r.ok) throw await errorOf(r);
+      noteLeft(r);
+      return r.json();
+    }
+    const clean = cleanScene(sc), cm = cleanMessages(msgs);
+    try {
+      r = await fetch('https://api.venice.ai/api/v1/chat/completions', { method: 'POST', referrerPolicy: 'no-referrer',
+        headers: { 'Authorization': 'Bearer ' + S.settings.key, 'Content-Type': 'application/json' }, body: JSON.stringify(veniceBody(task, clean, cm, model(), cleanText(draft, MAX_MESSAGE))) });
+    } catch (e) { throw new Error("Couldn't reach Venice. Check your connection and try again."); }
+    if (!r.ok) throw await errorOf(r);
+    const j = await r.json();
+    const d = parseJSON(j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content);
+    let out;
+    if (task === 'coach') out = { scores: shapeScores(d.scores), praise: String(d.praise || ''), tip: String(d.tip || ''), better: String(d.better || ''), drill: d.drill && clean.drill ? { progress: Math.max(0, Math.min(100, Math.round(+d.drill.progress || 0))), note: String(d.drill.note || '') } : undefined };
+    else if (task === 'ideas') out = { ideas: (Array.isArray(d.ideas) ? d.ideas : []).slice(0, 3).filter(i => i && i.text).map(i => ({ tone: String(i.tone || 'Idea').slice(0, 20), text: String(i.text) })) };
+    else if (task === 'polish') out = { text: String(d.text || '') };
+    else out = { grade: String(d.grade || 'B').slice(0, 3), headline: String(d.headline || ''), scores: shapeScores(d.scores), strengths: (d.strengths || []).slice(0, 3).map(String), work_on: (d.work_on || []).slice(0, 3).map(String), best_line: String(d.best_line || ''), next_drill: DRILLS[d.next_drill] ? d.next_drill : '', why: String(d.why || '') };
+    if (isMinorText(JSON.stringify(out))) throw new Error(ADULTS_ONLY);
+    return out;
+  }
+  async function decodeKinkList(link) {
+    const url = S.mode === 'server' ? '/api/sbs/velvet/kinklist' : PUBLIC_API + '/api/sbs/velvet/public/kinklist';
+    let r;
+    try { r = await fetch(url, { method: 'POST', credentials: S.mode === 'server' ? 'same-origin' : 'omit', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ link }) }); }
+    catch (e) { throw new Error("Couldn't reach the Kink List reader. Add your likes and limits by hand below."); }
+    let d = {}; try { d = await r.json(); } catch (e) { /* not JSON */ }
+    if (!r.ok) throw new Error(d.error || "Couldn't read that link.");
+    return d;
+  }
+  function apiScene(sc) {
+    return { partner: sc.partner, you: sc.you, setting: sc.setting, notes: sc.notes, heat: sc.heat, pace: sc.pace, style: sc.style,
+      into: sc.into, curious: sc.curious, soft: sc.soft, hard: sc.hard, drill: sc.drill };
+  }
+  function apiMsgs(list) { return list.filter(m => (m.who === 'you' || m.who === 'partner') && !m.failed).map(m => ({ who: m.who, text: msgText(m) })).filter(m => m.text.trim()); }
+
+  async function tryPublic() {
+    try {
+      const r = await fetch(PUBLIC_API + '/api/sbs/velvet/public/status', { credentials: 'omit' });
+      if (!r.ok) throw new Error(String(r.status));
+      const st = await r.json();
+      if (!st.public || !st.configured) throw new Error('off');
+      S.status = st; S.mode = 'public';
+      return true;
+    } catch (e) { return false; }
+  }
+  async function detectMode() {
+    const qs = new URLSearchParams(location.search);
+    if (/\.github\.io$/i.test(location.hostname) || location.protocol === 'file:' || qs.has('public')) {
+      if (!(await tryPublic())) byok();
+    } else {
+      try {
+        const r = await fetch('/api/sbs/velvet/status', { credentials: 'same-origin' });
+        if (!r.ok) throw new Error(String(r.status));
+        S.status = await r.json(); S.mode = 'server';
+        if (!S.status.signed_in) { $('loginLink').href = '/login?return_to=' + (inFrame() ? '/desktop' : '/velvet'); $('gate').hidden = false; }
+        else if (!S.status.configured) toast("Velvet isn't switched on yet. Try again later.", 'err');
+      } catch (e) { byok(); }
+    }
+    if (store.get('vv_adult') !== 'yes') $('ageGate').hidden = false;
+    renderLeft(); render();
+  }
+  function byok() { S.mode = 'byok'; $('memberLink').hidden = false; }
+  $('ageYes').onclick = () => { store.set('vv_adult', 'yes'); $('ageGate').hidden = true; };
+  function ready() {
+    if (!S.mode) { toast('Still connecting. Try again in a second.'); return false; }
+    if (S.mode === 'server' && S.status && !S.status.signed_in) { $('gate').hidden = false; return false; }
+    if (store.get('vv_adult') !== 'yes') { $('ageGate').hidden = false; return false; }
+    if (S.mode === 'byok' && !S.settings.key) { openSettings(true); toast('Velvet needs a Venice key here. Paste yours in Settings.', 'err'); return false; }
+    if (viaServer() && S.status && S.status.left === 0) { toast("That's all for today. Turns reset at midnight UTC.", 'err'); return false; }
+    return true;
+  }
+
+  // ---------------------------------------------------------------- rendering: sidebar
+  function renderXP() {
+    const L = level(S.progress.xp), p = S.progress;
+    const pct = L.to ? Math.round((S.progress.xp - L.from) / (L.to - L.from) * 100) : 100;
+    $('xp').innerHTML = '';
+    const r1 = el('div', 'row'); r1.append(el('span', 'lvl', L.name), el('span', 'pts', p.xp + ' XP'));
+    const bar = el('div', 'bar'); const fillEl = el('i'); bar.appendChild(fillEl);
+    const st = el('div', 'stats');
+    st.innerHTML = '<span>🔥 <b>' + p.streak + '</b> day' + (p.streak === 1 ? '' : 's') + '</span><span><b>' + p.lines + '</b> lines</span><span><b>' + Object.keys(p.drills).length + '</b>/10 drills</span>';
+    $('xp').append(r1, bar, st);
+    $('xp').title = L.next ? (L.to - p.xp) + ' XP to ' + L.next : 'Top level';
+    requestAnimationFrame(() => { fillEl.style.width = pct + '%'; });
+  }
+  function renderScenes() {
+    const box = $('scenes'); box.innerHTML = '';
+    if (!S.index.length) { box.appendChild(el('div', 'empty-note', 'No scenes yet. Start one and it shows up here.')); return; }
+    S.index.forEach(x => {
+      const b = el('button', 'scene-item'); b.type = 'button';
+      b.setAttribute('aria-current', S.scene && S.scene.id === x.id ? 'true' : 'false');
+      const t = el('div', 't');
+      t.append(el('b', '', x.title || x.partner), el('span', '', (x.lines || 0) + ' lines · ' + ago(x.updated) + (x.drill && DRILLS[x.drill] ? ' · ' + DRILLS[x.drill].name : '')));
+      b.append(avatar(x.partner, x.colors, 'sm'), t);
+      b.onclick = () => { openScene(x.id); closeDrawers(); };
+      box.appendChild(b);
+    });
+  }
+  function renderLeft() {
+    const l = $('left');
+    if (S.mode === 'byok') l.textContent = 'Your own Venice key';
+    else if (!S.status) l.textContent = '';
+    else if (S.status.owner || (S.mode === 'server' && S.status.signed_in && S.status.left == null)) l.textContent = 'No daily limit';
+    else if (typeof S.status.left === 'number') l.textContent = S.status.left + (S.mode === 'public' ? ' free' : '') + ' turns left today';
+    else l.textContent = S.mode === 'public' ? 'Free' : '';
+  }
+
+  // ---------------------------------------------------------------- rendering: header
+  function renderHead() {
+    const h = $('head'); h.innerHTML = '';
+    const menuBtn = el('button', 'ib only-mid'); menuBtn.type = 'button'; menuBtn.innerHTML = icon('menu'); menuBtn.setAttribute('aria-label', 'Scenes'); menuBtn.onclick = () => openDrawer('side');
+    h.appendChild(menuBtn);
+    const sc = S.scene;
+    if (!sc) {
+      const w = el('div', 'who'); w.append(el('b', '', 'Velvet'), el('span', '', 'Practise roleplay with a partner who plays along'));
+      h.appendChild(w);
+      const cb = el('button', 'ib c-teal only-narrow'); cb.type = 'button'; cb.innerHTML = btnHTML('target', 'Coach'); cb.onclick = () => openDrawer('coach');
+      h.appendChild(cb);
+      return;
+    }
+    h.appendChild(avatar(sc.partner.name, sc.colors));
+    const w = el('div', 'who');
+    w.append(el('b', '', sc.partner.name), el('span', '', ROLE_LABEL[sc.partner.role] + ' · ' + HEAT_LABEL[sc.heat] + ' · ' + sceneTitle(sc).split(' · ').slice(1).join(' · ')));
+    h.appendChild(w);
+    const safe = el('div', 'safe');
+    const y = el('button', 'ib c-yellow'); y.type = 'button'; y.innerHTML = '<span class="dot"></span><span class="lbl">Yellow</span>'; y.title = 'Yellow: slow down and check in'; y.setAttribute('aria-label', 'Yellow: slow down and check in');
+    const r = el('button', 'ib c-red'); r.type = 'button'; r.innerHTML = '<span class="dot"></span><span class="lbl">Red</span>'; r.title = 'Red: stop the scene now'; r.setAttribute('aria-label', 'Red: stop the scene now');
+    y.disabled = r.disabled = S.busy && !S.abort;
+    y.onclick = () => safeword('yellow'); r.onclick = () => safeword('red');
+    safe.append(y, r);
+    h.appendChild(safe);
+    const cb = el('button', 'ib c-teal only-narrow'); cb.type = 'button'; cb.setAttribute('aria-label', 'Coach');
+    const avg = sceneAverage(sc);
+    cb.innerHTML = icon('target') + '<span class="lbl">' + (avg ? avg.overall.toFixed(1) : 'Coach') + '</span>';
+    cb.onclick = () => openDrawer('coach');
+    h.appendChild(cb);
+    const more = el('button', 'ib'); more.type = 'button'; more.innerHTML = icon('more'); more.setAttribute('aria-label', 'Scene menu'); more.title = 'Scene menu';
+    more.onclick = e => { e.stopPropagation(); sceneMenu(more); };
+    h.appendChild(more);
+  }
+  let openMenu = null;
+  function closeMenu() { if (openMenu) { openMenu.remove(); openMenu = null; } }
+  document.addEventListener('click', closeMenu);
+  function sceneMenu(anchor) {
+    closeMenu();
+    const m = el('div', 'menu'); m.setAttribute('role', 'menu');
+    const item = (ic, label, fn, cls) => { const b = el('button', cls || ''); b.type = 'button'; b.innerHTML = icon(ic) + '<span>' + label + '</span>'; b.onclick = e => { e.stopPropagation(); closeMenu(); fn(); }; m.appendChild(b); };
+    item('trophy', 'End scene and get my report', () => report(), 'c-gold');
+    item('regen', 'Start again with the same setup', () => restartScene());
+    item('download', 'Download the transcript', () => downloadTranscript());
+    item('trash', 'Delete this scene', async () => { if (await ask('Delete this scene?', 'It goes from this device for good.', 'Delete')) deleteScene(S.scene.id); }, 'c-red');
+    document.body.appendChild(m);
+    const r = anchor.getBoundingClientRect();
+    m.style.top = (r.bottom + 6) + 'px';
+    m.style.left = Math.max(8, Math.min(window.innerWidth - m.offsetWidth - 8, r.right - m.offsetWidth)) + 'px';
+    openMenu = m;
+  }
+
+  // ---------------------------------------------------------------- rendering: thread
+  const thread = $('thread');
+  function nearBottom() { return thread.scrollHeight - thread.scrollTop - thread.clientHeight < 120; }
+  function scrollDown(force) { if (force || nearBottom()) thread.scrollTop = thread.scrollHeight; }
+  function renderThread(keepScroll) {
+    const was = thread.scrollTop, stick = nearBottom();
+    thread.innerHTML = '';
+    if (!S.scene) { thread.appendChild(welcome()); thread.scrollTop = 0; return; }
+    const inner = el('div', 'inner');
+    inner.appendChild(sceneCard(S.scene));
+    const msgs = S.scene.msgs;
+    let lastP = -1, lastY = -1;
+    msgs.forEach((m, i) => { if (m.who === 'partner') lastP = i; if (m.who === 'you') lastY = i; });
+    msgs.forEach((m, i) => inner.appendChild(msgEl(m, i, i === lastP, i === lastY)));
+    if (S.scene.report) {
+      const n = el('button', 'note gold', 'Report card: ' + S.scene.report.grade + ' · ' + (S.scene.report.headline || 'see how you did'));
+      n.type = 'button'; n.onclick = () => showReport(S.scene.report);
+      inner.appendChild(n);
+    }
+    thread.appendChild(inner);
+    if (keepScroll && !stick) thread.scrollTop = was; else thread.scrollTop = thread.scrollHeight;
+  }
+  function sceneCard(sc) {
+    const c = el('div', 'scene-card');
+    c.appendChild(avatar(sc.partner.name, sc.colors, 'lg'));
+    const t = el('div', 't');
+    t.appendChild(el('b', '', sc.partner.name + ', ' + sc.partner.age));
+    t.appendChild(el('p', '', sc.setting || 'Wherever the story takes you.'));
+    const tags = el('div', 'tags');
+    const tag = (text, cls) => { const x = el('span', 'tag ' + (cls || ''), text); tags.appendChild(x); };
+    tag(ROLE_LABEL[sc.partner.role], 'c-violet'); tag(HEAT_LABEL[sc.heat], 'c-rose'); tag(PACE_LABEL[sc.pace], 'c-amber'); tag(STYLE_LABEL[sc.style], 'c-teal');
+    if (sc.drill && DRILLS[sc.drill]) tag('Drill: ' + DRILLS[sc.drill].name, 'c-gold');
+    if (sc.hard.length) tag(sc.hard.length + ' hard limits kept', 'c-red');
+    t.appendChild(tags);
+    c.appendChild(t);
+    return c;
+  }
+  function scoreColor(v) { return v >= 8 ? 'c-teal' : v >= 6 ? 'c-gold' : 'c-rose'; }
+  function mean(sc) { let s = 0; DIMS.forEach(d => { s += sc[d[0]] || 0; }); return s / DIMS.length; }
+  function msgEl(m, i, isLastP, isLastY) {
+    if (m.who === 'note') return el('div', 'note', m.text);
+    const row = el('div', 'msg ' + m.who + ((isLastP || isLastY) ? ' last' : ''));
+    row.dataset.i = i;
+    if (m.who === 'partner') row.appendChild(avatar(S.scene.partner.name, S.scene.colors, 'sm'));
+    const col = el('div', 'col');
+    const text = msgText(m);
+    const b = el('div', 'bubble story');
+    if (m.editing) {
+      const ta = el('textarea'); ta.value = text;
+      const acts = el('div', 'macts'); acts.style.opacity = 1;
+      const save = el('button', '', 'Save'), cancel = el('button', '', 'Cancel');
+      save.type = cancel.type = 'button';
+      save.onclick = () => finishEdit(m, ta.value); cancel.onclick = () => { m.editing = false; renderThread(true); };
+      ta.onkeydown = e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) finishEdit(m, ta.value); if (e.key === 'Escape') { m.editing = false; renderThread(true); } };
+      b.appendChild(ta); col.append(b, acts); acts.append(save, cancel);
+      row.appendChild(col);
+      setTimeout(() => { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }, 0);
+      return row;
+    }
+    if (m.who === 'partner' && !text && S.streamMsg === m) {
+      b.innerHTML = '<span class="typing"><i></i><i></i><i></i></span>';
+    } else {
+      renderRP(b, text);
+      if (S.streamMsg === m) b.classList.add('caret');
+    }
+    if (m.safe) b.classList.add('safe-' + m.safe);
+    else if (isOOC(text)) b.classList.add('ooc-only');
+    if (text || S.streamMsg === m || !m.err) col.appendChild(b);
+    const acts = el('div', 'macts');
+    const ab = (ic, label, fn, title) => { const x = el('button'); x.type = 'button'; x.innerHTML = icon(ic) + (label ? '<span>' + label + '</span>' : ''); x.title = title || label; x.setAttribute('aria-label', title || label); x.onclick = fn; x.disabled = S.busy; acts.appendChild(x); return x; };
+    if (m.who === 'partner' && S.streamMsg !== m) {
+      if (m.alts && m.alts.length > 1) {
+        const prev = ab('left', '', () => { m.alt = (m.alt - 1 + m.alts.length) % m.alts.length; saveScene(); renderThread(true); }, 'Previous version');
+        acts.appendChild(el('span', 'alt', (m.alt + 1) + '/' + m.alts.length));
+        const next = ab('right', '', () => { m.alt = (m.alt + 1) % m.alts.length; saveScene(); renderThread(true); }, 'Next version');
+        prev.disabled = next.disabled = S.busy;
+      }
+      ab('regen', '', () => regenerate(i), 'Write this reply again');
+      if (isLastP) ab('send', '', () => partnerTurn('continue'), 'Keep going: write more of this reply');
+      ab('edit', '', () => { m.editing = true; renderThread(true); }, 'Edit this reply');
+      if ('speechSynthesis' in window) { const s = ab('speak', '', () => speak(text, true), 'Read it aloud'); s.disabled = false; }
+      const cp = ab('copy', '', () => copy(text), 'Copy'); cp.disabled = false;
+      if (i < S.scene.msgs.length - 1) ab('rewind', '', () => rewind(i), 'Rewind the scene to here');
+    } else if (m.who === 'you') {
+      if (m.coach) {
+        const v = mean(m.coach.scores);
+        const chip = el('button', 'score-chip ' + scoreColor(v)); chip.type = 'button';
+        chip.innerHTML = icon('target') + v.toFixed(1); chip.title = 'See the coach’s notes on this line';
+        chip.onclick = () => { S.scene.coachSel = m.id; renderCoach(); openDrawer('coach', true); };
+        acts.appendChild(chip);
+      } else if (m.coaching) {
+        acts.appendChild(el('span', 'alt', 'Coach is reading…'));
+      }
+      ab('edit', '', () => { m.editing = true; renderThread(true); }, 'Edit this line and resend');
+      if (i < S.scene.msgs.length - 1) ab('rewind', '', () => rewind(i), 'Rewind the scene to here');
+    }
+    if (m.err) {
+      const eb = el('div', 'bubble err', m.err);
+      col.appendChild(eb);
+      const retry = ab('regen', 'Try again', () => { m.err = ''; if (m.who === 'partner') regenerate(i); else partnerTurn('reply'); }, 'Try again');
+      retry.disabled = S.busy;
+    }
+    col.appendChild(acts);
+    row.appendChild(col);
+    return row;
+  }
+  function paintStream(m) {
+    const row = thread.querySelector('.msg[data-i="' + S.scene.msgs.indexOf(m) + '"]');
+    if (!row) { renderThread(true); return; }
+    const b = row.querySelector('.bubble');
+    const text = msgText(m);
+    if (!text) return;
+    renderRP(b, text); b.classList.add('caret');
+    scrollDown();
+  }
+  function welcome() {
+    const w = el('div', 'welcome');
+    const hero = el('div', 'hero');
+    hero.innerHTML = '<div class="logo"><svg viewBox="0 0 24 24"><path d="' + ICONS.heart + '"/></svg></div>';
+    hero.appendChild(el('h1', '', 'Velvet'));
+    hero.appendChild(el('p', '', 'Practise erotic roleplay with a partner who plays along, and a coach who scores every line and shows you how to make it hotter. Your scenes stay on this device.'));
+    const cta = el('div', 'cta');
+    const nb = el('button', 'btn main'); nb.type = 'button'; nb.innerHTML = icon('plus') + 'New scene'; nb.onclick = () => openNew();
+    const qb = el('button', 'btn tint c-gold'); qb.type = 'button'; qb.innerHTML = icon('dice') + 'Surprise me'; qb.onclick = () => quickStart();
+    cta.append(nb, qb);
+    if (S.index.length) { const cb = el('button', 'btn'); cb.type = 'button'; cb.innerHTML = icon('back') + 'Continue with ' + S.index[0].partner; cb.onclick = () => openScene(S.index[0].id); cta.appendChild(cb); }
+    hero.appendChild(cta);
+    w.appendChild(hero);
+    w.appendChild(el('h2', '', 'Practise a skill'));
+    const g = el('div', 'grid');
+    Object.keys(DRILLS).forEach(id => {
+      const d = DRILLS[id], ui = DRILL_UI[id];
+      const c = el('button', 'drill-card ' + ui[1]); c.type = 'button';
+      const top = el('div', 'top'); const ic = el('span'); ic.innerHTML = icon(ui[0]); top.append(ic, el('span', '', d.name));
+      top.lastChild.style.cssText = 'width:auto;height:auto;background:none;color:inherit;display:inline';
+      const done = S.progress.drills[id];
+      c.append(top, el('small', '', d.goal + (done ? '  ✓ done ' + done + '×' : '')));
+      c.onclick = () => openNew({ drill: id });
+      g.appendChild(c);
+    });
+    w.appendChild(g);
+    w.appendChild(el('h2', '', 'How it works'));
+    const how = el('div', 'how');
+    [['Your partner plays their side', 'They never write for you. You decide what your character says, does and feels.'],
+      ['(( )) talks out of character', 'Steer the scene, ask for something different, or check in, like with a real partner.'],
+      ['Yellow and Red', 'Yellow slows things down and checks in. Red stops the scene straight away.'],
+      ['The coach', 'Scores each line for detail, voice, initiative, pacing and chemistry, with a stronger version to learn from.'],
+      ['Your Kink List', 'Paste your Kink List link and your partner knows what you love and never crosses a hard limit.'],
+      ['Private', 'Scenes, scores and progress stay in this browser. Nothing is kept on the server.']].forEach(x => {
+      const d = el('div'); d.append(el('b', '', x[0]), document.createTextNode(x[1])); how.appendChild(d);
+    });
+    w.appendChild(how);
+    return w;
+  }
+
+  // ---------------------------------------------------------------- rendering: coach
+  function sceneAverage(sc) {
+    const coached = sc.msgs.filter(m => m.who === 'you' && m.coach);
+    if (!coached.length) return null;
+    const o = {}; DIMS.forEach(d => { o[d[0]] = coached.reduce((s, m) => s + m.coach.scores[d[0]], 0) / coached.length; });
+    o.overall = mean(o); o.count = coached.length;
+    return o;
+  }
+  function renderCoach() {
+    const c = $('coach'); c.innerHTML = '';
+    const head = el('div', 'coach-head');
+    head.innerHTML = '<span class="ib c-teal on" style="pointer-events:none">' + icon('target') + '</span>';
+    head.appendChild(el('b', '', 'Coach'));
+    const sw = el('label', 'switch'); const inp = el('input'); inp.type = 'checkbox';
+    inp.checked = S.scene ? S.scene.coachAuto !== false : S.settings.coachAuto;
+    inp.onchange = () => { if (S.scene) { S.scene.coachAuto = inp.checked; saveScene(); } else { S.settings.coachAuto = inp.checked; saveSettings(); } };
+    sw.append(inp, document.createTextNode('Every line'));
+    sw.title = 'Coach every line you send';
+    head.appendChild(sw);
+    const close = el('button', 'ib only-narrow'); close.type = 'button'; close.innerHTML = icon('x'); close.setAttribute('aria-label', 'Close the coach'); close.onclick = closeDrawers;
+    head.appendChild(close);
+    c.appendChild(head);
+    const body = el('div', 'coach-body');
+    c.appendChild(body);
+    const sc = S.scene;
+    if (!sc) {
+      const p = el('div', 'panel');
+      p.appendChild(el('h4', '', 'Your coach'));
+      p.appendChild(el('p', 'muted', 'Start a scene and I score every line you write for detail, voice, initiative, pacing and chemistry, and show you a stronger version to learn from.'));
+      body.appendChild(p);
+      const pr = el('div', 'panel');
+      pr.appendChild(el('h4', '', 'Best report'));
+      pr.appendChild(el('p', 'muted', S.progress.reports ? S.progress.reports + ' report' + (S.progress.reports === 1 ? '' : 's') + ' so far.' : 'End a scene from its menu to get a report card.'));
+      body.appendChild(pr);
+      return;
+    }
+    // drill
+    if (sc.drill && DRILLS[sc.drill]) {
+      const d = DRILLS[sc.drill];
+      const p = el('div', 'panel drillp');
+      p.innerHTML = '<h4>' + icon(DRILL_UI[sc.drill][0]) + 'Drill</h4>';
+      p.appendChild(el('b', '', d.name + (sc.drillDone ? '  ✓' : '')));
+      p.appendChild(el('p', 'muted', d.goal));
+      const bar = el('div', 'bar'); const f = el('i'); bar.appendChild(f); p.appendChild(bar);
+      requestAnimationFrame(() => { f.style.width = (sc.drillProgress || 0) + '%'; });
+      if (sc.drillNote) { const n = el('p', 'muted', sc.drillNote); n.style.marginTop = '6px'; p.appendChild(n); }
+      body.appendChild(p);
+    }
+    // scores
+    const avg = sceneAverage(sc);
+    const ps = el('div', 'panel');
+    ps.appendChild(el('h4', '', 'This scene'));
+    const rr = el('div', 'ring-row');
+    const ring = el('div', 'ring');
+    const C = 2 * Math.PI * 33;
+    ring.innerHTML = '<svg viewBox="0 0 78 78"><circle class="bg" cx="39" cy="39" r="33"/><circle class="fg" cx="39" cy="39" r="33" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + C.toFixed(1) + '"/></svg>';
+    const num = el('div', 'num'); num.innerHTML = '<div>' + (avg ? avg.overall.toFixed(1) : '–') + '<small>' + (avg ? avg.count + ' line' + (avg.count === 1 ? '' : 's') : 'no lines') + '</small></div>';
+    ring.appendChild(num);
+    rr.appendChild(ring);
+    const dims = el('div', 'dims');
+    DIMS.forEach(d => {
+      const row = el('div', 'dim'); row.style.setProperty('--c', d[2]);
+      const tr = el('div', 'track'); const f = el('i'); tr.appendChild(f);
+      row.append(el('span', '', d[1]), tr, el('b', '', avg ? avg[d[0]].toFixed(1) : '–'));
+      dims.appendChild(row);
+      if (avg) requestAnimationFrame(() => { f.style.width = (avg[d[0]] * 10) + '%'; });
+    });
+    rr.appendChild(dims);
+    ps.appendChild(rr);
+    if (avg) requestAnimationFrame(() => { const fg = ring.querySelector('.fg'); if (fg) fg.style.strokeDashoffset = (C * (1 - avg.overall / 10)).toFixed(1); });
+    body.appendChild(ps);
+    // feedback
+    const pf = el('div', 'panel fb');
+    const yours = sc.msgs.filter(m => m.who === 'you');
+    let sel = sc.msgs.find(m => m.id === sc.coachSel && m.coach) || yours.slice().reverse().find(m => m.coach);
+    const pending = yours.slice().reverse().find(m => m.coaching);
+    const lastCoachable = yours.filter(m => coachable(sc, m)).pop();
+    pf.appendChild(el('h4', '', sel && sel !== lastCoachable ? 'Notes on an earlier line' : 'Your last line'));
+    if (pending && (!sel || yours.indexOf(pending) > yours.indexOf(sel))) {
+      const p = el('p', 'muted'); p.innerHTML = '<span class="spin"></span> Reading your line…'; pf.appendChild(p);
+    } else if (sc.coachErr) {
+      pf.appendChild(el('p', 'muted', sc.coachErr));
+    }
+    if (sel) {
+      const fb = sel.coach;
+      const q = el('p', 'muted'); q.textContent = '“' + sel.text.slice(0, 140) + (sel.text.length > 140 ? '…' : '') + '”'; pf.appendChild(q);
+      const mini = el('div', 'tags'); DIMS.forEach(d => { const t = el('span', 'tag', d[1] + ' ' + fb.scores[d[0]]); t.style.setProperty('--c', d[2]); mini.appendChild(t); }); mini.style.marginBottom = '10px'; pf.appendChild(mini);
+      if (fb.praise) { const p = el('p'); p.style.setProperty('--c', 'var(--teal)'); p.append(el('b', '', 'What worked'), document.createTextNode(fb.praise)); pf.appendChild(p); }
+      if (fb.tip) { const p = el('p'); p.style.setProperty('--c', 'var(--amber)'); p.append(el('b', '', 'Try this'), document.createTextNode(fb.tip)); pf.appendChild(p); }
+      if (fb.better) {
+        const p = el('p'); p.style.setProperty('--c', 'var(--gold)'); p.appendChild(el('b', '', 'A stronger version'));
+        const bt = el('div', 'better story'); renderRP(bt, fb.better); p.appendChild(bt); pf.appendChild(p);
+        const row = el('div', 'row');
+        const cp = el('button', 'btn c-slate'); cp.type = 'button'; cp.innerHTML = icon('copy') + 'Copy'; cp.onclick = () => copy(fb.better);
+        row.appendChild(cp);
+        if (sel === yours[yours.length - 1]) {
+          const redo = el('button', 'btn tint c-gold'); redo.type = 'button'; redo.innerHTML = icon('regen') + 'Redo my line with it';
+          redo.disabled = S.busy; redo.onclick = () => redoWith(sel, fb.better);
+          row.appendChild(redo);
+        }
+        pf.appendChild(row);
+      }
+    } else if (!pending && !sc.coachErr) {
+      pf.appendChild(el('p', 'muted', yours.length ? 'Tap "Coach my last line" for notes on it.' : 'Send your first line and I’ll tell you what worked and what would make it hotter.'));
+    }
+    body.appendChild(pf);
+    // actions
+    const pa = el('div', 'panel');
+    const last = yours[yours.length - 1];
+    const cbtn = el('button', 'btn tint c-teal block'); cbtn.type = 'button'; cbtn.innerHTML = icon('target') + 'Coach my last line';
+    cbtn.disabled = !last || !!last.coaching || !!last.coach || !coachable(sc, last);
+    cbtn.onclick = () => coachLine(last.id);
+    const rbtn = el('button', 'btn tint c-gold block'); rbtn.type = 'button'; rbtn.innerHTML = icon('trophy') + 'End scene and get my report';
+    rbtn.disabled = yours.length < 2 || S.busy; rbtn.style.marginTop = '8px';
+    rbtn.onclick = report;
+    pa.append(cbtn, rbtn);
+    body.appendChild(pa);
+    // the scene's settings
+    const pk = el('div', 'panel');
+    pk.appendChild(el('h4', '', 'Scene'));
+    const kv = el('div', 'kv');
+    const sel2 = (label, key, opts) => {
+      const l = el('label', '', label); const s = el('select'); s.setAttribute('aria-label', label);
+      Object.keys(opts).forEach(k => { const o = el('option', '', opts[k]); o.value = k; if (sc[key] === k) o.selected = true; s.appendChild(o); });
+      s.onchange = () => { sc[key] = s.value; saveScene(); renderHead(); toast(label + ': ' + opts[s.value] + ' from the next reply'); };
+      kv.append(l, s);
+    };
+    sel2('Heat', 'heat', HEAT_LABEL); sel2('Pace', 'pace', PACE_LABEL); sel2('Format', 'style', STYLE_LABEL);
+    pk.appendChild(kv);
+    const nl = el('label', 'muted', 'Things your partner should remember'); nl.style.cssText = 'display:block;margin-top:10px;font-size:12px';
+    const ta = el('textarea'); ta.value = sc.notes || ''; ta.maxLength = 1000; ta.placeholder = 'For example: we met last summer, I have a tattoo on my back';
+    ta.onchange = () => { if (isMinorText(ta.value)) { toast(ADULTS_ONLY, 'err'); ta.value = sc.notes || ''; return; } sc.notes = ta.value; saveScene(); };
+    pk.append(nl, ta);
+    const lim = [sc.into.length + ' into', sc.curious.length + ' curious', sc.soft.length + ' soft limits', sc.hard.length + ' hard limits'].join(' · ');
+    const lp = el('p', 'muted', 'Boundaries: ' + lim); lp.style.cssText = 'margin:8px 0 0;font-size:12px';
+    pk.appendChild(lp);
+    body.appendChild(pk);
+  }
+
+  // ---------------------------------------------------------------- rendering: composer
+  function renderComposer() {
+    const has = !!S.scene;
+    $('composer').hidden = !has; $('nudges').hidden = !has;
+    if (!has) { $('ideasWrap').hidden = true; return; }
+    const streaming = !!S.abort;
+    const sb = $('sendBtn');
+    sb.classList.toggle('stop', streaming);
+    sb.innerHTML = streaming ? icon('stop') + '<span class="lbl">Stop</span>' : icon('send');
+    sb.setAttribute('aria-label', streaming ? 'Stop' : 'Send');
+    sb.disabled = streaming ? false : (S.busy || !$('input').value.trim());
+    $('ideasBtn').disabled = S.busy; $('polishBtn').disabled = S.busy || !$('input').value.trim();
+    $('oocBtn').classList.toggle('on', S.ooc); $('oocBtn').setAttribute('aria-pressed', S.ooc ? 'true' : 'false');
+    $('box').classList.toggle('ooc', S.ooc);
+    const first = !S.scene.msgs.some(m => m.who === 'you' || m.who === 'partner');
+    $('input').placeholder = S.ooc ? 'Talk to your partner out of character' : first ? 'Open the scene: where are you, what do they see?' : 'Write your line. *Actions in asterisks*';
+    const nb = $('nudges'); nb.innerHTML = '';
+    NUDGES.forEach(n => { const c = el('button', 'chip', n.label); c.type = 'button'; c.disabled = S.busy || first; c.title = n.text; c.onclick = () => send(n.text, { nudge: true, raw: true }); nb.appendChild(c); });
+  }
+  function render() { renderXP(); renderScenes(); renderHead(); renderThread(); renderCoach(); renderComposer(); renderLeft(); }
+  function refreshUI() { renderHead(); renderComposer(); renderCoach(); }
+
+  // ---------------------------------------------------------------- drawers
+  function openDrawer(which, onlyIfNarrow) {
+    if (which === 'coach' && window.innerWidth > 859) return;
+    if (which === 'side' && window.innerWidth > 1179) return;
+    if (onlyIfNarrow && window.innerWidth > 859) return;
+    $(which).classList.add('open'); $('scrim').hidden = false;
+  }
+  function closeDrawers() { $('side').classList.remove('open'); $('coach').classList.remove('open'); $('scrim').hidden = true; }
+  $('scrim').onclick = closeDrawers;
+
+  // ---------------------------------------------------------------- scenes
+  function openScene(id) {
+    const sc = loadScene(id);
+    if (!sc) { toast("That scene couldn't be loaded.", 'err'); S.index = S.index.filter(x => x.id !== id); saveIndex(); render(); return; }
+    stopStream();
+    sc.msgs = (sc.msgs || []).filter(m => !(m.who === 'partner' && !msgText(m)));
+    sc.msgs.forEach(m => { m.editing = false; m.coaching = false; });
+    S.scene = sc; S.ideas = null; $('ideasWrap').hidden = true; S.ooc = false;
+    store.set('vv_open', id);
+    render();
+  }
+  function createScene(cfg) {
+    const sc = {
+      id: newId(), created: Date.now(), updated: Date.now(),
+      partner: cfg.partner, colors: cfg.colors || colorsFor(cfg.partner.name), you: cfg.you,
+      settingId: cfg.settingId || '', setting: cfg.setting || '', notes: '',
+      heat: cfg.heat, pace: cfg.pace, style: cfg.style,
+      into: cfg.into || [], curious: cfg.curious || [], soft: cfg.soft || [], hard: cfg.hard || [],
+      drill: cfg.drill || '', coachAuto: cfg.coachAuto !== false, starts: cfg.starts || 'partner',
+      msgs: [], coachSel: '', drillProgress: 0, drillDone: false, drillNote: '', report: null,
+    };
+    S.scene = sc; S.ooc = false; S.ideas = null; $('ideasWrap').hidden = true;
+    store.set('vv_open', sc.id);
+    saveScene(sc, true);
+    render();
+    if (sc.starts === 'partner') partnerTurn('opening');
+    else { $('input').focus(); }
+  }
+  function restartScene() {
+    const sc = S.scene; if (!sc) return;
+    createScene({ partner: sc.partner, colors: sc.colors, you: sc.you, settingId: sc.settingId, setting: sc.setting, heat: sc.heat, pace: sc.pace, style: sc.style,
+      into: sc.into, curious: sc.curious, soft: sc.soft, hard: sc.hard, drill: sc.drill, coachAuto: sc.coachAuto, starts: sc.starts });
+  }
+  function quickStart() {
+    if (!S.profile.name) { openNew({ random: true }); toast('Tell your partner your name first.'); return; }
+    const p = PARTNERS[Math.floor(Math.random() * PARTNERS.length)];
+    const st = SETTINGS.find(s => s.id === p.setting) || SETTINGS[0];
+    if (!ready()) return;
+    createScene({ partner: partnerFrom(p), colors: p.colors, you: youFromProfile(), settingId: st.id, setting: st.text,
+      heat: S.profile.heat, pace: S.profile.pace, style: S.profile.style, into: S.profile.into.slice(), curious: S.profile.curious.slice(),
+      soft: S.profile.soft.slice(), hard: S.profile.hard.slice(), drill: '', coachAuto: S.settings.coachAuto, starts: 'partner' });
+  }
+  function partnerFrom(p) { return { name: p.name, age: p.age, pronouns: p.pronouns, role: p.role, look: p.look, personality: p.personality, voice: p.voice }; }
+  function youFromProfile() { return { name: S.profile.name, pronouns: S.profile.pronouns, role: S.profile.role, look: S.profile.look }; }
+  function downloadTranscript() {
+    const sc = S.scene; if (!sc) return;
+    const lines = ['Velvet · ' + sceneTitle(sc), new Date(sc.created).toLocaleString(), ''];
+    sc.msgs.forEach(m => { if (m.who === 'you') lines.push(sc.you.name + ': ' + m.text, ''); else if (m.who === 'partner') lines.push(sc.partner.name + ': ' + msgText(m), ''); });
+    saveFile(lines.join('\n'), 'velvet-' + sc.partner.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + todayKey() + '.txt', 'text/plain');
+  }
+  function saveFile(text, name, type) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: type + ';charset=utf-8' }));
+    a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+  function copy(text) {
+    const done = () => toast('Copied');
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, () => fallbackCopy(text, done));
+    else fallbackCopy(text, done);
+  }
+  function fallbackCopy(text, done) {
+    const ta = el('textarea'); ta.value = text; ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { toast("Couldn't copy here.", 'err'); }
+    ta.remove();
+  }
+
+  // ---------------------------------------------------------------- the conversation
+  function stopStream() { if (S.abort) { try { S.abort.abort(); } catch (e) { /* already done */ } } }
+  async function partnerTurn(kind, at) {
+    const sc = S.scene;
+    if (!sc || S.busy) return;
+    if (!ready()) return;
+    let target, history, task, base = '';
+    if (kind === 'continue') {
+      for (let i = sc.msgs.length - 1; i >= 0; i--) if (sc.msgs[i].who === 'partner') { target = sc.msgs[i]; break; }
+      if (!target) return;
+      history = sc.msgs.slice(0, sc.msgs.indexOf(target) + 1);
+      base = msgText(target); task = 'continue';
+    } else if (kind === 'regen') {
+      target = sc.msgs[at];
+      history = sc.msgs.slice(0, at);
+      if (!target.alts) target.alts = [msgText(target)];
+      if (msgText(target)) { target.alts.push(''); target.alt = target.alts.length - 1; }   // a failed, empty reply is reused
+      task = apiMsgs(history).length ? 'reply' : 'opening';
+    } else {
+      const lastReal = sc.msgs.filter(m => m.who !== 'note').slice(-1)[0];
+      if (lastReal && lastReal.who === 'partner' && lastReal.err && !msgText(lastReal)) sc.msgs.splice(sc.msgs.indexOf(lastReal), 1);
+      target = { id: newId(), who: 'partner', alts: [''], alt: 0, t: Date.now() };
+      history = sc.msgs.slice();
+      sc.msgs.push(target);
+      task = apiMsgs(history).length ? 'reply' : 'opening';
+    }
+    target.err = '';
+    S.busy = true; S.abort = new AbortController(); S.streamMsg = target;
+    renderThread(); refreshUI(); scrollDown(true);
+    let pending = 0;
+    const setText = t => {
+      const joined = base ? base.replace(/\s+$/, '') + (/^\s/.test(t) ? '' : ' ') + t : t;
+      target.alts[target.alt] = joined;
+      if (!pending) pending = requestAnimationFrame(() => { pending = 0; if (S.scene === sc) paintStream(target); });
+    };
+    try {
+      const text = await streamTask(task, apiScene(sc), apiMsgs(history), setText, S.abort.signal);
+      if (!text.trim()) throw new Error('The reply came back empty. Try again.');
+      if (S.settings.voice) speak(msgText(target));
+    } catch (e) {
+      if (e && e.name === 'AbortError') {
+        if (!msgText(target).trim() || (base && msgText(target) === base)) dropAlt(target, base);
+        else if (!/[.!?…"”*)]\s*$/.test(msgText(target))) target.alts[target.alt] = msgText(target).replace(/\s+$/, '') + '…';   // cut off: say so
+      } else if (e && e.held) {
+        dropAlt(target, base);
+        sc.msgs.push({ id: newId(), who: 'note', text: 'That reply was held back: Velvet keeps every character an adult. Try again or steer the scene another way.' });
+      } else {
+        const msg = (e && e.data && e.data.flagged) ? flaggedNote(e.data) : ((e && e.message) || 'Something went wrong. Try again.');
+        if (e && e.partial) target.alts[target.alt] = (base ? base + ' ' : '') + e.partial;
+        else dropAlt(target, base, true);
+        const still = sc.msgs.indexOf(target) >= 0 ? target : null;
+        if (still) still.err = msg; else sc.msgs.push({ id: newId(), who: 'note', text: msg });
+      }
+    } finally {
+      if (pending) cancelAnimationFrame(pending);
+      S.busy = false; S.abort = null; S.streamMsg = null;
+      saveScene(sc);
+      if (S.scene === sc) { renderThread(true); refreshUI(); }
+    }
+  }
+  function dropAlt(target, base, keepEmptyForError) {
+    const sc = S.scene;
+    if (base) { target.alts[target.alt] = base; return; }
+    if (target.alts && target.alts.length > 1) { target.alts.splice(target.alt, 1); target.alt = target.alts.length - 1; return; }
+    if (keepEmptyForError) { target.alts = ['']; return; }
+    const i = sc.msgs.indexOf(target); if (i >= 0) sc.msgs.splice(i, 1);
+  }
+  function flaggedNote(d) {
+    if (d.flagged === 'message' && typeof d.index === 'number') return ADULTS_ONLY + ' (Look for it in the scene: edit or rewind that line.)';
+    if (d.flagged === 'scene') return ADULTS_ONLY + ' (It is in the scene setup: ' + String(d.field || '').replace('.', ' ') + '.)';
+    return ADULTS_ONLY;
+  }
+  function regenerate(i) { if (!S.busy) partnerTurn('regen', i); }
+  async function send(raw, opts) {
+    opts = opts || {};
+    let text = String(raw || '').trim();
+    const sc = S.scene;
+    if (!text || !sc || S.busy) return false;
+    if (!ready()) return false;
+    if (S.ooc && !opts.raw && !isOOC(text)) text = '((' + text + '))';
+    if (isMinorText(text)) { toast(ADULTS_ONLY, 'err'); return false; }
+    unlockSpeech();
+    const m = { id: newId(), who: 'you', text, t: Date.now() };
+    const sw = safeWord(text);
+    if (sw) m.safe = sw;
+    if (opts.nudge) m.nudge = true;
+    sc.msgs.push(m);
+    const coachIt = coachable(sc, m);
+    if (coachIt) countLine();
+    S.ideas = null; $('ideasWrap').hidden = true;
+    saveScene(sc);
+    renderThread(); scrollDown(true);
+    const reply = partnerTurn('reply');
+    if (coachIt && sc.coachAuto !== false) coachLine(m.id);
+    await reply;
+    return true;
+  }
+  // Lines the coach reads: in character, or out of character when that's the drill (Talk first).
+  function coachable(sc, m) { return !!m && m.who === 'you' && !m.safe && !m.nudge && (!isOOC(m.text) || sc.drill === 'talk_first'); }
+  function waitIdle(ms) {
+    return new Promise(res => { const t0 = Date.now(); (function poll() { if (!S.busy || Date.now() - t0 > ms) res(); else setTimeout(poll, 30); })(); });
+  }
+  async function safeword(word) {
+    if (!S.scene) return;
+    if (S.abort) { stopStream(); await waitIdle(3000); }
+    if (await send(word, { raw: true }) === false) return;
+    toast(word === 'red' ? 'Red: the scene stops. Your partner checks in out of character.' : 'Yellow: slowing down and checking in.');
+  }
+  async function coachLine(id) {
+    const sc = S.scene; if (!sc) return;
+    const idx = sc.msgs.findIndex(x => x.id === id); if (idx < 0) return;
+    const m = sc.msgs[idx];
+    if (m.coaching) return;
+    m.coaching = true; sc.coachErr = '';
+    if (S.scene === sc) { renderCoach(); renderThread(true); }
+    try {
+      const out = await jsonTask('coach', apiScene(sc), apiMsgs(sc.msgs.slice(0, idx + 1)));
+      m.coach = { scores: out.scores, praise: out.praise || '', tip: out.tip || '', better: out.better || '' };
+      sc.coachSel = m.id;
+      const v = mean(out.scores);
+      if (v >= 9) addXP(15, 'superb line (' + v.toFixed(1) + ')'); else if (v >= 8) addXP(8, 'great line (' + v.toFixed(1) + ')'); else addXP(Math.round(v / 3));
+      if (out.drill && sc.drill) {
+        sc.drillProgress = Math.max(sc.drillProgress || 0, out.drill.progress || 0);
+        sc.drillNote = out.drill.note || sc.drillNote;
+        if (sc.drillProgress >= 100 && !sc.drillDone) {
+          sc.drillDone = true;
+          S.progress.drills[sc.drill] = (S.progress.drills[sc.drill] || 0) + 1; saveProgress();
+          sc.msgs.push({ id: newId(), who: 'note', text: 'Drill complete: ' + DRILLS[sc.drill].name + '. Keep playing, or end the scene for your report.' });
+          addXP(100, 'drill complete');
+        }
+      }
+    } catch (e) {
+      sc.coachErr = (e && e.message) ? 'The coach couldn’t read that one: ' + e.message : 'The coach couldn’t read that one.';
+    } finally {
+      m.coaching = false;
+      saveScene(sc);
+      if (S.scene === sc) { renderCoach(); renderThread(true); renderHead(); }
+    }
+  }
+  async function redoWith(m, better) {
+    const sc = S.scene; if (!sc || S.busy) return;
+    if (isMinorText(better)) { toast(ADULTS_ONLY, 'err'); return; }
+    const i = sc.msgs.indexOf(m); if (i < 0) return;
+    sc.msgs.splice(i + 1);
+    m.text = better; m.coach = null; m.redo = true;
+    saveScene(sc); renderThread(); refreshUI();
+    const reply = partnerTurn('reply');
+    if (sc.coachAuto !== false) coachLine(m.id);
+    await reply;
+  }
+  async function finishEdit(m, value) {
+    const sc = S.scene; if (!sc) return;
+    const text = String(value || '').trim();
+    if (!text) { toast('A line can’t be empty. Use Rewind to remove it.', 'err'); return; }
+    if (isMinorText(text)) { toast(ADULTS_ONLY, 'err'); return; }
+    m.editing = false;
+    const i = sc.msgs.indexOf(m);
+    if (m.who === 'partner') { m.alts[m.alt] = text; saveScene(sc); renderThread(true); return; }
+    const after = sc.msgs.slice(i + 1).some(x => x.who === 'partner' || x.who === 'you');
+    if (after && !(await ask('Resend from here?', 'Everything after this line goes, and your partner answers the new version.', 'Resend'))) { renderThread(true); return; }
+    sc.msgs.splice(i + 1);
+    m.text = text; m.coach = null; m.safe = safeWord(text) || undefined;
+    saveScene(sc); renderThread(); refreshUI();
+    const reply = partnerTurn('reply');
+    if (sc.coachAuto !== false && !m.safe && !isOOC(text)) coachLine(m.id);
+    await reply;
+  }
+  async function rewind(i) {
+    const sc = S.scene; if (!sc || S.busy) return;
+    if (!(await ask('Rewind to here?', 'Everything after this point goes.', 'Rewind'))) return;
+    sc.msgs.splice(i + 1); sc.report = null;
+    saveScene(sc); render();
+  }
+  async function ideas() {
+    const sc = S.scene; if (!sc || S.busy) return;
+    if (!ready()) return;
+    const draft = $('input').value.trim();
+    if (draft && isMinorText(draft)) { toast(ADULTS_ONLY, 'err'); return; }
+    S.busy = true; refreshUI();
+    const wrap = $('ideasWrap'), box = $('ideas');
+    wrap.hidden = false; box.innerHTML = ''; $('ideasNote').textContent = 'Thinking of three ways to go…';
+    for (let k = 0; k < 3; k++) { const s = el('div', 'idea c-slate'); s.innerHTML = '<span class="spin"></span>'; box.appendChild(s); }
+    try {
+      const out = await jsonTask('ideas', apiScene(sc), apiMsgs(sc.msgs), draft);
+      box.innerHTML = '';
+      const cls = ['c-rose', 'c-amber', 'c-violet'];
+      (out.ideas || []).forEach((it, k) => {
+        const b = el('button', 'idea story ' + cls[k % 3]); b.type = 'button';
+        b.appendChild(el('b', '', it.tone)); const t = el('span'); renderRP(t, it.text); b.appendChild(t);
+        b.onclick = () => { $('input').value = it.text; autosize(); renderComposer(); $('input').focus(); };
+        box.appendChild(b);
+      });
+      $('ideasNote').textContent = out.ideas && out.ideas.length ? 'Tap one to use it. Make it yours before you send.' : 'No ideas came back. Try again.';
+    } catch (e) {
+      box.innerHTML = ''; $('ideasNote').textContent = (e && e.message) || "Couldn't get ideas. Try again.";
+    } finally { S.busy = false; refreshUI(); }
+  }
+  async function polish() {
+    const sc = S.scene; const draft = $('input').value.trim();
+    if (!sc || S.busy || !draft) return;
+    if (!ready()) return;
+    if (isMinorText(draft)) { toast(ADULTS_ONLY, 'err'); return; }
+    S.busy = true; refreshUI();
+    const pb = $('polishBtn'); const old = pb.innerHTML; pb.innerHTML = '<span class="spin"></span>';
+    try {
+      const out = await jsonTask('polish', apiScene(sc), apiMsgs(sc.msgs), draft);
+      if (out.text) {
+        S.polishUndo = draft; $('input').value = out.text; autosize();
+        const t = el('div', 'toast'); t.append(document.createTextNode('Polished. '));
+        const u = el('button', '', 'Undo'); u.type = 'button'; u.style.cssText = 'border:0;background:none;color:inherit;text-decoration:underline;font-weight:700';
+        u.onclick = () => { if (S.polishUndo != null) { $('input').value = S.polishUndo; S.polishUndo = null; autosize(); renderComposer(); } t.remove(); };
+        t.appendChild(u); $('toasts').appendChild(t); setTimeout(() => t.remove(), 6000);
+      }
+    } catch (e) { toast((e && e.message) || "Couldn't polish that. Try again.", 'err'); }
+    finally { pb.innerHTML = old; S.busy = false; refreshUI(); $('input').focus(); }
+  }
+  async function report() {
+    const sc = S.scene; if (!sc || S.busy) return;
+    if (!ready()) return;
+    if (sc.msgs.filter(m => m.who === 'you').length < 2) { toast('Write a few lines first, then end the scene for a report.'); return; }
+    S.busy = true; refreshUI();
+    $('repBody').innerHTML = '<p class="muted" style="padding:20px 0;text-align:center"><span class="spin"></span> The coach is reading the whole scene…</p>';
+    $('repFoot').innerHTML = ''; $('reportSheet').hidden = false;
+    try {
+      const out = await jsonTask('report', apiScene(sc), apiMsgs(sc.msgs));
+      const first = !sc.report;
+      sc.report = out; saveScene(sc);
+      if (first) { S.progress.reports++; saveProgress(); addXP(25 + (GRADE_XP[out.grade] || 15), 'report card'); }
+      showReport(out);
+      renderThread(true);
+    } catch (e) {
+      $('repBody').innerHTML = ''; $('repBody').appendChild(el('p', 'muted', (e && e.message) || "Couldn't write the report. Try again."));
+    } finally { S.busy = false; refreshUI(); }
+  }
+  function showReport(r) {
+    const b = $('repBody'); b.innerHTML = '';
+    const top = el('div', 'report-top');
+    top.appendChild(el('div', 'grade', r.grade));
+    const t = el('div'); t.append(el('h3', '', r.headline || 'Your scene'), el('p', 'muted', S.scene ? sceneTitle(S.scene) : ''));
+    top.appendChild(t); b.appendChild(top);
+    const dims = el('div', 'dims'); dims.style.marginTop = '14px';
+    DIMS.forEach(d => { const row = el('div', 'dim'); row.style.setProperty('--c', d[2]); const tr = el('div', 'track'); const f = el('i'); f.style.width = (r.scores[d[0]] * 10) + '%'; tr.appendChild(f); row.append(el('span', '', d[1]), tr, el('b', '', String(r.scores[d[0]]))); dims.appendChild(row); });
+    b.appendChild(dims);
+    const list = (title, items, color) => { if (!items || !items.length) return; const h = el('h4', '', title); h.style.cssText = 'margin:16px 0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:' + color; b.appendChild(h); const ul = el('ul', 'rlist'); items.forEach(x => ul.appendChild(el('li', '', x))); b.appendChild(ul); };
+    list('Strengths', r.strengths, 'var(--teal)');
+    list('Work on', r.work_on, 'var(--amber)');
+    if (r.best_line) { const h = el('h4', '', 'Your best line'); h.style.cssText = 'margin:16px 0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold)'; b.appendChild(h); const q = el('div', 'quote story'); renderRP(q, r.best_line); b.appendChild(q); }
+    const f = $('repFoot'); f.innerHTML = '';
+    if (r.next_drill && DRILLS[r.next_drill]) {
+      const note = el('span', 'note2', 'Next: ' + DRILLS[r.next_drill].name + (r.why ? '. ' + r.why : ''));
+      const go = el('button', 'btn main'); go.type = 'button'; go.innerHTML = icon(DRILL_UI[r.next_drill][0]) + 'Try that drill';
+      go.onclick = () => { $('reportSheet').hidden = true; openNew({ drill: r.next_drill }); };
+      f.append(note, go);
+    } else {
+      const ok = el('button', 'btn main', 'Done'); ok.type = 'button'; ok.onclick = () => { $('reportSheet').hidden = true; }; f.appendChild(ok);
+    }
+    $('reportSheet').hidden = false;
+  }
+
+  // ---------------------------------------------------------------- voice
+  let voices = [];
+  function loadVoices() { try { voices = speechSynthesis.getVoices() || []; } catch (e) { voices = []; } }
+  if ('speechSynthesis' in window) { loadVoices(); try { speechSynthesis.onvoiceschanged = loadVoices; } catch (e) { /* old Safari */ } }
+  let speechReady = false;
+  function unlockSpeech() {
+    if (speechReady || !S.settings.voice || !('speechSynthesis' in window)) return;
+    try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); speechReady = true; } catch (e) { /* no voice here */ }
+  }
+  function speak(text, now) {
+    if (!('speechSynthesis' in window)) return;
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(plainForSpeech(text));
+      const v = voices.find(x => x.name === S.settings.voiceName);
+      if (v) u.voice = v;
+      u.rate = S.settings.rate || 1;
+      speechSynthesis.speak(u);
+    } catch (e) { if (now) toast("This browser can't read aloud.", 'err'); }
+  }
+
+  // ---------------------------------------------------------------- composer events
+  function autosize() { const i = $('input'); i.style.height = 'auto'; i.style.height = Math.min(180, i.scrollHeight) + 'px'; }
+  $('input').addEventListener('input', () => { autosize(); renderComposer(); });
+  $('input').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && !(window.matchMedia && matchMedia('(hover: none)').matches)) { e.preventDefault(); if (!S.abort) submit(); } });
+  $('composer').addEventListener('submit', e => { e.preventDefault(); submit(); });
+  async function submit() {
+    if (S.abort) { stopStream(); return; }
+    const v = $('input').value, sc = S.scene;
+    if (!v.trim() || !sc) return;
+    const before = sc.msgs.length;
+    const p = send(v);              // send() adds the line before its first await
+    if (sc.msgs.length > before) { $('input').value = ''; autosize(); S.ooc = false; renderComposer(); }
+    await p;
+  }
+  $('actBtn').innerHTML = btnHTML('star', 'Action');
+  $('oocBtn').innerHTML = btnHTML('ooc', 'OOC');
+  $('ideasBtn').innerHTML = btnHTML('bulb', 'Ideas');
+  $('polishBtn').innerHTML = btnHTML('sparkle', 'Polish');
+  $('actBtn').onclick = () => {
+    const i = $('input'), a = i.selectionStart, b = i.selectionEnd, v = i.value;
+    if (a !== b) { i.value = v.slice(0, a) + '*' + v.slice(a, b) + '*' + v.slice(b); i.setSelectionRange(b + 2, b + 2); }
+    else { i.value = v.slice(0, a) + '**' + v.slice(a); i.setSelectionRange(a + 1, a + 1); }
+    i.focus(); autosize(); renderComposer();
+  };
+  $('oocBtn').onclick = () => { S.ooc = !S.ooc; renderComposer(); $('input').focus(); };
+  $('ideasBtn').onclick = ideas;
+  $('polishBtn').onclick = polish;
+  $('ideasClose').onclick = () => { $('ideasWrap').hidden = true; };
+
+  // ---------------------------------------------------------------- new scene sheet
+  let NEW = null;
+  function openNew(opts) {
+    opts = opts || {};
+    if (store.get('vv_adult') !== 'yes') { $('ageGate').hidden = false; return; }
+    const pr = S.profile;
+    const p = opts.random ? PARTNERS[Math.floor(Math.random() * PARTNERS.length)] : (S.scene ? PARTNERS.find(x => x.name === S.scene.partner.name) || PARTNERS[0] : PARTNERS[0]);
+    NEW = {
+      partnerId: p.id, partner: partnerFrom(p), colors: p.colors, settingId: p.setting, setting: (SETTINGS.find(s => s.id === p.setting) || {}).text || '', settingTouched: false,
+      you: youFromProfile(), heat: pr.heat, pace: pr.pace, style: pr.style,
+      into: pr.into.slice(), curious: pr.curious.slice(), soft: pr.soft.slice(), hard: pr.hard.slice(), kinkName: pr.kinkName || '',
+      drill: opts.drill || '', coachAuto: S.settings.coachAuto, starts: 'partner',
+    };
+    if (NEW.drill) applyDrill(NEW.drill);
+    renderNew();
+    $('newSheet').hidden = false;
+    closeDrawers();
+    setTimeout(() => { const f = $('newBody').querySelector(S.profile.name ? '.pcard[aria-pressed="true"]' : '#yName'); if (f) f.focus(); }, 30);
+  }
+  function applyDrill(id) {
+    const d = DRILLS[id]; if (!d) return;
+    if (d.you_role) NEW.you.role = d.you_role;
+    if (d.partner_role) NEW.partner.role = d.partner_role;
+    if (d.pace) NEW.pace = d.pace;
+    if (d.style) NEW.style = d.style;
+    NEW.starts = d.starts || 'partner';
+    NEW.coachAuto = true;
+  }
+  function seg(values, labels, cur, onPick, name) {
+    const g = el('div', 'seg'); g.setAttribute('role', 'group'); if (name) g.setAttribute('aria-label', name);
+    values.forEach(v => { const b = el('button', '', labels[v]); b.type = 'button'; b.setAttribute('aria-pressed', v === cur ? 'true' : 'false'); b.onclick = () => { onPick(v); [].forEach.call(g.children, c => c.setAttribute('aria-pressed', c === b ? 'true' : 'false')); }; g.appendChild(b); });
+    return g;
+  }
+  function field(label, input, cls) { const f = el('div', 'f' + (cls ? ' ' + cls : '')); const l = el('label', '', label); if (input.id) l.htmlFor = input.id; f.append(l, input); return f; }
+  function inputEl(id, value, max, ph, type) { const i = el('input'); i.id = id; i.type = type || 'text'; i.value = value == null ? '' : value; if (max) i.maxLength = max; if (ph) i.placeholder = ph; return i; }
+  function selectEl(id, opts, cur) { const s = el('select'); s.id = id; Object.keys(opts).forEach(k => { const o = el('option', '', opts[k]); o.value = k; if (k === cur) o.selected = true; s.appendChild(o); }); return s; }
+  function renderNew() {
+    const body = $('newBody'); body.innerHTML = '';
+    // partner
+    const s1 = el('div', 'sec');
+    s1.appendChild(el('h3', '', 'Your partner'));
+    const grid = el('div', 'partners');
+    PARTNERS.forEach(p => {
+      const c = el('button', 'pcard'); c.type = 'button'; c.setAttribute('aria-pressed', NEW.partnerId === p.id ? 'true' : 'false');
+      const r1 = el('div', 'r1'); const t = el('div'); t.append(el('b', '', p.name), el('span', '', p.age + ' · ' + ROLE_LABEL[p.role]));
+      r1.append(avatar(p.name, p.colors, 'sm'), t);
+      c.append(r1, el('small', '', p.vibe));
+      c.onclick = () => {
+        NEW.partnerId = p.id; NEW.partner = partnerFrom(p); NEW.colors = p.colors;
+        if (NEW.drill && DRILLS[NEW.drill].partner_role) NEW.partner.role = DRILLS[NEW.drill].partner_role;
+        if (!NEW.settingTouched) { NEW.settingId = p.setting; NEW.setting = (SETTINGS.find(s => s.id === p.setting) || {}).text || ''; }
+        renderNew();
+      };
+      grid.appendChild(c);
+    });
+    const add = el('button', 'pcard add'); add.type = 'button'; add.setAttribute('aria-pressed', NEW.partnerId === 'custom' ? 'true' : 'false');
+    add.innerHTML = icon('plus') + '<b>Make your own</b>';
+    add.onclick = () => { NEW.partnerId = 'custom'; NEW.partner = { name: '', age: 28, pronouns: 'she', role: NEW.partner.role, look: '', personality: '', voice: '' }; NEW.colors = null; renderNew(); setTimeout(() => $('pName') && $('pName').focus(), 20); };
+    grid.appendChild(add);
+    s1.appendChild(grid);
+    const det = el('details', 'tweak'); if (NEW.partnerId === 'custom') det.open = true;
+    det.appendChild(el('summary', '', NEW.partnerId === 'custom' ? 'Your partner' : 'Change ' + NEW.partner.name + '’s details'));
+    const fs = el('div', 'fields');
+    const P = NEW.partner;
+    const pName = inputEl('pName', P.name, 40, 'Their name'); pName.required = true; pName.oninput = () => { P.name = pName.value; };
+    const pAge = inputEl('pAge', P.age, 2, '', 'number'); pAge.min = 18; pAge.max = 99; pAge.required = true; pAge.oninput = () => { P.age = parseInt(pAge.value, 10) || ''; };
+    const pPro = selectEl('pPro', { she: 'She / her', he: 'He / him', they: 'They / them' }, P.pronouns); pPro.onchange = () => { P.pronouns = pPro.value; };
+    const pRole = selectEl('pRole', ROLE_LABEL, P.role); pRole.onchange = () => { P.role = pRole.value; };
+    const pLook = el('textarea'); pLook.id = 'pLook'; pLook.maxLength = 400; pLook.value = P.look; pLook.placeholder = 'What they look like and what they are wearing'; pLook.oninput = () => { P.look = pLook.value; };
+    const pPers = inputEl('pPers', P.personality, 400, 'Confident, teasing, a little bossy'); pPers.oninput = () => { P.personality = pPers.value; };
+    const pVoice = inputEl('pVoice', P.voice, 300, 'How they talk: short and commanding, lots of pet names'); pVoice.oninput = () => { P.voice = pVoice.value; };
+    fs.append(field('Name', pName), field('Age (18 or older)', pAge), field('Pronouns', pPro), field('Their role', pRole), field('Looks', pLook, 'full'), field('Personality', pPers, 'full'), field('How they talk', pVoice, 'full'));
+    det.appendChild(fs);
+    s1.appendChild(det);
+    body.appendChild(s1);
+    // setting
+    const s2 = el('div', 'sec');
+    s2.appendChild(el('h3', '', 'Where'));
+    const chips = el('div', 'chips2');
+    const stText = el('textarea'); stText.id = 'stText'; stText.maxLength = 600; stText.value = NEW.setting; stText.placeholder = 'Describe the place, or pick one above';
+    SETTINGS.forEach(s => {
+      const c = el('button', 'chip', s.label); c.type = 'button'; c.setAttribute('aria-pressed', NEW.settingId === s.id ? 'true' : 'false');
+      c.onclick = () => { NEW.settingId = s.id; NEW.setting = s.text; NEW.settingTouched = true; stText.value = s.text; [].forEach.call(chips.children, x => x.setAttribute('aria-pressed', x === c ? 'true' : 'false')); };
+      chips.appendChild(c);
+    });
+    stText.oninput = () => { NEW.setting = stText.value; NEW.settingTouched = true; const s = SETTINGS.find(x => x.text === stText.value); NEW.settingId = s ? s.id : ''; [].forEach.call(chips.children, x => x.setAttribute('aria-pressed', 'false')); };
+    s2.appendChild(chips);
+    const fw = el('div', 'f'); fw.style.marginTop = '10px'; fw.appendChild(stText); s2.appendChild(fw);
+    body.appendChild(s2);
+    // you
+    const s3 = el('div', 'sec');
+    s3.appendChild(el('h3', '', 'You'));
+    const Y = NEW.you;
+    const fy = el('div', 'fields');
+    const yName = inputEl('yName', Y.name, 40, 'What your partner calls you'); yName.required = true; yName.oninput = () => { Y.name = yName.value; };
+    const yPro = selectEl('yPro', { she: 'She / her', he: 'He / him', they: 'They / them' }, Y.pronouns); yPro.onchange = () => { Y.pronouns = yPro.value; };
+    const yLook = inputEl('yLook', Y.look, 400, 'Optional: what you look like tonight'); yLook.oninput = () => { Y.look = yLook.value; };
+    const roleWrap = el('div', 'f'); roleWrap.appendChild(el('label', '', 'Your role'));
+    roleWrap.appendChild(seg(ROLES, ROLE_LABEL, Y.role, v => { Y.role = v; }, 'Your role'));
+    fy.append(field('Your name', yName), field('Your pronouns', yPro), roleWrap, field('Your look', yLook));
+    s3.appendChild(fy);
+    body.appendChild(s3);
+    // feel
+    const s4 = el('div', 'sec');
+    s4.appendChild(el('h3', '', 'The feel'));
+    const feel = el('div', 'feel');
+    const heatDesc = { flirty: 'Tension and teasing; it fades to black past kissing.', steamy: 'Sensual and sexual, with feeling rather than graphic detail.', explicit: 'Fully explicit when the scene gets there.' };
+    const hd = el('div', 'desc', heatDesc[NEW.heat]);
+    feel.append(el('span', '', 'Heat'), seg(HEATS, HEAT_LABEL, NEW.heat, v => { NEW.heat = v; hd.textContent = heatDesc[v]; }, 'Heat'), hd);
+    feel.append(el('span', '', 'Pace'), seg(PACES, PACE_LABEL, NEW.pace, v => { NEW.pace = v; }, 'Pace'));
+    const styDesc = { chat: 'Short lines like 3DXChat’s chat. Best for practising for the game.', paragraphs: 'One or two short paragraphs each turn.', novel: 'Rich, slower, book-like prose.' };
+    const sd = el('div', 'desc', styDesc[NEW.style]);
+    feel.append(el('span', '', 'Format'), seg(STYLES, STYLE_LABEL, NEW.style, v => { NEW.style = v; sd.textContent = styDesc[v]; }, 'Format'), sd);
+    s4.appendChild(feel);
+    body.appendChild(s4);
+    // boundaries
+    const s5 = el('div', 'sec');
+    const h5 = el('h3'); h5.append(document.createTextNode('Boundaries '), el('small', '', NEW.kinkName ? 'from ' + NEW.kinkName + '’s Kink List' : 'your partner keeps to these'));
+    s5.appendChild(h5);
+    const kl = el('div', 'kl');
+    const klIn = inputEl('klLink', '', 8000, 'Paste your Kink List link'); klIn.setAttribute('aria-label', 'Kink List link');
+    const klBtn = el('button', 'btn tint c-rose'); klBtn.type = 'button'; klBtn.innerHTML = icon('link') + 'Load';
+    klBtn.onclick = async () => {
+      const link = klIn.value.trim(); if (!link) { klIn.focus(); return; }
+      klBtn.disabled = true; klBtn.innerHTML = '<span class="spin"></span>';
+      try {
+        const d = await decodeKinkList(link);
+        NEW.into = d.into || []; NEW.curious = d.curious || []; NEW.soft = d.soft || []; NEW.hard = d.hard || []; NEW.kinkName = d.name || 'your';
+        toast('Loaded: ' + NEW.into.length + ' into, ' + NEW.curious.length + ' curious, ' + NEW.soft.length + ' soft and ' + NEW.hard.length + ' hard limits');
+        renderNew();
+      } catch (e) { toast(e.message, 'err'); klBtn.disabled = false; klBtn.innerHTML = icon('link') + 'Load'; }
+    };
+    kl.append(klIn, klBtn);
+    s5.appendChild(kl);
+    const klHint = el('p', 'muted'); klHint.style.cssText = 'margin:6px 0 0;font-size:12px';
+    klHint.innerHTML = 'No list yet? Make one on the <a href="' + (S.mode === 'server' ? '/kinklist' : 'https://sbsbot.my.pebble.host/kinklist') + '" target="_blank" rel="noopener">Kink List</a> and copy its link. Or add things by hand:';
+    s5.appendChild(klHint);
+    s5.appendChild(tagGroup('into', 'Into', 'things you want in the scene', 'c-teal'));
+    s5.appendChild(tagGroup('curious', 'Curious', 'your partner goes gently', 'c-violet'));
+    s5.appendChild(tagGroup('soft', 'Soft limits', 'only after checking in', 'c-amber'));
+    s5.appendChild(tagGroup('hard', 'Hard limits', 'never, not even mentioned', 'c-red'));
+    body.appendChild(s5);
+    // practice
+    const s6 = el('div', 'sec');
+    s6.appendChild(el('h3', '', 'Practice'));
+    const fd = el('div', 'fields');
+    const opts = { '': 'Free play' }; Object.keys(DRILLS).forEach(k => { opts[k] = 'Drill: ' + DRILLS[k].name; });
+    const dSel = selectEl('drillSel', opts, NEW.drill);
+    const dDesc = el('p', 'muted', NEW.drill ? DRILLS[NEW.drill].goal : 'Play freely. The coach still scores every line.'); dDesc.style.cssText = 'margin:6px 0 0;font-size:12.5px';
+    dSel.onchange = () => { NEW.drill = dSel.value; if (NEW.drill) applyDrill(NEW.drill); else NEW.starts = 'partner'; renderNew(); };
+    const dw = field('What to practise', dSel); dw.appendChild(dDesc);
+    const startWrap = el('div', 'f'); startWrap.appendChild(el('label', '', 'Who starts'));
+    startWrap.appendChild(seg(['partner', 'you'], { partner: NEW.partnerId === 'custom' ? 'Them' : NEW.partner.name, you: 'Me' }, NEW.starts, v => { NEW.starts = v; }, 'Who starts'));
+    fd.append(dw, startWrap);
+    s6.appendChild(fd);
+    const cc = el('label', 'check'); const cci = el('input'); cci.type = 'checkbox'; cci.checked = NEW.coachAuto; cci.onchange = () => { NEW.coachAuto = cci.checked; };
+    cc.append(cci, document.createTextNode('Coach every line I send'));
+    s6.appendChild(cc);
+    body.appendChild(s6);
+  }
+  function tagGroup(key, label, hint, cls) {
+    const g = el('div', 'tg ' + cls);
+    const lab = el('div', 'lab'); lab.append(document.createTextNode(label + ' · ' + NEW[key].length), el('small', '', hint));
+    g.appendChild(lab);
+    const list = el('div', 'list');
+    const max = 14, all = NEW[key], showAll = g.dataset.all === '1';
+    const draw = full => {
+      list.innerHTML = '';
+      all.slice(0, full ? all.length : max).forEach((t, i) => {
+        const c = el('span', 't'); c.appendChild(document.createTextNode(t));
+        const x = el('button', '', '×'); x.type = 'button'; x.setAttribute('aria-label', 'Remove ' + t);
+        x.onclick = () => { all.splice(i, 1); lab.firstChild.textContent = label + ' · ' + all.length + ' '; draw(full); };
+        c.appendChild(x); list.appendChild(c);
+      });
+      if (!full && all.length > max) { const m = el('button', 'more', '+' + (all.length - max) + ' more'); m.type = 'button'; m.onclick = () => draw(true); list.appendChild(m); }
+      const inp = el('input'); inp.placeholder = '+ add'; inp.maxLength = 80; inp.setAttribute('aria-label', 'Add to ' + label);
+      inp.onkeydown = e => {
+        if (e.key !== 'Enter' && e.key !== ',') return;
+        e.preventDefault();
+        const v = inp.value.trim().replace(/,$/, '');
+        if (!v) return;
+        if (key !== 'hard' && isMinorText(v)) { toast(ADULTS_ONLY, 'err'); return; }
+        if (all.indexOf(v) < 0 && all.length < 60) all.push(v);
+        lab.firstChild.textContent = label + ' · ' + all.length + ' ';
+        draw(full); const again = list.querySelector('input'); if (again) again.focus();
+      };
+      list.appendChild(inp);
+    };
+    draw(showAll);
+    g.appendChild(list);
+    return g;
+  }
+  $('newForm').addEventListener('submit', e => {
+    e.preventDefault();
+    if (!ready()) return;
+    const P = NEW.partner, Y = NEW.you;
+    P.name = (P.name || '').trim(); Y.name = (Y.name || '').trim();
+    if (!P.name) { toast('Give your partner a name.', 'err'); const d = $('newBody').querySelector('details'); if (d) d.open = true; $('pName').focus(); return; }
+    const age = parseInt(P.age, 10);
+    if (!(age >= 18)) { toast('Every character in Velvet is 18 or older.', 'err'); const d = $('newBody').querySelector('details'); if (d) d.open = true; $('pAge').focus(); return; }
+    if (!Y.name) { toast('Tell your partner your name.', 'err'); $('yName').focus(); return; }
+    P.age = Math.min(99, age);
+    const texts = [P.name, P.look, P.personality, P.voice, Y.name, Y.look, NEW.setting].concat(NEW.into, NEW.curious, NEW.soft);
+    if (texts.some(isMinorText)) { toast(ADULTS_ONLY, 'err'); return; }
+    Object.assign(S.profile, { name: Y.name, pronouns: Y.pronouns, role: Y.role, look: Y.look, heat: NEW.heat, pace: NEW.pace, style: NEW.style,
+      into: NEW.into.slice(), curious: NEW.curious.slice(), soft: NEW.soft.slice(), hard: NEW.hard.slice(), kinkName: NEW.kinkName });
+    saveProfile();
+    $('newSheet').hidden = true;
+    createScene({ partner: Object.assign({}, P), colors: NEW.colors || colorsFor(P.name), you: Object.assign({}, Y), settingId: NEW.settingId, setting: NEW.setting.trim(),
+      heat: NEW.heat, pace: NEW.pace, style: NEW.style, into: NEW.into.slice(), curious: NEW.curious.slice(), soft: NEW.soft.slice(), hard: NEW.hard.slice(),
+      drill: NEW.drill, coachAuto: NEW.coachAuto, starts: NEW.starts });
+  });
+
+  // ---------------------------------------------------------------- settings sheet
+  function openSettings(focusKey) {
+    const b = $('setBody'); b.innerHTML = '';
+    const models = (S.status && S.status.models) ? S.status.models.map(m => [m.id, m.label, m.in, m.out]) : MODELS;
+    const mOpts = {}; models.forEach(m => { mOpts[m[0]] = m[1] + (S.mode === 'byok' ? ' (about $' + ((3000 * m[2] + 250 * m[3]) / 1e6).toFixed(4) + ' a reply)' : ''); });
+    const mSel = selectEl('setModel', mOpts, model());
+    mSel.onchange = () => { S.settings.model = mSel.value; saveSettings(); };
+    const sec1 = el('div', 'sec'); sec1.appendChild(el('h3', '', 'Your partner’s writing'));
+    sec1.appendChild(field('Model', mSel));
+    const mHint = el('p', 'muted', 'Rich writes the most vivid scenes. Try the others if you want a different voice.'); mHint.style.cssText = 'margin:6px 0 0;font-size:12px'; sec1.appendChild(mHint);
+    b.appendChild(sec1);
+    const sec2 = el('div', 'sec'); sec2.appendChild(el('h3', '', 'Voice and coach'));
+    const vc = el('label', 'check'); const vci = el('input'); vci.type = 'checkbox'; vci.checked = S.settings.voice;
+    vci.onchange = () => { S.settings.voice = vci.checked; saveSettings(); if (vci.checked) { speechReady = false; unlockSpeech(); } };
+    vc.append(vci, document.createTextNode('Read my partner’s replies aloud'));
+    if (!('speechSynthesis' in window)) { vci.disabled = true; vc.title = 'This browser can’t read aloud'; }
+    sec2.appendChild(vc);
+    loadVoices();
+    if (voices.length) {
+      const vOpts = { '': 'The browser’s default voice' };
+      voices.forEach(v => { vOpts[v.name] = v.name + (v.lang ? ' (' + v.lang + ')' : ''); });
+      const vSel = selectEl('setVoice', vOpts, S.settings.voiceName);
+      vSel.onchange = () => { S.settings.voiceName = vSel.value; saveSettings(); speak('Mm. Hello, you.', true); };
+      const vf = field('Voice', vSel); vf.style.marginTop = '8px'; sec2.appendChild(vf);
+    }
+    const cc = el('label', 'check'); const cci = el('input'); cci.type = 'checkbox'; cci.checked = S.settings.coachAuto;
+    cci.onchange = () => { S.settings.coachAuto = cci.checked; saveSettings(); };
+    cc.append(cci, document.createTextNode('Coach every line in new scenes'));
+    sec2.appendChild(cc);
+    b.appendChild(sec2);
+    if (S.mode === 'byok') {
+      const sec3 = el('div', 'sec'); sec3.appendChild(el('h3', '', 'Your Venice key'));
+      const p = el('p', 'muted'); p.innerHTML = 'Velvet runs on your own Venice AI account here. Get a key at <a href="https://venice.ai/settings/api" target="_blank" rel="noopener noreferrer">venice.ai/settings/api</a>. Your key goes only to api.venice.ai.';
+      p.style.cssText = 'margin:0 0 8px;font-size:13px';
+      sec3.appendChild(p);
+      const k = inputEl('setKey', S.settings.key, 200, 'Paste your Venice API key', 'password'); k.spellcheck = false; k.autocomplete = 'off';
+      k.oninput = () => { S.settings.key = k.value.trim(); if ($('setRemember').checked) store.set('vv_key', S.settings.key || null); };
+      sec3.appendChild(field('API key', k));
+      const rc = el('label', 'check'); const rci = el('input'); rci.type = 'checkbox'; rci.id = 'setRemember'; rci.checked = !!store.get('vv_key');
+      rci.onchange = () => store.set('vv_key', rci.checked && S.settings.key ? S.settings.key : null);
+      rc.append(rci, document.createTextNode('Remember it on this device'));
+      sec3.appendChild(rc);
+      b.appendChild(sec3);
+      if (focusKey) setTimeout(() => k.focus(), 30);
+    }
+    const sec4 = el('div', 'sec'); sec4.appendChild(el('h3', '', 'Your data'));
+    const p4 = el('p', 'muted', 'Your scenes, scores and progress live only in this browser. Download them to keep a copy or move them to another device.'); p4.style.cssText = 'margin:0 0 8px;font-size:13px';
+    sec4.appendChild(p4);
+    const row = el('div', 'chips2');
+    const ex = el('button', 'btn c-teal'); ex.type = 'button'; ex.innerHTML = icon('download') + 'Download everything'; ex.onclick = exportAll;
+    const im = el('button', 'btn c-violet'); im.type = 'button'; im.innerHTML = icon('upload') + 'Bring scenes in'; im.onclick = () => $('importFile').click();
+    const er = el('button', 'btn c-red'); er.type = 'button'; er.innerHTML = icon('trash') + 'Erase everything'; er.onclick = eraseAll;
+    row.append(ex, im, er);
+    sec4.appendChild(row);
+    b.appendChild(sec4);
+    $('settingsSheet').hidden = false;
+  }
+  $('settingsForm').addEventListener('submit', e => { e.preventDefault(); $('settingsSheet').hidden = true; renderLeft(); });
+  function exportAll() {
+    flushSaves();
+    const scenes = S.index.map(x => loadScene(x.id)).filter(Boolean);
+    saveFile(JSON.stringify({ app: 'velvet', version: 1, saved: new Date().toISOString(), profile: S.profile, progress: S.progress, scenes }, null, 1), 'velvet-' + todayKey() + '.json', 'application/json');
+  }
+  $('importFile').addEventListener('change', async () => {
+    const f = $('importFile').files[0]; $('importFile').value = '';
+    if (!f) return;
+    try {
+      const d = JSON.parse(await f.text());
+      if (!d || d.app !== 'velvet' || !Array.isArray(d.scenes)) throw new Error('not velvet');
+      let n = 0;
+      d.scenes.forEach(sc => {
+        if (!sc || !sc.partner || !Array.isArray(sc.msgs)) return;
+        if (S.index.some(x => x.id === sc.id)) sc.id = newId();
+        saveScene(sc, true); n++;
+      });
+      if (d.progress && d.progress.xp > S.progress.xp) { S.progress = Object.assign(S.progress, d.progress); saveProgress(); }
+      if (d.profile && !S.profile.name) { S.profile = Object.assign(S.profile, d.profile); saveProfile(); }
+      toast('Brought in ' + n + ' scene' + (n === 1 ? '' : 's'));
+      render();
+    } catch (e) { toast("That isn't a Velvet download.", 'err'); }
+  });
+  async function eraseAll() {
+    if (!(await ask('Erase everything?', 'Every scene, score and setting on this device goes for good. Download first if you want a copy.', 'Erase'))) return;
+    S.index.forEach(x => store.set('vv_s_' + x.id, null));
+    ['vv_index', 'vv_profile', 'vv_progress', 'vv_settings', 'vv_open', 'vv_key'].forEach(k => store.set(k, null));
+    location.reload();
+  }
+
+  // ---------------------------------------------------------------- wiring
+  $('newBtn').innerHTML = icon('plus') + 'New scene';
+  $('quickBtn').innerHTML = icon('dice') + 'Surprise me';
+  $('newBtn').onclick = () => openNew();
+  $('quickBtn').onclick = () => { closeDrawers(); quickStart(); };
+  $('settingsBtn').innerHTML = icon('gear');
+  $('settingsBtn').onclick = () => openSettings(false);
+  $('themeBtn').innerHTML = icon('moon');
+  $('themeBtn').onclick = toggleTheme;
+  ['newClose', 'setClose', 'repClose'].forEach(id => { $(id).innerHTML = icon('x'); });
+  document.querySelectorAll('[data-close]').forEach(b => { b.addEventListener('click', () => { const s = b.closest('.sheet'); if (s) s.hidden = true; }); });
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (!$('askSheet').hidden) { $('askNo').click(); return; }
+    ['newSheet', 'settingsSheet', 'reportSheet'].forEach(id => { $(id).hidden = true; });
+    closeDrawers(); closeMenu();
+  });
+  window.addEventListener('beforeunload', flushSaves);
+  window.addEventListener('pagehide', flushSaves);
+
+  // ---------------------------------------------------------------- start
+  const lastOpen = store.get('vv_open');
+  if (lastOpen && S.index.some(x => x.id === lastOpen)) {
+    const sc = loadScene(lastOpen);
+    if (sc) { sc.msgs = (sc.msgs || []).filter(m => !(m.who === 'partner' && !msgText(m))); sc.msgs.forEach(m => { m.editing = false; m.coaching = false; }); S.scene = sc; }
+  }
+  render();
+  detectMode();
+  window.__vv = { S, cleanScene, cleanMessages, partnerPrompt, chatMessages, jsonMessages, veniceBody, isMinorText };
+})();
+</script>
+</body>
+</html>
