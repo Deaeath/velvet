@@ -1523,19 +1523,28 @@
   }
   // ---- cast order end
   PARTNERS.splice(0, PARTNERS.length, ...mixCast(PARTNERS));
-  // who you want to see first (Settings, "Your partners"): likes is '' for everyone, or the groups, like 'she,they';
-  // likeRole is '' or one role. The home screen, new scenes, assignments, the Cast and Surprise me start from these.
-  const LIKES = { '': 'Everyone', she: 'Women', he: 'Men', they: 'Non-binary people', 'she,he': 'Women and men',
-    'she,they': 'Women and non-binary people', 'he,they': 'Men and non-binary people' };
-  const LIKE_ROLES = { '': 'Any role', dominant: 'Dominant partners', submissive: 'Submissive partners', switch: 'Switches' };
-  function likesWho(p) { const l = S.settings.likes; return !l || l.split(',').indexOf(p.pronouns) >= 0; }
-  function likesRole(p) { return !S.settings.likeRole || p.role === S.settings.likeRole; }
+  // ---- your type start
+  // who you want to see first (Settings, "Your partners"): likes and likeRole are '' for anyone, or any mix, like
+  // 'she,they' and 'dominant,switch'. The home screen, new scenes, assignments, the Cast and Surprise me start from them.
+  const WHO = ['she', 'he', 'they'], ROLE_LIST = ['dominant', 'submissive', 'switch'];
+  const WHO_LABEL = { she: 'Women', he: 'Men', they: 'Non-binary' }, ROLE_PICK = { dominant: 'Dominant', submissive: 'Submissive', switch: 'Switch' };
+  const WHO_WORDS = { she: 'women', he: 'men', they: 'non-binary people' };
+  // a mix kept in one order with nothing unknown in it: all of them is the same as anyone
+  function cleanList(v, all) { const got = String(v || '').split(','); const out = all.filter(a => got.indexOf(a) >= 0); return out.length === all.length ? '' : out.join(','); }
+  function inList(list, v) { return !list || String(list).split(',').indexOf(v) >= 0; }
+  function likesWho(p) { return inList(S.settings.likes, p.pronouns); }
+  function likesRole(p) { return inList(S.settings.likeRole, p.role); }
   function preferred() {                              // never empty: drop the role, then the whole preference, if nobody fits
     const both = PARTNERS.filter(p => likesWho(p) && likesRole(p)), who = PARTNERS.filter(likesWho);
     return both.length ? both : who.length ? who : PARTNERS.slice();
   }
   function prefFilter(withRole) { return { q: '', g: S.settings.likes, r: withRole === false ? '' : S.settings.likeRole }; }
-  function likesText() { return [S.settings.likes ? LIKES[S.settings.likes] : '', S.settings.likeRole ? LIKE_ROLES[S.settings.likeRole] : ''].filter(Boolean).join(' · '); }
+  function joinWords(a, last) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' ' + last + ' ' + a[a.length - 1]; }
+  function likesText() {                              // "Women and non-binary people · Dominant or switch partners"
+    const w = S.settings.likes ? S.settings.likes.split(',').map(k => WHO_WORDS[k]) : [], r = S.settings.likeRole ? S.settings.likeRole.split(',') : [];
+    return [w.length ? joinWords(w, 'and') : '', r.length ? joinWords(r, 'or') + ' partners' : ''].filter(Boolean).map(t => t.charAt(0).toUpperCase() + t.slice(1)).join(' · ');
+  }
+  // ---- your type end
   const DRILL_UI = {
     first_move: ['spark', 'c-rose'], five_senses: ['eye', 'c-violet'], slow_burn: ['flame', 'c-amber'], talk_first: ['chat', 'c-teal'],
     lead: ['crown', 'c-gold'], surrender: ['feather', 'c-violet'], say_it: ['mic', 'c-rose'], read_room: ['radar', 'c-teal'],
@@ -1618,8 +1627,8 @@
   };
   if (!Array.isArray(S.cast)) S.cast = [];
   if (!Array.isArray(S.reviews)) S.reviews = [];
-  if (!Object.prototype.hasOwnProperty.call(LIKES, S.settings.likes)) S.settings.likes = '';
-  if (!Object.prototype.hasOwnProperty.call(LIKE_ROLES, S.settings.likeRole)) S.settings.likeRole = '';
+  S.settings.likes = cleanList(S.settings.likes, WHO);
+  S.settings.likeRole = cleanList(S.settings.likeRole, ROLE_LIST);
   ['kinkItems', 'aliases'].forEach(k => { if (!Array.isArray(S.profile[k])) S.profile[k] = []; });
   if (typeof S.profile.pic !== 'string') S.profile.pic = '';
   if (typeof S.profile.lang !== 'string') S.profile.lang = '';
@@ -2352,7 +2361,7 @@
       const cards = el('div', 'cards'); recent.forEach(x => cards.appendChild(sceneCardSmall(x))); w.appendChild(cards);
     }
     const acts = el('span', 'sec-acts');
-    const type = el('button', 'lnk'); type.type = 'button'; type.textContent = 'Your type'; type.title = 'Who Velvet shows you first'; type.onclick = () => openSettings(false, 'likes');
+    const type = el('button', 'lnk'); type.type = 'button'; type.textContent = 'Your type'; type.title = 'Who Velvet shows you first'; type.onclick = () => openSettings(false);   // "Your partners" is its first section
     const all = el('button', 'lnk'); all.type = 'button'; all.textContent = 'See all ' + fav.length; all.onclick = () => openNew();
     acts.append(type, all);
     w.appendChild(secTitle('Partners', likesText() ? likesText() + ' · tap one to start' : 'Tap one to start', acts));
@@ -3039,6 +3048,23 @@
     values.forEach(v => { const b = el('button', '', labels[v]); b.type = 'button'; b.setAttribute('aria-pressed', v === cur ? 'true' : 'false'); b.onclick = () => { onPick(v); [].forEach.call(g.children, c => c.setAttribute('aria-pressed', c === b ? 'true' : 'false')); }; g.appendChild(b); });
     return g;
   }
+  // buttons where any mix can be on: the first ("Anyone") clears them and is on when none are; all of them is anyone
+  function multiPick(cls, allLabel, values, labels, cur, onPick, name) {
+    const g = el('div', cls); g.setAttribute('role', 'group'); if (name) g.setAttribute('aria-label', name);
+    let on = cleanList(cur, values) ? cleanList(cur, values).split(',') : [];
+    const paint = () => [].forEach.call(g.children, (b, i) => b.setAttribute('aria-pressed', String(i ? on.indexOf(values[i - 1]) >= 0 : !on.length)));
+    [''].concat(values).forEach(v => {
+      const b = el('button', cls === 'seg' ? '' : 'chip', v ? labels[v] : allLabel); b.type = 'button';
+      b.onclick = () => {
+        on = !v ? [] : on.indexOf(v) >= 0 ? on.filter(x => x !== v) : values.filter(x => x === v || on.indexOf(x) >= 0);
+        if (on.length === values.length) on = [];
+        paint(); onPick(on.join(','));
+      };
+      g.appendChild(b);
+    });
+    paint();
+    return g;
+  }
   function field(label, input, cls) { const f = el('div', 'f' + (cls ? ' ' + cls : '')); const l = el('label', '', label); if (input.id) l.htmlFor = input.id; f.append(l, input); return f; }
   function inputEl(id, value, max, ph, type) { const i = el('input'); i.id = id; i.type = type || 'text'; i.value = value == null ? '' : value; if (max) i.maxLength = max; if (ph) i.placeholder = ph; return i; }
   function selectEl(id, opts, cur) { const s = el('select'); s.id = id; Object.keys(opts).forEach(k => { const o = el('option', '', opts[k]); o.value = k; if (k === cur) o.selected = true; s.appendChild(o); }); return s; }
@@ -3277,14 +3303,16 @@
   });
 
   // ---------------------------------------------------------------- settings sheet
-  function openSettings(focusKey, section) {
+  function openSettings(focusKey) {
     const b = $('setBody'); b.innerHTML = '';
     const sec0 = el('div', 'sec'); sec0.appendChild(el('h3', '', 'Your partners'));
-    const lSel = selectEl('setLikes', LIKES, S.settings.likes), rSel = selectEl('setLikeRole', LIKE_ROLES, S.settings.likeRole);
-    lSel.onchange = rSel.onchange = () => { S.settings.likes = lSel.value; S.settings.likeRole = rSel.value; saveSettings(); S.castF = null; renderThread(); };
-    sec0.appendChild(field('Show me', lSel));
-    const rf = field('Their role', rSel); rf.style.marginTop = '8px'; sec0.appendChild(rf);
-    const lHint = el('p', 'muted', 'Your home screen, new scenes, assignments, the Cast and Surprise me start with these. You can still pick anyone.');
+    const saveLikes = () => { saveSettings(); S.castF = null; renderThread(); };
+    const lWho = multiPick('chips2', 'Everyone', WHO, WHO_LABEL, S.settings.likes, v => { S.settings.likes = v; saveLikes(); }, 'Show me');
+    const lRole = multiPick('chips2', 'Any role', ROLE_LIST, ROLE_PICK, S.settings.likeRole, v => { S.settings.likeRole = v; saveLikes(); }, 'Their role');
+    lWho.id = 'setLikes'; lRole.id = 'setLikeRole';
+    sec0.appendChild(field('Show me', lWho));
+    const rf = field('Their role', lRole); rf.style.marginTop = '10px'; sec0.appendChild(rf);
+    const lHint = el('p', 'muted', 'Pick as many as you like. Your home screen, new scenes, assignments, the Cast and Surprise me start with these, and you can still pick anyone.');
     lHint.style.cssText = 'margin:6px 0 0;font-size:12px'; sec0.appendChild(lHint);
     b.appendChild(sec0);
     const models = (S.status && S.status.models) ? S.status.models.map(m => [m.id, m.label, m.in, m.out]) : MODELS;
@@ -3340,7 +3368,6 @@
     sec4.appendChild(row);
     b.appendChild(sec4);
     $('settingsSheet').hidden = false;
-    if (section === 'likes') setTimeout(() => lSel.focus(), 30);
   }
   $('settingsForm').addEventListener('submit', e => { e.preventDefault(); $('settingsSheet').hidden = true; renderLeft(); });
   function exportAll() {
@@ -3875,16 +3902,14 @@
     const box = el('div', 'pfilters');
     const find = el('input'); find.type = 'search'; find.value = F.q || ''; find.placeholder = 'Find someone: a name, a vibe, a place'; find.setAttribute('aria-label', 'Find a partner'); find.className = 'pfind';
     find.oninput = () => { F.q = find.value; redraw(); };
-    const who = ['', 'she', 'he', 'they'], whoL = { '': 'Anyone', she: 'Women', he: 'Men', they: 'Non-binary' }, likes = S.settings.likes;
-    if (likes.indexOf(',') > 0) { who.splice(1, 0, likes); whoL[likes] = 'Your type'; }      // two groups: one button for both
-    const g = seg(who, whoL, F.g || '', v => { F.g = v; redraw(); }, 'Who');
-    const r = seg(['', 'dominant', 'submissive', 'switch'], { '': 'Any role', dominant: 'Dominant', submissive: 'Submissive', switch: 'Switch' }, F.r || '', v => { F.r = v; redraw(); }, 'Role');
+    const g = multiPick('seg', 'Anyone', WHO, WHO_LABEL, F.g, v => { F.g = v; redraw(); }, 'Who');           // any mix, like Settings
+    const r = multiPick('seg', 'Any role', ROLE_LIST, ROLE_PICK, F.r, v => { F.r = v; redraw(); }, 'Role');
     box.append(find, g, r);
     return box;
   }
   function filterPartners(list, F) {
     const q = String(F.q || '').trim().toLowerCase();
-    return list.filter(p => (!F.g || String(F.g).split(',').indexOf(p.pronouns) >= 0) && (!F.r || p.role === F.r) &&
+    return list.filter(p => inList(F.g, p.pronouns) && inList(F.r, p.role) &&
       (!q || [p.name, p.vibe, p.look, p.personality, (SETTINGS.find(s => s.id === p.setting) || {}).label].join(' ').toLowerCase().indexOf(q) >= 0));
   }
   let PICK = null;
