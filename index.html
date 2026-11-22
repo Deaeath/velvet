@@ -4142,10 +4142,13 @@
   const STOPWORDS = new Set(('about after again also always back been before being both came come could does done down each even ever every from going gonna have here hers into just know like little look made make more most much never only other over really right said same says some still such take than that their them then there these they thing think this those through very want wanna were what when where which while will with would your yours yeah okay').split(' '));
   function leanWords(sc) {
     const counts = {}, form = {};
-    const skip = new Set([sc.partner.name, sc.you.name].map(n => String(n || '').toLowerCase()));
+    // names are not words you lean on: yours, any alias, theirs, and any CamelCase game name ("HeavyPressure lays…")
+    const skip = new Set();
+    [sc.partner.name].concat(Array.from(myNames(sc))).forEach(n => String(n || '').toLowerCase().split(/[^a-z']+/).forEach(x => x && skip.add(x)));
     sc.msgs.filter(m => m.who === 'you' && !m.ghost && !m.used && !isOOC(m.text)).forEach(m => {
-      (String(m.text).toLowerCase().match(/[a-z']+/g) || []).forEach(w => {
-        w = w.replace(/^'+|'+$/g, '');
+      (String(m.text).match(/[A-Za-z']+/g) || []).forEach(raw => {
+        if (/[a-z][A-Z]/.test(raw)) return;
+        const w = raw.toLowerCase().replace(/^'+|'+$/g, '').replace(/'s$/, '');
         if (w.length < 4 || STOPWORDS.has(w) || skip.has(w)) return;
         const stem = w.length > 5 ? w.replace(/(ing|ed|es|s)$/, '') : w;
         counts[stem] = (counts[stem] || 0) + 1;
